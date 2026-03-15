@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mon Plan</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Mon Plan">
+<meta name="theme-color" content="#1A1612">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Georgia, serif; background: #1A1612; color: #E8DDD0; min-height: 100vh; }
+
+  .header { background: linear-gradient(135deg, #2A1F14, #1A1612); padding: 20px 16px 14px; border-bottom: 1px solid #3A2E24; }
+  .header-top { display: flex; justify-content: space-between; align-items: flex-start; }
+  .header-label { font-size: 10px; letter-spacing: 3px; color: #C17A3A; text-transform: uppercase; margin-bottom: 4px; font-family: sans-serif; }
+  .header-title { font-size: 20px; font-weight: bold; color: #F0E8DC; }
+  .header-sub { font-size: 11px; color: #5A4A3A; font-family: sans-serif; margin-top: 2px; }
+  .badge { background: #C17A3A; border-radius: 50%; width: 50px; height: 50px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: sans-serif; font-weight: bold; color: #fff; flex-shrink: 0; }
+  .badge-pct { font-size: 15px; }
+  .badge-label { font-size: 9px; opacity: 0.8; }
+  .progress-bar { margin-top: 12px; height: 3px; background: #3A2E24; border-radius: 2px; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, #C17A3A, #E8A060); border-radius: 2px; transition: width 0.4s; }
+
+  .tabs { display: flex; gap: 8px; margin-top: 14px; }
+  .tab { background: transparent; border: 1px solid #3A2E24; color: #8A7A6A; border-radius: 20px; padding: 5px 14px; font-size: 11px; cursor: pointer; font-family: sans-serif; letter-spacing: 1px; text-transform: uppercase; }
+  .tab.active { background: #C17A3A; border-color: #C17A3A; color: #fff; }
+
+  .days-scroll { display: flex; overflow-x: auto; gap: 8px; padding: 12px 16px; border-bottom: 1px solid #2A2018; scrollbar-width: none; -ms-overflow-style: none; }
+  .days-scroll::-webkit-scrollbar { display: none; }
+  .day-btn { flex-shrink: 0; border-radius: 10px; padding: 8px 12px; cursor: pointer; text-align: center; border: 1px solid #3A2E24; background: #2A2018; }
+  .day-btn.active { border-color: transparent; }
+  .day-btn.today-marker { box-shadow: 0 0 0 1px #E8A060; }
+  .day-emoji { font-size: 14px; }
+  .day-name { font-size: 10px; color: #8A7A6A; font-family: sans-serif; margin-top: 2px; }
+  .day-btn.active .day-name { color: #fff; }
+  .day-count { font-size: 9px; color: #5A4A3A; font-family: sans-serif; }
+  .day-btn.active .day-count { color: rgba(255,255,255,0.7); }
+
+  .day-detail { padding: 16px; }
+  .day-header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+  .day-header-emoji { font-size: 24px; }
+  .day-header-title { font-size: 16px; font-weight: bold; color: #F0E8DC; }
+  .day-header-label { font-size: 11px; font-family: sans-serif; letter-spacing: 2px; text-transform: uppercase; }
+
+  .tasks { display: flex; flex-direction: column; gap: 10px; }
+  .task { border-radius: 10px; padding: 12px 14px; cursor: pointer; display: flex; gap: 12px; align-items: flex-start; background: #251E16; border: 1px solid #3A2E24; transition: all 0.2s; }
+  .task.done { background: #1E1A14; border-color: #2A2018; opacity: 0.5; }
+  .task-icon { font-size: 20px; flex-shrink: 0; }
+  .task-content { flex: 1; }
+  .task-time { font-size: 10px; color: #8A7A6A; font-family: sans-serif; margin-bottom: 2px; }
+  .task-text { font-size: 13px; color: #D8CCC0; line-height: 1.4; font-family: sans-serif; }
+  .task.done .task-text { text-decoration: line-through; color: #5A4A3A; }
+  .task-check { width: 20px; height: 20px; border-radius: 50%; border: 2px solid #3A2E24; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; margin-top: 2px; color: #fff; }
+  .task.done .task-check { background: #C17A3A; border-color: #C17A3A; }
+
+  .mantra { margin: 4px 16px 24px; background: linear-gradient(135deg, #2A1F14, #1E1812); border: 1px solid #3A2E24; border-radius: 12px; padding: 14px 16px; text-align: center; }
+  .mantra-label { font-size: 9px; letter-spacing: 3px; color: #C17A3A; text-transform: uppercase; font-family: sans-serif; margin-bottom: 6px; }
+  .mantra-text { font-size: 13px; color: #8A7A6A; font-style: italic; line-height: 1.6; }
+
+  .repas-section { padding: 16px; }
+  .repas-label { font-size: 12px; color: #8A7A6A; font-family: sans-serif; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 4px; }
+  .repas-week { font-size: 10px; color: #5A4A3A; font-family: sans-serif; margin-bottom: 16px; }
+  .repas-moment { font-size: 13px; color: #C17A3A; font-family: sans-serif; font-weight: bold; margin-bottom: 8px; letter-spacing: 1px; }
+  .repas-item { background: #251E16; border: 1px solid #3A2E24; border-radius: 8px; padding: 10px 14px; margin-bottom: 6px; font-size: 13px; color: #C8BCA8; font-family: sans-serif; line-height: 1.4; }
+  .repas-group { margin-bottom: 16px; }
+  .rules-box { background: #1E1812; border: 1px solid #3A2E24; border-radius: 10px; padding: 14px; margin-top: 8px; }
+  .rules-title { font-size: 11px; color: #C17A3A; font-family: sans-serif; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; }
+  .rule { font-size: 12px; color: #8A7A6A; font-family: sans-serif; margin-bottom: 6px; display: flex; gap: 8px; }
+  .rule-arrow { color: #3A7A5A; }
+
+  #planning-tab { display: block; }
+  #repas-tab { display: none; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div>
+      <div class="header-label" id="week-label">...</div>
+      <div class="header-title" id="header-title">Mon plan</div>
+      <div class="header-sub" id="header-sub"></div>
+    </div>
+    <div class="badge">
+      <div class="badge-pct" id="pct">0%</div>
+      <div class="badge-label">fait</div>
+    </div>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="bar" style="width:0%"></div></div>
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('planning')">📅 Planning</button>
+    <button class="tab" onclick="showTab('repas')">🍽️ Repas</button>
+  </div>
+</div>
+
+<div id="planning-tab">
+  <div class="days-scroll" id="days-scroll"></div>
+  <div class="day-detail" id="day-detail"></div>
+  <div class="mantra">
+    <div class="mantra-label" id="mantra-label"></div>
+    <div class="mantra-text" id="mantra-text"></div>
+  </div>
+</div>
+
+<div id="repas-tab">
+  <div class="repas-section" id="repas-content"></div>
+</div>
+
+<script>
+const MOIS = ['jan','fév','mar','avr','mai','juin','juil','août','sep','oct','nov','déc'];
+const JOURS = ['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
+const DJERBA = new Date('2026-05-20');
+const SUD = new Date('2026-07-15');
+
+function getMonday(d) {
+  const c = new Date(d);
+  const day = c.getDay();
+  const diff = c.getDate() - day + (day === 0 ? -6 : 1);
+  c.setDate(diff); c.setHours(0,0,0,0);
+  return c;
+}
+
+function daysUntil(target) {
+  const now = new Date(); now.setHours(0,0,0,0);
+  return Math.max(0, Math.ceil((target - now) / 86400000));
+}
+
+function getWeekNumber(monday) {
+  const start = new Date('2026-03-16'); start.setHours(0,0,0,0);
+  return Math.max(0, Math.floor((monday - start) / (7 * 86400000)));
+}
+
+function weekKey(monday) {
+  return `w${monday.getFullYear()}${String(monday.getMonth()+1).padStart(2,'0')}${String(monday.getDate()).padStart(2,'0')}`;
+}
+
+// Menus rotatifs sur 4 semaines
+const menus = [
+  { lundi:'🍳 Omelette 3 œufs + salade verte', mardi:'🍝 Pasta + thon + tomate', mercredi:'🍲 Soupe + pain + fromage', jeudi:'🍚 Riz + thon + légumes surgelés', vendredi:'🥪 Sandwich jambon + crudités' },
+  { lundi:'🍚 Riz + œuf au plat + légumes', mardi:'🥗 Salade composée + pain', mercredi:'🍳 Omelette fromage + jambon', jeudi:'🍝 Pasta + crème légère + jambon', vendredi:'🍲 Soupe + tartines + yaourt' },
+  { lundi:'🥚 Œufs brouillés + pain grillé', mardi:'🍚 Riz + thon + maïs + sauce soja', mercredi:'🥪 Wrap jambon + fromage frais', jeudi:'🍳 Omelette champignons + salade', vendredi:'🍝 Pasta + tomate + mozzarella' },
+  { lundi:'🍲 Velouté de légumes + pain', mardi:'🍚 Riz + légumes wok + œuf', mercredi:'🥗 Salade niçoise : thon + œuf + tomate', jeudi:'🥪 Pain complet + saumon fumé', vendredi:'🍝 Pasta + pesto + jambon' },
+];
+
+// Phrases de motivation (rotation quotidienne)
+const mantras = [
+  { label:'🏝️ Djerba arrive', text:'Chaque soir sur ce vélo, tu construis la version de toi qui arrive là-bas en forme.' },
+  { label:'💭 Ce soir', text:'Il y a quelqu\'un qui te connaît mieux que personne. Cette personne mérite de te voir comme tu sais l\'être.' },
+  { label:'🏝️ Cap au sud', text:'Dans quelques semaines tu seras au bord de la mer avec tes meilleurs amis. Ce vélo, c\'est le prix d\'entrée.' },
+  { label:'💭 L\'image que tu renvoies', text:'Tu veux que certaines personnes te voient à ton meilleur. Commence ce soir.' },
+  { label:'⛳ Sur le green', text:'Au golf tu connais ça : un bon swing ne vient pas de nulle part. L\'énergie non plus.' },
+  { label:'🏝️ Le compte à rebours', text:'Les jours passent. Même toi. Sauf que cette version-là monte sur le vélo.' },
+  { label:'💭 La personne qui compte', text:'Quelqu\'un dans ta vie a été là quand ça n\'allait pas. Sois à la hauteur de cette confiance.' },
+  { label:'🌅 Ce soir', text:'La fatigue du soir ne disparaît pas en s\'asseyant. Elle disparaît en bougeant 20 minutes.' },
+  { label:'🏝️ Djerba · tes 50 ans', text:'Tes amis y seront. Toi aussi. La question c\'est dans quel état tu arrives.' },
+  { label:'💭 Discret mais réel', text:'Il y a des gens pour qui tu veux être la meilleure version de toi. Tu sais de qui tu parles.' },
+  { label:'⛳ Pulnoy te regarde', text:'Tu as commencé le golf en juillet. Depuis, tu te tiens à quelque chose. Continue.' },
+  { label:'🌅 Ce moment', text:'Dans quelques mois tu te souviendras de ce printemps comme le moment où tu as décidé de changer de cap.' },
+  { label:'💭 Quelqu\'un sait qui tu es vraiment', text:'Pas besoin de le prouver — juste de l\'être. Ce soir, 20 minutes.' },
+  { label:'🏝️ Le soleil de mai', text:'Djerba en mai. Le golf. La mer. Tes amis. Ce vélo ce soir, c\'est pour ça.' },
+  { label:'💭 Ce regard-là', text:'Il y a un regard qu\'on porte sur soi quand on sait qu\'on a fait ce qu\'il fallait. Gagne-le ce soir.' },
+  { label:'⛳ La balle va là où tu envoies', text:'Ta vie aussi. Chaque soir sur ce vélo est un coup que tu joues dans la bonne direction.' },
+];
+
+// Structure des jours
+const dayConfigs = [
+  { emoji:'🔥', label:'Départ', color:'#C17A3A', tasks:[
+    {icon:'🚴',time:'18h00',text:'Vélo 20 min — musique ou série',dinner:false},
+    {icon:'🚿',time:'18h30',text:'Douche — tu réinitialises la journée',dinner:false},
+    {icon:'🍳',time:'19h00',text:'__DINNER__',dinner:true},
+    {icon:'👕',time:'20h00',text:'Lancer une machine à linge',dinner:false},
+    {icon:'🧠',time:'Soir',text:'5 min : une chose positive de la journée',dinner:false},
+  ]},
+  { emoji:'💪', label:'On tient', color:'#7A6A9A', tasks:[
+    {icon:'🚴',time:'18h00',text:'Vélo 20 min',dinner:false},
+    {icon:'🚿',time:'18h30',text:'Douche',dinner:false},
+    {icon:'🍝',time:'19h00',text:'__DINNER__',dinner:true},
+    {icon:'👕',time:'20h00',text:'Étendre / plier le linge',dinner:false},
+  ]},
+  { emoji:'🛒', label:'Courses', color:'#3A7A5A', tasks:[
+    {icon:'🚶',time:'18h00',text:'Courses à pied — marche bonus',dinner:false},
+    {icon:'🛒',time:'',text:'Liste : yaourts · œufs · thon · pâtes · riz · fruits · fromage · jambon · légumes surgelés · salade',dinner:false},
+    {icon:'🍲',time:'19h30',text:'__DINNER__',dinner:true},
+    {icon:'🚴',time:'Soir',text:'Vélo 20 min si énergie (optionnel)',dinner:false},
+  ]},
+  { emoji:'⚡', label:'Milieu', color:'#C17A3A', tasks:[
+    {icon:'🚴',time:'18h00',text:'Vélo 25 min — on monte un peu',dinner:false},
+    {icon:'🚿',time:'18h30',text:'Douche',dinner:false},
+    {icon:'🍚',time:'19h00',text:'__DINNER__',dinner:true},
+    {icon:'🧠',time:'Soir',text:'5 min : une chose positive de la journée',dinner:false},
+  ]},
+  { emoji:'🧹', label:'Reset appart', color:'#7A6A9A', tasks:[
+    {icon:'🚴',time:'18h00',text:'Vélo 20 min',dinner:false},
+    {icon:'🧹',time:'18h30',text:'Ménage express 45 min : aspirateur + salle de bain + cuisine',dinner:false},
+    {icon:'🍳',time:'19h15',text:'__DINNER__',dinner:true},
+    {icon:'😌',time:'Soir',text:'Soirée libre — tu as mérité',dinner:false},
+  ]},
+  { emoji:'⛳', label:'Golf', color:'#3A7A5A', tasks:[
+    {icon:'⛳',time:'Matin',text:'Golf à Pulnoy — sport sans y penser',dinner:false},
+    {icon:'🛁',time:'Après',text:'Récupération, prends soin de toi',dinner:false},
+    {icon:'🍽️',time:'Soir',text:'Repas plaisir — tu te fais du bien',dinner:false},
+  ]},
+  { emoji:'🔄', label:'Préparer', color:'#8A5A3A', tasks:[
+    {icon:'😴',time:'Matin',text:'Grasse matinée — récupère le sommeil',dinner:false},
+    {icon:'🧺',time:'Après-midi',text:'Linge de la semaine si besoin',dinner:false},
+    {icon:'📋',time:'Soir',text:'Préparer mentalement la semaine — 5 min',dinner:false},
+  ]},
+];
+
+// State
+const today = new Date(); today.setHours(0,0,0,0);
+const monday = getMonday(new Date());
+const wk = weekKey(monday);
+const wn = getWeekNumber(monday);
+const menu = menus[((wn % 4) + 4) % 4];
+const dinners = [menu.lundi, menu.mardi, menu.mercredi, menu.jeudi, menu.vendredi, '', ''];
+
+let checked = JSON.parse(localStorage.getItem('planning_checked') || '{}');
+const todayDow = today.getDay();
+let activeDay = todayDow === 0 ? 6 : todayDow - 1;
+
+// Build week plan
+const weekPlan = dayConfigs.map((cfg, i) => {
+  const d = new Date(monday); d.setDate(d.getDate() + i);
+  const label = `${JOURS[d.getDay()]} ${d.getDate()} ${MOIS[d.getMonth()]}`;
+  return {
+    key: label, date: new Date(d), emoji: cfg.emoji, label: cfg.label, color: cfg.color,
+    tasks: cfg.tasks.map((t, ti) => ({
+      ...t,
+      id: `${wk}_${i}_${ti}`,
+      text: t.dinner ? dinners[i] || t.text.replace('__DINNER__','Dîner libre') : t.text
+    }))
+  };
+});
+
+function save() { localStorage.setItem('planning_checked', JSON.stringify(checked)); }
+function totalTasks() { return weekPlan.flatMap(d => d.tasks).length; }
+function doneTasks() { return weekPlan.flatMap(d => d.tasks).filter(t => checked[t.id]).length; }
+
+function updateHeader() {
+  document.getElementById('week-label').textContent = `Semaine du ${monday.getDate()} ${MOIS[monday.getMonth()]}`;
+  const dj = daysUntil(DJERBA);
+  const su = daysUntil(SUD);
+  const sub = dj > 0 ? `🏝️ Djerba dans ${dj} jours` : su > 0 ? `🌊 Sud dans ${su} jours` : '☀️ Bon été !';
+  document.getElementById('header-sub').textContent = sub;
+  document.getElementById('header-title').textContent = 'Mon plan · ' + (dj > 0 ? `J-${dj}` : su > 0 ? `J-${su}` : '☀️');
+}
+
+function updateProgress() {
+  const pct = Math.round((doneTasks() / totalTasks()) * 100);
+  document.getElementById('pct').textContent = pct + '%';
+  document.getElementById('bar').style.width = pct + '%';
+}
+
+function updateMantra() {
+  const dayOfYear = Math.floor((today - new Date(today.getFullYear(),0,1)) / 86400000);
+  const m = mantras[dayOfYear % mantras.length];
+  document.getElementById('mantra-label').textContent = m.label;
+  document.getElementById('mantra-text').textContent = '\u201c' + m.text + '\u201d';
+}
+
+function renderDays() {
+  const container = document.getElementById('days-scroll');
+  container.innerHTML = '';
+  weekPlan.forEach((day, i) => {
+    const done = day.tasks.filter(t => checked[t.id]).length;
+    const isActive = i === activeDay;
+    const isToday = day.date.getTime() === today.getTime();
+    const btn = document.createElement('div');
+    btn.className = 'day-btn' + (isActive ? ' active' : '') + (isToday ? ' today-marker' : '');
+    if (isActive) btn.style.background = day.color;
+    btn.innerHTML = `<div class="day-emoji">${day.emoji}</div><div class="day-name">${day.key}</div><div class="day-count">${done}/${day.tasks.length}</div>`;
+    btn.onclick = () => { activeDay = i; renderDays(); renderDetail(); };
+    container.appendChild(btn);
+  });
+}
+
+function renderDetail() {
+  const day = weekPlan[activeDay];
+  document.getElementById('day-detail').innerHTML = `
+    <div class="day-header">
+      <div class="day-header-emoji">${day.emoji}</div>
+      <div>
+        <div class="day-header-title">${day.key}</div>
+        <div class="day-header-label" style="color:${day.color}">${day.label}</div>
+      </div>
+    </div>
+    <div class="tasks">
+      ${day.tasks.map(task => `
+        <div class="task${checked[task.id] ? ' done' : ''}" style="border-left:3px solid ${checked[task.id] ? '#3A2E24' : day.color}" onclick="toggleTask('${task.id}')">
+          <div class="task-icon">${task.icon}</div>
+          <div class="task-content">
+            ${task.time ? `<div class="task-time">${task.time}</div>` : ''}
+            <div class="task-text">${task.text}</div>
+          </div>
+          <div class="task-check">${checked[task.id] ? '✓' : ''}</div>
+        </div>`).join('')}
+    </div>`;
+}
+
+function renderRepas() {
+  const semNum = (((wn % 4) + 4) % 4) + 1;
+  document.getElementById('repas-content').innerHTML = `
+    <div class="repas-label">Solutions sans cuisine</div>
+    <div class="repas-week">Menu semaine ${semNum}/4 — change chaque semaine automatiquement</div>
+    <div class="repas-group">
+      <div class="repas-moment">Petit-déjeuner</div>
+      <div class="repas-item">☕ Yaourt + fruit + café</div>
+      <div class="repas-item">🍞 Pain complet + fromage + café</div>
+    </div>
+    <div class="repas-group">
+      <div class="repas-moment">Midi</div>
+      <div class="repas-item">🥪 Sandwich + fruit</div>
+      <div class="repas-item">🥗 Salade composée toute faite</div>
+      <div class="repas-item">🐟 Thon + pain + fruit</div>
+    </div>
+    <div class="repas-group">
+      <div class="repas-moment">Dîners cette semaine</div>
+      <div class="repas-item">Lun — ${menu.lundi}</div>
+      <div class="repas-item">Mar — ${menu.mardi}</div>
+      <div class="repas-item">Mer — ${menu.mercredi}</div>
+      <div class="repas-item">Jeu — ${menu.jeudi}</div>
+      <div class="repas-item">Ven — ${menu.vendredi}</div>
+    </div>
+    <div class="rules-box">
+      <div class="rules-title">Règles simples</div>
+      <div class="rule"><span class="rule-arrow">→</span> Eau ou café, pas de sodas</div>
+      <div class="rule"><span class="rule-arrow">→</span> Fruit à la place du gâteau</div>
+      <div class="rule"><span class="rule-arrow">→</span> Supermarché > fast food toujours</div>
+      <div class="rule"><span class="rule-arrow">→</span> Même sans appétit, mange un peu le soir</div>
+    </div>`;
+}
+
+function toggleTask(id) {
+  checked[id] = !checked[id];
+  save(); updateProgress(); renderDays(); renderDetail();
+}
+
+function showTab(tab) {
+  document.getElementById('planning-tab').style.display = tab === 'planning' ? 'block' : 'none';
+  document.getElementById('repas-tab').style.display = tab === 'repas' ? 'block' : 'none';
+  document.querySelectorAll('.tab').forEach((t, i) => {
+    t.classList.toggle('active', (i === 0 && tab === 'planning') || (i === 1 && tab === 'repas'));
+  });
+}
+
+updateHeader(); updateMantra(); renderDays(); renderDetail(); renderRepas(); updateProgress();
+</script>
+</body>
+</html>
