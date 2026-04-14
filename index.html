@@ -2,351 +2,1633 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mon Plan</title>
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Mon Plan">
-<meta name="theme-color" content="#1A1612">
+<title>Plan Annotator — OCI Connect</title>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: Georgia, serif; background: #1A1612; color: #E8DDD0; min-height: 100vh; }
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; height: 100%; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #1a1a1a; color: #e5e5e5; overflow: hidden; user-select: none; }
+.app { display: flex; flex-direction: column; height: 100vh; }
 
-  .header { background: linear-gradient(135deg, #2A1F14, #1A1612); padding: 20px 16px 14px; border-bottom: 1px solid #3A2E24; }
-  .header-top { display: flex; justify-content: space-between; align-items: flex-start; }
-  .header-label { font-size: 10px; letter-spacing: 3px; color: #C17A3A; text-transform: uppercase; margin-bottom: 4px; font-family: sans-serif; }
-  .header-title { font-size: 20px; font-weight: bold; color: #F0E8DC; }
-  .header-sub { font-size: 11px; color: #5A4A3A; font-family: sans-serif; margin-top: 2px; }
-  .badge { background: #C17A3A; border-radius: 50%; width: 50px; height: 50px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: sans-serif; font-weight: bold; color: #fff; flex-shrink: 0; }
-  .badge-pct { font-size: 15px; }
-  .badge-label { font-size: 9px; opacity: 0.8; }
-  .progress-bar { margin-top: 12px; height: 3px; background: #3A2E24; border-radius: 2px; }
-  .progress-fill { height: 100%; background: linear-gradient(90deg, #C17A3A, #E8A060); border-radius: 2px; transition: width 0.4s; }
+/* Top bar */
+.topbar { height: 48px; background: #232323; border-bottom: 1px solid #333; display: flex; align-items: center; padding: 0 12px; gap: 6px; flex-shrink: 0; }
+.topbar .brand { font-weight: 600; font-size: 14px; margin-right: 16px; color: #fff; }
+.topbar .sep { width: 1px; height: 24px; background: #3a3a3a; margin: 0 4px; }
+.topbar .spacer { flex: 1; }
+.btn { background: #333; color: #e5e5e5; border: 1px solid #3a3a3a; padding: 6px 12px; border-radius: 5px; cursor: pointer; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; }
+.btn:hover { background: #3a3a3a; border-color: #4a4a4a; }
+.btn.primary { background: #2a6fd1; border-color: #2a6fd1; color: white; }
+.btn.primary:hover { background: #3580e0; }
+.btn.danger:hover { background: #c0392b; border-color: #c0392b; color: white; }
 
-  .tabs { display: flex; gap: 8px; margin-top: 14px; }
-  .tab { background: transparent; border: 1px solid #3A2E24; color: #8A7A6A; border-radius: 20px; padding: 5px 14px; font-size: 11px; cursor: pointer; font-family: sans-serif; letter-spacing: 1px; text-transform: uppercase; }
-  .tab.active { background: #C17A3A; border-color: #C17A3A; color: #fff; }
+/* Workspace */
+.workspace { flex: 1; display: flex; overflow: hidden; }
 
-  .days-scroll { display: flex; overflow-x: auto; gap: 8px; padding: 12px 16px; border-bottom: 1px solid #2A2018; scrollbar-width: none; -ms-overflow-style: none; }
-  .days-scroll::-webkit-scrollbar { display: none; }
-  .day-btn { flex-shrink: 0; border-radius: 10px; padding: 8px 12px; cursor: pointer; text-align: center; border: 1px solid #3A2E24; background: #2A2018; }
-  .day-btn.active { border-color: transparent; }
-  .day-btn.today-marker { box-shadow: 0 0 0 1px #E8A060; }
-  .day-emoji { font-size: 14px; }
-  .day-name { font-size: 10px; color: #8A7A6A; font-family: sans-serif; margin-top: 2px; }
-  .day-btn.active .day-name { color: #fff; }
-  .day-count { font-size: 9px; color: #5A4A3A; font-family: sans-serif; }
-  .day-btn.active .day-count { color: rgba(255,255,255,0.7); }
+/* Sidebar */
+.sidebar { width: 56px; background: #232323; border-right: 1px solid #333; display: flex; flex-direction: column; padding: 6px 0; gap: 2px; flex-shrink: 0; }
+.tool { width: 44px; height: 44px; margin: 0 auto; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #999; position: relative; }
+.tool:hover { background: #2e2e2e; color: #ddd; }
+.tool.active { background: #2a6fd1; color: white; }
+.tool svg { width: 20px; height: 20px; }
+.tool .tt { position: absolute; left: 52px; top: 50%; transform: translateY(-50%); background: #111; color: #ddd; font-size: 12px; padding: 4px 8px; border-radius: 4px; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity 0.15s; z-index: 100; }
+.tool:hover .tt { opacity: 1; }
+.sidebar .divider { height: 1px; background: #333; margin: 6px 10px; }
 
-  .day-detail { padding: 16px; }
-  .day-header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
-  .day-header-emoji { font-size: 24px; }
-  .day-header-title { font-size: 16px; font-weight: bold; color: #F0E8DC; }
-  .day-header-label { font-size: 11px; font-family: sans-serif; letter-spacing: 2px; text-transform: uppercase; }
+/* Canvas area */
+.canvas-area { flex: 1; position: relative; overflow: hidden; background: #2a2a2a; background-image: linear-gradient(45deg, #252525 25%, transparent 25%), linear-gradient(-45deg, #252525 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #252525 75%), linear-gradient(-45deg, transparent 75%, #252525 75%); background-size: 20px 20px; background-position: 0 0, 0 10px, 10px -10px, -10px 0; }
+.canvas-stage { position: absolute; transform-origin: 0 0; }
+.canvas-stage canvas, .canvas-stage svg { position: absolute; top: 0; left: 0; display: block; }
+.canvas-stage svg { pointer-events: auto; }
 
-  .tasks { display: flex; flex-direction: column; gap: 10px; }
-  .task { border-radius: 10px; padding: 12px 14px; cursor: pointer; display: flex; gap: 12px; align-items: flex-start; background: #251E16; border: 1px solid #3A2E24; transition: all 0.2s; }
-  .task.done { background: #1E1A14; border-color: #2A2018; opacity: 0.5; }
-  .task-icon { font-size: 20px; flex-shrink: 0; }
-  .task-content { flex: 1; }
-  .task-time { font-size: 10px; color: #8A7A6A; font-family: sans-serif; margin-bottom: 2px; }
-  .task-text { font-size: 13px; color: #D8CCC0; line-height: 1.4; font-family: sans-serif; }
-  .task.done .task-text { text-decoration: line-through; color: #5A4A3A; }
-  .task-check { width: 20px; height: 20px; border-radius: 50%; border: 2px solid #3A2E24; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; margin-top: 2px; color: #fff; }
-  .task.done .task-check { background: #C17A3A; border-color: #C17A3A; }
+.empty-state { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 12px; color: #777; pointer-events: none; }
+.empty-state svg { width: 64px; height: 64px; opacity: 0.3; }
+.empty-state .hint { font-size: 14px; }
 
-  .mantra { margin: 4px 16px 24px; background: linear-gradient(135deg, #2A1F14, #1E1812); border: 1px solid #3A2E24; border-radius: 12px; padding: 14px 16px; text-align: center; }
-  .mantra-label { font-size: 9px; letter-spacing: 3px; color: #C17A3A; text-transform: uppercase; font-family: sans-serif; margin-bottom: 6px; }
-  .mantra-text { font-size: 13px; color: #8A7A6A; font-style: italic; line-height: 1.6; }
+/* Status bar */
+.statusbar { position: absolute; bottom: 12px; left: 12px; background: rgba(0,0,0,0.7); color: #ccc; font-size: 11px; padding: 6px 10px; border-radius: 4px; font-variant-numeric: tabular-nums; pointer-events: none; z-index: 10; }
+.zoom-controls { position: absolute; bottom: 12px; right: 12px; display: flex; gap: 4px; z-index: 10; }
+.zoom-controls .btn { padding: 6px 10px; background: rgba(0,0,0,0.7); border-color: transparent; }
 
-  .repas-section { padding: 16px; }
-  .repas-label { font-size: 12px; color: #8A7A6A; font-family: sans-serif; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 4px; }
-  .repas-week { font-size: 10px; color: #5A4A3A; font-family: sans-serif; margin-bottom: 16px; }
-  .repas-moment { font-size: 13px; color: #C17A3A; font-family: sans-serif; font-weight: bold; margin-bottom: 8px; letter-spacing: 1px; }
-  .repas-item { background: #251E16; border: 1px solid #3A2E24; border-radius: 8px; padding: 10px 14px; margin-bottom: 6px; font-size: 13px; color: #C8BCA8; font-family: sans-serif; line-height: 1.4; }
-  .repas-group { margin-bottom: 16px; }
-  .rules-box { background: #1E1812; border: 1px solid #3A2E24; border-radius: 10px; padding: 14px; margin-top: 8px; }
-  .rules-title { font-size: 11px; color: #C17A3A; font-family: sans-serif; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; }
-  .rule { font-size: 12px; color: #8A7A6A; font-family: sans-serif; margin-bottom: 6px; display: flex; gap: 8px; }
-  .rule-arrow { color: #3A7A5A; }
+/* Right panel */
+.rightpanel { width: 300px; background: #232323; border-left: 1px solid #333; overflow-y: auto; flex-shrink: 0; }
+.panel-section { border-bottom: 1px solid #2e2e2e; padding: 14px 14px; }
+.panel-section h3 { margin: 0 0 10px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; color: #888; font-weight: 600; }
+label.field { font-size: 12px; color: #aaa; display: block; margin: 8px 0 4px; }
+input[type=text], input[type=number], select { background: #1a1a1a; border: 1px solid #3a3a3a; color: #e5e5e5; padding: 6px 8px; border-radius: 4px; font-size: 13px; width: 100%; font-family: inherit; }
+input[type=text]:focus, input[type=number]:focus, select:focus { outline: none; border-color: #2a6fd1; }
+input[type=range] { width: 100%; accent-color: #2a6fd1; }
+input[type=color] { width: 40px; height: 28px; background: #1a1a1a; border: 1px solid #3a3a3a; border-radius: 4px; padding: 2px; cursor: pointer; }
+.slider-row { display: flex; gap: 10px; align-items: center; }
+.slider-row .value { min-width: 48px; text-align: right; font-variant-numeric: tabular-nums; font-size: 12px; color: #ccc; }
+.color-row { display: flex; gap: 8px; align-items: center; }
+.preset-colors { display: flex; gap: 4px; margin-top: 6px; flex-wrap: wrap; }
+.preset-color { width: 22px; height: 22px; border-radius: 4px; cursor: pointer; border: 2px solid transparent; }
+.preset-color:hover { border-color: #666; }
+.preset-color.active { border-color: #fff; }
 
-  #planning-tab { display: block; }
-  #repas-tab { display: none; }
+.layer-row { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 4px; margin-bottom: 4px; }
+.layer-row:hover { background: #2a2a2a; }
+.layer-row.layer-selectable { cursor: pointer; border: 1px solid transparent; }
+.layer-row.active-layer { background: #1d3a5f; border-color: #2a6fd1; }
+.layer-row.active-layer .name { color: #fff; font-weight: 600; }
+.layers-top { background: #1e1e1e; border-bottom: 2px solid #2a6fd1; }
+.layer-row .eye { cursor: pointer; color: #888; width: 18px; height: 18px; }
+.layer-row .eye.visible { color: #ddd; }
+.layer-row .name { flex: 1; font-size: 13px; }
+.layer-row .count { font-size: 11px; color: #777; }
+
+.shape-list { max-height: 200px; overflow-y: auto; }
+.shape-item { display: flex; align-items: center; gap: 6px; padding: 5px 8px; border-radius: 4px; font-size: 12px; cursor: pointer; }
+.shape-item:hover { background: #2a2a2a; }
+.shape-item.selected { background: #2a6fd1; }
+.shape-item .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.shape-item .lbl { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.shape-item .del { color: #999; cursor: pointer; padding: 2px; }
+.shape-item .del:hover { color: #e74c3c; }
+
+.kbd { background: #111; padding: 1px 5px; border-radius: 3px; font-size: 11px; font-family: monospace; color: #ccc; border: 1px solid #333; }
+.hint-box { background: #1e1e1e; border-left: 2px solid #2a6fd1; padding: 8px 10px; font-size: 12px; color: #bbb; margin-top: 6px; line-height: 1.5; }
+
+/* File input hidden */
+#file-input { display: none; }
+
+/* SVG cursor feedback */
+.canvas-stage.cursor-crosshair svg { cursor: crosshair; }
+.canvas-stage.cursor-grab svg { cursor: grab; }
+.canvas-stage.cursor-grabbing svg { cursor: grabbing; }
+.canvas-stage.cursor-move svg { cursor: move; }
+
+/* SVG handles */
+.handle { fill: #fff; stroke: #2a6fd1; stroke-width: 2; cursor: pointer; }
+.handle.rot { fill: #2a9d8f; stroke: #fff; }
+.selection-box { fill: none; stroke: #2a6fd1; stroke-width: 1; stroke-dasharray: 4 3; }
 </style>
 </head>
 <body>
 
-<div class="header">
-  <div class="header-top">
-    <div>
-      <div class="header-label" id="week-label">...</div>
-      <div class="header-title" id="header-title">Mon plan</div>
-      <div class="header-sub" id="header-sub"></div>
-    </div>
-    <div class="badge">
-      <div class="badge-pct" id="pct">0%</div>
-      <div class="badge-label">fait</div>
-    </div>
-  </div>
-  <div class="progress-bar"><div class="progress-fill" id="bar" style="width:0%"></div></div>
-  <div class="tabs">
-    <button class="tab active" onclick="showTab('planning')">📅 Planning</button>
-    <button class="tab" onclick="showTab('repas')">🍽️ Repas</button>
-  </div>
-</div>
+<div class="app">
+  <div class="topbar">
+    <div class="brand">◆ Plan Annotator</div>
+    <button class="btn" id="btn-import"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Importer plan</button>
+    <input type="file" id="file-input" accept="image/*">
+    <div class="sep"></div>
 
-<div id="planning-tab">
-  <div class="days-scroll" id="days-scroll"></div>
-  <div class="day-detail" id="day-detail"></div>
-  <div class="mantra">
-    <div class="mantra-label" id="mantra-label"></div>
-    <div class="mantra-text" id="mantra-text"></div>
-  </div>
-</div>
+    <label style="font-size:12px; color:#aaa;">Mode:</label>
+    <select id="mode-select" style="width:auto;">
+      <option value="color">Couleur</option>
+      <option value="bw">Noir & blanc</option>
+      <option value="gray">Niveaux de gris</option>
+      <option value="invert">Inversé</option>
+    </select>
 
-<div id="repas-tab">
-  <div class="repas-section" id="repas-content"></div>
+    <div id="threshold-wrap" style="display:none; align-items:center; gap:8px;">
+      <label style="font-size:12px; color:#aaa;">Seuil:</label>
+      <input type="range" id="threshold" min="50" max="200" value="100" style="width:100px;">
+      <span id="threshold-val" style="font-size:12px; color:#ccc; width:30px;">100</span>
+    </div>
+
+    <div class="sep"></div>
+    <button class="btn" id="btn-rot-left" title="Rotation 90° antihoraire">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><polyline points="3 3 3 8 8 8"/></svg>
+      90° ↺
+    </button>
+    <button class="btn" id="btn-rot-right" title="Rotation 90° horaire">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><polyline points="21 3 21 8 16 8"/></svg>
+      ↻ 90°
+    </button>
+
+    <div class="spacer"></div>
+
+    <button class="btn" id="btn-undo" title="Annuler (Ctrl+Z)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg></button>
+    <button class="btn" id="btn-redo" title="Rétablir (Ctrl+Y)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button>
+    <div class="sep"></div>
+    <button class="btn" id="btn-export-png">Export PNG</button>
+    <button class="btn" id="btn-export-svg">Export SVG</button>
+    <button class="btn primary" id="btn-save">💾 Sauver</button>
+    <button class="btn" id="btn-load">📂 Charger</button>
+  </div>
+
+  <div class="workspace">
+    <div class="sidebar">
+      <div class="tool active" data-tool="select" title="Sélection / Déplacer">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 2l14 10-6 1.5 3 7-3 1.5-3-7-5 4.5z"/></svg>
+        <span class="tt">Sélection <span class="kbd">V</span></span>
+      </div>
+      <div class="tool" data-tool="pan" title="Pan">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 11V6a2 2 0 0 0-4 0v6M14 10V4a2 2 0 0 0-4 0v8M10 10V5a2 2 0 0 0-4 0v10M6 13c-2 0-2 2-2 2 0 3 3 7 8 7h2a8 8 0 0 0 8-8V8a2 2 0 1 0-4 0v4"/></svg>
+        <span class="tt">Déplacer la vue <span class="kbd">H</span></span>
+      </div>
+      <div class="divider"></div>
+      <div class="tool" data-tool="pen" title="Pinceau libre">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>
+        <span class="tt">Pinceau <span class="kbd">B</span></span>
+      </div>
+      <div class="tool" data-tool="line" title="Ligne droite">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="20" x2="20" y2="4"/></svg>
+        <span class="tt">Ligne <span class="kbd">L</span></span>
+      </div>
+      <div class="tool" data-tool="wall" title="Mur (polyligne)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 17 9 11 13 15 21 7"/><circle cx="3" cy="17" r="1.5" fill="currentColor"/><circle cx="9" cy="11" r="1.5" fill="currentColor"/><circle cx="13" cy="15" r="1.5" fill="currentColor"/><circle cx="21" cy="7" r="1.5" fill="currentColor"/></svg>
+        <span class="tt">Mur / polyligne <span class="kbd">W</span></span>
+      </div>
+      <div class="tool" data-tool="rect" title="Rectangle">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="1"/></svg>
+        <span class="tt">Rectangle <span class="kbd">R</span></span>
+      </div>
+      <div class="divider"></div>
+      <div class="tool" data-tool="camera" title="Caméra (point)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg>
+        <span class="tt">Caméra <span class="kbd">C</span></span>
+      </div>
+      <div class="tool" data-tool="fov" title="Cône de vision">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 12 L22 6 A12 12 0 0 1 22 18 Z" fill="currentColor" fill-opacity="0.3"/><circle cx="12" cy="12" r="2" fill="currentColor"/></svg>
+        <span class="tt">Angle de vue <span class="kbd">F</span></span>
+      </div>
+      <div class="tool" data-tool="baie" title="Baie informatique">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="3" width="14" height="18" rx="1"/><line x1="8" y1="7" x2="16" y2="7"/><line x1="8" y1="11" x2="16" y2="11"/><line x1="8" y1="15" x2="16" y2="15"/><line x1="8" y1="19" x2="16" y2="19"/></svg>
+        <span class="tt">Baie informatique <span class="kbd">I</span></span>
+      </div>
+      <div class="tool" data-tool="borne" title="Borne WiFi">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="14" r="2" fill="currentColor"/><path d="M8 11a5.4 5.4 0 0 1 8 0"/><path d="M5 8a9.4 9.4 0 0 1 14 0"/></svg>
+        <span class="tt">Borne WiFi <span class="kbd">N</span></span>
+      </div>
+      <div class="tool" data-tool="porte" title="Porte contrôle d'accès">
+        <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><text x="12" y="17" text-anchor="middle" font-family="sans-serif" font-size="13" font-weight="700" fill="currentColor">P</text></svg>
+        <span class="tt">Porte accès <span class="kbd">A</span></span>
+      </div>
+      <div class="tool" data-tool="centrale" title="Centrale contrôle d'accès">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><line x1="7" y1="9" x2="17" y2="9"/><line x1="7" y1="12" x2="17" y2="12"/><circle cx="7" cy="16" r="1.5" fill="currentColor"/><text x="15" y="17.5" text-anchor="middle" font-family="sans-serif" font-size="6" font-weight="700" fill="currentColor">CA</text></svg>
+        <span class="tt">Centrale CA <span class="kbd">K</span></span>
+      </div>
+      <div class="tool" data-tool="percement" title="Percement (croix rouge)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="3" stroke-linecap="round"><line x1="5" y1="5" x2="19" y2="19"/><line x1="19" y1="5" x2="5" y2="19"/></svg>
+        <span class="tt">Percement <span class="kbd">X</span></span>
+      </div>
+      <div class="tool" data-tool="text" title="Texte / libellé">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+        <span class="tt">Texte <span class="kbd">T</span></span>
+      </div>
+      <div class="divider"></div>
+      <div class="tool" data-tool="eraser" title="Gomme (effacer le plan)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 20H7l-4-4 11-11 9 9z"/><line x1="14" y1="8" x2="8" y2="14"/></svg>
+        <span class="tt">Gomme plan <span class="kbd">E</span></span>
+      </div>
+      <div class="tool" data-tool="delete" title="Supprimer">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+        <span class="tt">Supprimer <span class="kbd">Del</span></span>
+      </div>
+    </div>
+
+    <div class="canvas-area" id="canvas-area">
+      <div class="canvas-stage" id="stage">
+        <canvas id="plan-canvas"></canvas>
+        <svg id="overlay" xmlns="http://www.w3.org/2000/svg"></svg>
+      </div>
+      <div class="empty-state" id="empty-state">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg>
+        <div class="hint">Importez un plan pour commencer</div>
+        <button class="btn primary" onclick="document.getElementById('file-input').click()">Importer un plan</button>
+      </div>
+      <div class="statusbar" id="statusbar">— Aucun plan chargé —</div>
+      <div class="zoom-controls">
+        <button class="btn" onclick="zoomOut()">−</button>
+        <button class="btn" onclick="zoomReset()" id="zoom-val">100%</button>
+        <button class="btn" onclick="zoomIn()">+</button>
+        <button class="btn" onclick="fitToView()" title="Ajuster à l'écran">⊡</button>
+      </div>
+    </div>
+
+    <div class="rightpanel">
+      <div class="panel-section layers-top">
+        <h3 style="color:#2a6fd1;">▤ Calques</h3>
+        <div class="layer-row layer-selectable" data-layer="plan">
+          <svg class="eye visible" id="eye-plan" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" onclick="event.stopPropagation();toggleLayer('plan')"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          <span class="name">Plan importé (fond)</span>
+          <span class="count" id="cnt-plan">—</span>
+        </div>
+        <div class="layer-row layer-selectable active-layer" data-layer="trace">
+          <svg class="eye visible" id="eye-trace" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" onclick="event.stopPropagation();toggleLayer('trace')"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          <span class="name">Traçage / murs</span>
+          <span class="count" id="cnt-trace">0</span>
+        </div>
+        <div class="layer-row layer-selectable" data-layer="annot">
+          <svg class="eye visible" id="eye-annot" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" onclick="event.stopPropagation();toggleLayer('annot')"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          <span class="name">Caméras / baies / bornes / CA</span>
+          <span class="count" id="cnt-annot">0</span>
+        </div>
+        <div style="font-size:11px;color:#888;margin-top:8px;line-height:1.4">
+          <b style="color:#2a6fd1">Œil</b> = visibilité du calque · cliquez un calque pour le mettre en évidence.<br>
+          Les outils de traçage vont sur le calque <b>Traçage</b>, les pictogrammes sur <b>Annotations</b>.
+        </div>
+      </div>
+
+      <div class="panel-section" id="properties-panel">
+        <h3>Propriétés</h3>
+        <div id="prop-content" style="font-size:13px; color:#888;">Sélectionnez un outil ou un élément</div>
+      </div>
+
+      <div class="panel-section">
+        <h3>Couleurs rapides</h3>
+        <div class="preset-colors" id="preset-colors">
+          <div class="preset-color" style="background:#378add" data-color="#378add"></div>
+          <div class="preset-color" style="background:#2a9d8f" data-color="#2a9d8f"></div>
+          <div class="preset-color" style="background:#e67e22" data-color="#e67e22"></div>
+          <div class="preset-color" style="background:#ef4444" data-color="#ef4444"></div>
+          <div class="preset-color" style="background:#f1c40f" data-color="#f1c40f"></div>
+          <div class="preset-color" style="background:#9b59b6" data-color="#9b59b6"></div>
+          <div class="preset-color" style="background:#111111" data-color="#111111"></div>
+          <div class="preset-color" style="background:#ffffff" data-color="#ffffff"></div>
+        </div>
+      </div>
+
+      <div class="panel-section">
+        <h3>Éléments (<span id="shape-total">0</span>)</h3>
+        <div class="shape-list" id="shape-list"></div>
+      </div>
+
+      <div class="panel-section">
+        <h3>Aide</h3>
+        <div class="hint-box" id="tool-hint">Importez un plan, choisissez un outil à gauche, cliquez sur le plan pour placer. <span class="kbd">Esc</span> pour annuler une action en cours. <span class="kbd">Space+drag</span> pour panner, <span class="kbd">molette</span> pour zoomer.</div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
-const MOIS = ['jan','fév','mar','avr','mai','juin','juil','août','sep','oct','nov','déc'];
-const JOURS = ['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
-const DJERBA = new Date('2026-05-20');
-const SUD = new Date('2026-07-15');
+// ==================== STATE ====================
+const state = {
+  tool: 'select',
+  mode: 'color',
+  threshold: 100,
+  shapes: [],
+  selectedId: null,
+  nextId: 1,
+  cameraCounter: 1,
+  zoom: 1,
+  panX: 0,
+  panY: 0,
+  imgLoaded: false,
+  imgWidth: 0,
+  imgHeight: 0,
+  imgData: null,     // original ImageData
+  drawing: false,
+  currentShape: null,
+  wallPoints: [],
+  layers: { plan: true, trace: true, annot: true },
+  defaults: {
+    strokeColor: '#ef4444',
+    strokeWidth: 2,
+    fillColor: 'none',
+    cameraColor: '#378add',
+    cameraRadius: 12,
+    cameraLabel: 'C01',
+    fovColor: '#2a9d8f',
+    fovOpacity: 0.4,
+    fovRadius: 120,
+    fovAperture: 90,
+    fovBearing: 0,
+    textColor: '#111',
+    textSize: 16,
+    baieColor: '#2a6fd1',
+    baieSize: 30,
+    baieLabel: 'BAIE',
+    percementSize: 18,
+    percementColor: '#ef4444',
+    percementWidth: 3,
+    eraserSize: 20,
+    borneColor: '#16a34a',
+    borneRadius: 14,
+    borneLabel: 'AP01',
+    wifiRadius: 120,
+    wifiOpacity: 0.25,
+    porteColor: '#d97706',
+    porteSize: 22,
+    porteLabel: 'P01',
+    centraleColor: '#7c3aed',
+    centraleSize: 30,
+    centraleLabel: 'CCA',
+  },
+  history: [],
+  historyIndex: -1,
+  isDraggingHandle: false,
+  dragHandle: null,
+  dragStart: null,
+  isPanning: false,
+  spacePressed: false,
+};
 
-function getMonday(d) {
-  const c = new Date(d);
-  const day = c.getDay();
-  const diff = c.getDate() - day + (day === 0 ? -6 : 1);
-  c.setDate(diff); c.setHours(0,0,0,0);
-  return c;
-}
+const canvas = document.getElementById('plan-canvas');
+const ctx = canvas.getContext('2d');
+const overlay = document.getElementById('overlay');
+const stage = document.getElementById('stage');
+const canvasArea = document.getElementById('canvas-area');
+const statusbar = document.getElementById('statusbar');
 
-function daysUntil(target) {
-  const now = new Date(); now.setHours(0,0,0,0);
-  return Math.max(0, Math.ceil((target - now) / 86400000));
-}
-
-function getWeekNumber(monday) {
-  const start = new Date('2026-03-16'); start.setHours(0,0,0,0);
-  return Math.max(0, Math.floor((monday - start) / (7 * 86400000)));
-}
-
-function weekKey(monday) {
-  return `w${monday.getFullYear()}${String(monday.getMonth()+1).padStart(2,'0')}${String(monday.getDate()).padStart(2,'0')}`;
-}
-
-// Menus rotatifs sur 4 semaines
-const menus = [
-  { lundi:'🍳 Omelette 3 œufs + salade verte', mardi:'🍝 Pasta + thon + tomate', mercredi:'🍲 Soupe + pain + fromage', jeudi:'🍚 Riz + thon + légumes surgelés', vendredi:'🥪 Sandwich jambon + crudités' },
-  { lundi:'🍚 Riz + œuf au plat + légumes', mardi:'🥗 Salade composée + pain', mercredi:'🍳 Omelette fromage + jambon', jeudi:'🍝 Pasta + crème légère + jambon', vendredi:'🍲 Soupe + tartines + yaourt' },
-  { lundi:'🥚 Œufs brouillés + pain grillé', mardi:'🍚 Riz + thon + maïs + sauce soja', mercredi:'🥪 Wrap jambon + fromage frais', jeudi:'🍳 Omelette champignons + salade', vendredi:'🍝 Pasta + tomate + mozzarella' },
-  { lundi:'🍲 Velouté de légumes + pain', mardi:'🍚 Riz + légumes wok + œuf', mercredi:'🥗 Salade niçoise : thon + œuf + tomate', jeudi:'🥪 Pain complet + saumon fumé', vendredi:'🍝 Pasta + pesto + jambon' },
-];
-
-// Phrases de motivation (rotation quotidienne)
-const mantras = [
-  { label:'🏝️ Djerba arrive', text:'Chaque soir sur ce vélo, tu construis la version de toi qui arrive là-bas en forme.' },
-  { label:'💭 Ce soir', text:'Il y a quelqu\'un qui te connaît mieux que personne. Cette personne mérite de te voir comme tu sais l\'être.' },
-  { label:'🏝️ Cap au sud', text:'Dans quelques semaines tu seras au bord de la mer avec tes meilleurs amis. Ce vélo, c\'est le prix d\'entrée.' },
-  { label:'💭 L\'image que tu renvoies', text:'Tu veux que certaines personnes te voient à ton meilleur. Commence ce soir.' },
-  { label:'⛳ Sur le green', text:'Au golf tu connais ça : un bon swing ne vient pas de nulle part. L\'énergie non plus.' },
-  { label:'🏝️ Le compte à rebours', text:'Les jours passent. Même toi. Sauf que cette version-là monte sur le vélo.' },
-  { label:'💭 La personne qui compte', text:'Quelqu\'un dans ta vie a été là quand ça n\'allait pas. Sois à la hauteur de cette confiance.' },
-  { label:'🌅 Ce soir', text:'La fatigue du soir ne disparaît pas en s\'asseyant. Elle disparaît en bougeant 20 minutes.' },
-  { label:'🏝️ Djerba · tes 50 ans', text:'Tes amis y seront. Toi aussi. La question c\'est dans quel état tu arrives.' },
-  { label:'💭 Discret mais réel', text:'Il y a des gens pour qui tu veux être la meilleure version de toi. Tu sais de qui tu parles.' },
-  { label:'⛳ Pulnoy te regarde', text:'Tu as commencé le golf en juillet. Depuis, tu te tiens à quelque chose. Continue.' },
-  { label:'🌅 Ce moment', text:'Dans quelques mois tu te souviendras de ce printemps comme le moment où tu as décidé de changer de cap.' },
-  { label:'💭 Quelqu\'un sait qui tu es vraiment', text:'Pas besoin de le prouver — juste de l\'être. Ce soir, 20 minutes.' },
-  { label:'🏝️ Le soleil de mai', text:'Djerba en mai. Le golf. La mer. Tes amis. Ce vélo ce soir, c\'est pour ça.' },
-  { label:'💭 Ce regard-là', text:'Il y a un regard qu\'on porte sur soi quand on sait qu\'on a fait ce qu\'il fallait. Gagne-le ce soir.' },
-  { label:'⛳ La balle va là où tu envoies', text:'Ta vie aussi. Chaque soir sur ce vélo est un coup que tu joues dans la bonne direction.' },
-];
-
-// Structure des jours
-const dayConfigs = [
-  { emoji:'🔥', label:'Départ', color:'#C17A3A', tasks:[
-    {icon:'🚴',time:'18h00',text:'Vélo 20 min — musique ou série',dinner:false},
-    {icon:'🚿',time:'18h30',text:'Douche — tu réinitialises la journée',dinner:false},
-    {icon:'🍳',time:'19h00',text:'__DINNER__',dinner:true},
-    {icon:'👕',time:'20h00',text:'Lancer une machine à linge',dinner:false},
-    {icon:'🧠',time:'Soir',text:'5 min : une chose positive de la journée',dinner:false},
-  ]},
-  { emoji:'💪', label:'On tient', color:'#7A6A9A', tasks:[
-    {icon:'🚴',time:'18h00',text:'Vélo 20 min',dinner:false},
-    {icon:'🚿',time:'18h30',text:'Douche',dinner:false},
-    {icon:'🍝',time:'19h00',text:'__DINNER__',dinner:true},
-    {icon:'👕',time:'20h00',text:'Étendre / plier le linge',dinner:false},
-  ]},
-  { emoji:'🛒', label:'Courses', color:'#3A7A5A', tasks:[
-    {icon:'🚶',time:'18h00',text:'Courses à pied — marche bonus',dinner:false},
-    {icon:'🛒',time:'',text:'Liste : yaourts · œufs · thon · pâtes · riz · fruits · fromage · jambon · légumes surgelés · salade',dinner:false},
-    {icon:'🍲',time:'19h30',text:'__DINNER__',dinner:true},
-    {icon:'🚴',time:'Soir',text:'Vélo 20 min si énergie (optionnel)',dinner:false},
-  ]},
-  { emoji:'⚡', label:'Milieu', color:'#C17A3A', tasks:[
-    {icon:'🚴',time:'18h00',text:'Vélo 25 min — on monte un peu',dinner:false},
-    {icon:'🚿',time:'18h30',text:'Douche',dinner:false},
-    {icon:'🍚',time:'19h00',text:'__DINNER__',dinner:true},
-    {icon:'🧠',time:'Soir',text:'5 min : une chose positive de la journée',dinner:false},
-  ]},
-  { emoji:'🧹', label:'Reset appart', color:'#7A6A9A', tasks:[
-    {icon:'🚴',time:'18h00',text:'Vélo 20 min',dinner:false},
-    {icon:'🧹',time:'18h30',text:'Ménage express 45 min : aspirateur + salle de bain + cuisine',dinner:false},
-    {icon:'🍳',time:'19h15',text:'__DINNER__',dinner:true},
-    {icon:'😌',time:'Soir',text:'Soirée libre — tu as mérité',dinner:false},
-  ]},
-  { emoji:'⛳', label:'Golf', color:'#3A7A5A', tasks:[
-    {icon:'⛳',time:'Matin',text:'Golf à Pulnoy — sport sans y penser',dinner:false},
-    {icon:'🛁',time:'Après',text:'Récupération, prends soin de toi',dinner:false},
-    {icon:'🍽️',time:'Soir',text:'Repas plaisir — tu te fais du bien',dinner:false},
-  ]},
-  { emoji:'🔄', label:'Préparer', color:'#8A5A3A', tasks:[
-    {icon:'😴',time:'Matin',text:'Grasse matinée — récupère le sommeil',dinner:false},
-    {icon:'🧺',time:'Après-midi',text:'Linge de la semaine si besoin',dinner:false},
-    {icon:'📋',time:'Soir',text:'Préparer mentalement la semaine — 5 min',dinner:false},
-  ]},
-];
-
-// State
-const today = new Date(); today.setHours(0,0,0,0);
-const monday = getMonday(new Date());
-const wk = weekKey(monday);
-const wn = getWeekNumber(monday);
-const menu = menus[((wn % 4) + 4) % 4];
-const dinners = [menu.lundi, menu.mardi, menu.mercredi, menu.jeudi, menu.vendredi, '', ''];
-
-let checked = JSON.parse(localStorage.getItem('planning_checked') || '{}');
-const todayDow = today.getDay();
-let activeDay = todayDow === 0 ? 6 : todayDow - 1;
-
-// Build week plan
-const weekPlan = dayConfigs.map((cfg, i) => {
-  const d = new Date(monday); d.setDate(d.getDate() + i);
-  const label = `${JOURS[d.getDay()]} ${d.getDate()} ${MOIS[d.getMonth()]}`;
-  return {
-    key: label, date: new Date(d), emoji: cfg.emoji, label: cfg.label, color: cfg.color,
-    tasks: cfg.tasks.map((t, ti) => ({
-      ...t,
-      id: `${wk}_${i}_${ti}`,
-      text: t.dinner ? dinners[i] || t.text.replace('__DINNER__','Dîner libre') : t.text
-    }))
-  };
+// ==================== IMAGE IMPORT ====================
+document.getElementById('btn-import').addEventListener('click', () => document.getElementById('file-input').click());
+document.getElementById('file-input').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => loadImage(ev.target.result);
+  reader.readAsDataURL(file);
 });
 
-function save() { localStorage.setItem('planning_checked', JSON.stringify(checked)); }
-function totalTasks() { return weekPlan.flatMap(d => d.tasks).length; }
-function doneTasks() { return weekPlan.flatMap(d => d.tasks).filter(t => checked[t.id]).length; }
+// drag and drop
+canvasArea.addEventListener('dragover', (e) => { e.preventDefault(); });
+canvasArea.addEventListener('drop', (e) => {
+  e.preventDefault();
+  const file = e.dataTransfer.files[0];
+  if (!file || !file.type.startsWith('image/')) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => loadImage(ev.target.result);
+  reader.readAsDataURL(file);
+});
 
-function updateHeader() {
-  document.getElementById('week-label').textContent = `Semaine du ${monday.getDate()} ${MOIS[monday.getMonth()]}`;
-  const dj = daysUntil(DJERBA);
-  const su = daysUntil(SUD);
-  const sub = dj > 0 ? `🏝️ Djerba dans ${dj} jours` : su > 0 ? `🌊 Sud dans ${su} jours` : '☀️ Bon été !';
-  document.getElementById('header-sub').textContent = sub;
-  document.getElementById('header-title').textContent = 'Mon plan · ' + (dj > 0 ? `J-${dj}` : su > 0 ? `J-${su}` : '☀️');
+function loadImage(src) {
+  const img = new Image();
+  img.onload = () => {
+    state.imgWidth = img.width;
+    state.imgHeight = img.height;
+    canvas.width = img.width;
+    canvas.height = img.height;
+    overlay.setAttribute('width', img.width);
+    overlay.setAttribute('height', img.height);
+    overlay.setAttribute('viewBox', `0 0 ${img.width} ${img.height}`);
+    ctx.drawImage(img, 0, 0);
+    state.imgData = ctx.getImageData(0, 0, img.width, img.height);
+    state.originalSrc = src;  // keep original for restore
+    state.imgLoaded = true;
+    document.getElementById('empty-state').style.display = 'none';
+    document.getElementById('cnt-plan').textContent = `${img.width}×${img.height}`;
+    applyMode();
+    fitToView();
+    updateStatus();
+  };
+  img.src = src;
 }
 
-function updateProgress() {
-  const pct = Math.round((doneTasks() / totalTasks()) * 100);
-  document.getElementById('pct').textContent = pct + '%';
-  document.getElementById('bar').style.width = pct + '%';
+// ==================== IMAGE MODE ====================
+document.getElementById('mode-select').addEventListener('change', (e) => {
+  state.mode = e.target.value;
+  document.getElementById('threshold-wrap').style.display = (state.mode === 'bw') ? 'flex' : 'none';
+  applyMode();
+});
+document.getElementById('threshold').addEventListener('input', (e) => {
+  state.threshold = parseInt(e.target.value);
+  document.getElementById('threshold-val').textContent = state.threshold;
+  if (state.mode === 'bw') applyMode();
+});
+
+function applyMode() {
+  if (!state.imgData) return;
+  const src = state.imgData;
+  const out = ctx.createImageData(src.width, src.height);
+  const s = src.data, d = out.data;
+  if (state.mode === 'color') {
+    d.set(s);
+  } else if (state.mode === 'bw') {
+    const thr = state.threshold;
+    for (let i = 0; i < s.length; i += 4) {
+      const r = s[i], g = s[i+1], b = s[i+2];
+      const mx = Math.max(r, g, b), mn = Math.min(r, g, b);
+      const isDark = mx < thr;
+      const isGray = (mx - mn) < 35;
+      const v = (isDark && isGray) ? 0 : 255;
+      d[i] = d[i+1] = d[i+2] = v;
+      d[i+3] = 255;
+    }
+  } else if (state.mode === 'gray') {
+    for (let i = 0; i < s.length; i += 4) {
+      const g = Math.round(0.299*s[i] + 0.587*s[i+1] + 0.114*s[i+2]);
+      d[i] = d[i+1] = d[i+2] = g;
+      d[i+3] = 255;
+    }
+  } else if (state.mode === 'invert') {
+    for (let i = 0; i < s.length; i += 4) {
+      d[i] = 255 - s[i]; d[i+1] = 255 - s[i+1]; d[i+2] = 255 - s[i+2]; d[i+3] = 255;
+    }
+  }
+  ctx.putImageData(out, 0, 0);
 }
 
-function updateMantra() {
-  const dayOfYear = Math.floor((today - new Date(today.getFullYear(),0,1)) / 86400000);
-  const m = mantras[dayOfYear % mantras.length];
-  document.getElementById('mantra-label').textContent = m.label;
-  document.getElementById('mantra-text').textContent = '\u201c' + m.text + '\u201d';
+// ==================== ZOOM / PAN ====================
+function applyTransform() {
+  stage.style.transform = `translate(${state.panX}px, ${state.panY}px) scale(${state.zoom})`;
+  document.getElementById('zoom-val').textContent = Math.round(state.zoom * 100) + '%';
+}
+function zoomIn() { setZoom(state.zoom * 1.25); }
+function zoomOut() { setZoom(state.zoom / 1.25); }
+function zoomReset() { setZoom(1); }
+function setZoom(z, centerX, centerY) {
+  const newZoom = Math.max(0.1, Math.min(10, z));
+  if (centerX !== undefined) {
+    const rect = canvasArea.getBoundingClientRect();
+    const mx = centerX - rect.left, my = centerY - rect.top;
+    const dx = (mx - state.panX) * (newZoom / state.zoom - 1);
+    const dy = (my - state.panY) * (newZoom / state.zoom - 1);
+    state.panX -= dx;
+    state.panY -= dy;
+  }
+  state.zoom = newZoom;
+  applyTransform();
 }
 
-function renderDays() {
-  const container = document.getElementById('days-scroll');
-  container.innerHTML = '';
-  weekPlan.forEach((day, i) => {
-    const done = day.tasks.filter(t => checked[t.id]).length;
-    const isActive = i === activeDay;
-    const isToday = day.date.getTime() === today.getTime();
-    const btn = document.createElement('div');
-    btn.className = 'day-btn' + (isActive ? ' active' : '') + (isToday ? ' today-marker' : '');
-    if (isActive) btn.style.background = day.color;
-    btn.innerHTML = `<div class="day-emoji">${day.emoji}</div><div class="day-name">${day.key}</div><div class="day-count">${done}/${day.tasks.length}</div>`;
-    btn.onclick = () => { activeDay = i; renderDays(); renderDetail(); };
-    container.appendChild(btn);
+function fitToView() {
+  if (!state.imgLoaded) return;
+  const rect = canvasArea.getBoundingClientRect();
+  const margin = 40;
+  const scaleX = (rect.width - margin*2) / state.imgWidth;
+  const scaleY = (rect.height - margin*2) / state.imgHeight;
+  state.zoom = Math.min(scaleX, scaleY);
+  state.panX = (rect.width - state.imgWidth * state.zoom) / 2;
+  state.panY = (rect.height - state.imgHeight * state.zoom) / 2;
+  applyTransform();
+}
+
+canvasArea.addEventListener('wheel', (e) => {
+  if (!state.imgLoaded) return;
+  e.preventDefault();
+  const factor = e.deltaY > 0 ? 0.9 : 1.111;
+  setZoom(state.zoom * factor, e.clientX, e.clientY);
+}, { passive: false });
+
+// convert screen coords to image coords
+function screenToImg(clientX, clientY) {
+  const rect = canvasArea.getBoundingClientRect();
+  const x = (clientX - rect.left - state.panX) / state.zoom;
+  const y = (clientY - rect.top - state.panY) / state.zoom;
+  return { x, y };
+}
+
+// ==================== TOOLS ====================
+document.querySelectorAll('.tool').forEach(el => {
+  el.addEventListener('click', () => {
+    document.querySelectorAll('.tool').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    state.tool = el.dataset.tool;
+    state.wallPoints = [];
+    state.selectedId = null;
+    render();
+    updatePropertiesPanel();
+    updateCursor();
   });
+});
+function updateCursor() {
+  stage.className = 'canvas-stage';
+  if (state.tool === 'pan' || state.spacePressed) stage.classList.add('cursor-grab');
+  else if (['pen','line','wall','rect','camera','fov','text','baie','percement','borne','porte','centrale','eraser'].includes(state.tool)) stage.classList.add('cursor-crosshair');
 }
 
-function renderDetail() {
-  const day = weekPlan[activeDay];
-  document.getElementById('day-detail').innerHTML = `
-    <div class="day-header">
-      <div class="day-header-emoji">${day.emoji}</div>
-      <div>
-        <div class="day-header-title">${day.key}</div>
-        <div class="day-header-label" style="color:${day.color}">${day.label}</div>
+// Keyboard shortcuts
+window.addEventListener('keydown', (e) => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') return;
+  const keyMap = { v: 'select', h: 'pan', b: 'pen', l: 'line', w: 'wall', r: 'rect', c: 'camera', f: 'fov', t: 'text', i: 'baie', x: 'percement', e: 'eraser', n: 'borne', a: 'porte', k: 'centrale' };
+  if (keyMap[e.key.toLowerCase()]) {
+    const btn = document.querySelector(`[data-tool="${keyMap[e.key.toLowerCase()]}"]`);
+    if (btn) btn.click();
+  } else if (e.key === 'Escape') {
+    state.wallPoints = []; state.selectedId = null; state.currentShape = null; state.drawing = false;
+    render(); updatePropertiesPanel();
+  } else if (e.key === 'Delete' || e.key === 'Backspace') {
+    if (state.selectedId) { deleteShape(state.selectedId); }
+  } else if (e.key === ' ') {
+    state.spacePressed = true; updateCursor(); e.preventDefault();
+  } else if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+    e.preventDefault(); if (e.shiftKey) redo(); else undo();
+  } else if ((e.ctrlKey || e.metaKey) && e.key === 'y') {
+    e.preventDefault(); redo();
+  }
+});
+window.addEventListener('keyup', (e) => {
+  if (e.key === ' ') { state.spacePressed = false; updateCursor(); }
+});
+
+// ==================== SHAPE CREATION ====================
+function newId() { return 's' + (state.nextId++); }
+
+function pushHistory() {
+  state.history = state.history.slice(0, state.historyIndex + 1);
+  state.history.push(JSON.stringify(state.shapes));
+  if (state.history.length > 50) state.history.shift();
+  state.historyIndex = state.history.length - 1;
+}
+function undo() {
+  if (state.historyIndex <= 0) return;
+  state.historyIndex--;
+  state.shapes = JSON.parse(state.history[state.historyIndex]);
+  state.selectedId = null;
+  render(); updatePropertiesPanel();
+}
+function redo() {
+  if (state.historyIndex >= state.history.length - 1) return;
+  state.historyIndex++;
+  state.shapes = JSON.parse(state.history[state.historyIndex]);
+  state.selectedId = null;
+  render(); updatePropertiesPanel();
+}
+document.getElementById('btn-undo').addEventListener('click', undo);
+document.getElementById('btn-redo').addEventListener('click', redo);
+
+function addShape(shape) {
+  shape.id = newId();
+  state.shapes.push(shape);
+  pushHistory();
+  render();
+  updateShapeList();
+}
+function deleteShape(id) {
+  state.shapes = state.shapes.filter(s => s.id !== id);
+  if (state.selectedId === id) state.selectedId = null;
+  pushHistory();
+  render();
+  updatePropertiesPanel();
+}
+function updateShape(id, updates) {
+  const s = state.shapes.find(x => x.id === id);
+  if (!s) return;
+  Object.assign(s, updates);
+  render();
+}
+
+// ==================== MOUSE EVENTS ====================
+overlay.addEventListener('mousedown', handleMouseDown);
+overlay.addEventListener('mousemove', handleMouseMove);
+overlay.addEventListener('mouseup', handleMouseUp);
+overlay.addEventListener('dblclick', handleDoubleClick);
+canvasArea.addEventListener('mousedown', handlePanStart);
+window.addEventListener('mousemove', handlePanMove);
+window.addEventListener('mouseup', handlePanEnd);
+
+function handlePanStart(e) {
+  if (!state.imgLoaded) return;
+  if (state.tool === 'pan' || state.spacePressed || e.button === 1) {
+    state.isPanning = true;
+    state.panStart = { x: e.clientX - state.panX, y: e.clientY - state.panY };
+    stage.classList.add('cursor-grabbing');
+    e.preventDefault();
+  }
+}
+function handlePanMove(e) {
+  if (!state.isPanning) return;
+  state.panX = e.clientX - state.panStart.x;
+  state.panY = e.clientY - state.panStart.y;
+  applyTransform();
+}
+function handlePanEnd(e) {
+  if (state.isPanning) { state.isPanning = false; updateCursor(); }
+}
+
+function handleMouseDown(e) {
+  if (state.isPanning || state.spacePressed) return;
+  if (!state.imgLoaded) return;
+  const p = screenToImg(e.clientX, e.clientY);
+
+  // handles (select mode)
+  const handleEl = e.target.closest('[data-handle]');
+  if (handleEl && state.tool === 'select') {
+    state.isDraggingHandle = true;
+    state.dragHandle = { id: handleEl.dataset.id, handle: handleEl.dataset.handle };
+    state.dragStart = p;
+    return;
+  }
+
+  // click on shape (select)
+  const shapeEl = e.target.closest('[data-shape-id]');
+  if (state.tool === 'select' && shapeEl) {
+    state.selectedId = shapeEl.dataset.shapeId;
+    updatePropertiesPanel(); render();
+    // start moving
+    state.isDraggingHandle = true;
+    state.dragHandle = { id: state.selectedId, handle: 'move' };
+    state.dragStart = p;
+    return;
+  }
+  if (state.tool === 'select' && !shapeEl) {
+    state.selectedId = null;
+    updatePropertiesPanel(); render();
+    return;
+  }
+
+  if (state.tool === 'delete' && shapeEl) {
+    deleteShape(shapeEl.dataset.shapeId);
+    return;
+  }
+
+  if (state.tool === 'pen') {
+    state.drawing = true;
+    state.currentShape = { type: 'pen', points: [[p.x, p.y]], stroke: state.defaults.strokeColor, width: state.defaults.strokeWidth, layer: 'trace' };
+  } else if (state.tool === 'line') {
+    state.drawing = true;
+    state.currentShape = { type: 'line', x1: p.x, y1: p.y, x2: p.x, y2: p.y, stroke: state.defaults.strokeColor, width: state.defaults.strokeWidth, layer: 'trace' };
+  } else if (state.tool === 'wall') {
+    if (state.wallPoints.length === 0) {
+      state.wallPoints.push([p.x, p.y]);
+    }
+    state.wallPoints.push([p.x, p.y]);
+    state.drawing = true;
+  } else if (state.tool === 'rect') {
+    state.drawing = true;
+    state.currentShape = { type: 'rect', x: p.x, y: p.y, w: 0, h: 0, stroke: state.defaults.strokeColor, width: state.defaults.strokeWidth, fill: 'none', layer: 'trace' };
+  } else if (state.tool === 'camera') {
+    const shape = {
+      type: 'camera', x: p.x, y: p.y, radius: state.defaults.cameraRadius,
+      color: state.defaults.cameraColor, label: nextCameraLabel(), layer: 'annot'
+    };
+    addShape(shape);
+    state.selectedId = shape.id;
+    updatePropertiesPanel();
+  } else if (state.tool === 'fov') {
+    const shape = {
+      type: 'fov', x: p.x, y: p.y, radius: state.defaults.fovRadius,
+      bearing: state.defaults.fovBearing, aperture: state.defaults.fovAperture,
+      color: state.defaults.fovColor, opacity: state.defaults.fovOpacity, layer: 'annot'
+    };
+    addShape(shape);
+    state.selectedId = shape.id;
+    updatePropertiesPanel();
+  } else if (state.tool === 'text') {
+    const txt = prompt('Texte:');
+    if (txt) {
+      addShape({ type: 'text', x: p.x, y: p.y, text: txt, color: state.defaults.textColor, size: state.defaults.textSize, layer: 'annot' });
+    }
+  } else if (state.tool === 'baie') {
+    const shape = {
+      type: 'baie', x: p.x, y: p.y, size: state.defaults.baieSize,
+      color: state.defaults.baieColor, label: nextBaieLabel(), layer: 'annot'
+    };
+    addShape(shape);
+    state.selectedId = shape.id;
+    updatePropertiesPanel();
+  } else if (state.tool === 'percement') {
+    const shape = {
+      type: 'percement', x: p.x, y: p.y, size: state.defaults.percementSize,
+      color: state.defaults.percementColor, width: state.defaults.percementWidth, layer: 'annot'
+    };
+    addShape(shape);
+    state.selectedId = shape.id;
+    updatePropertiesPanel();
+  } else if (state.tool === 'borne') {
+    const shape = {
+      type: 'borne', x: p.x, y: p.y, radius: state.defaults.borneRadius,
+      color: state.defaults.borneColor, label: nextBorneLabel(),
+      wifiRadius: state.defaults.wifiRadius, wifiOpacity: state.defaults.wifiOpacity, layer: 'annot'
+    };
+    addShape(shape);
+    state.selectedId = shape.id;
+    updatePropertiesPanel();
+  } else if (state.tool === 'porte') {
+    const shape = {
+      type: 'porte', x: p.x, y: p.y, size: state.defaults.porteSize,
+      color: state.defaults.porteColor, label: nextPorteLabel(), layer: 'annot'
+    };
+    addShape(shape);
+    state.selectedId = shape.id;
+    updatePropertiesPanel();
+  } else if (state.tool === 'centrale') {
+    const shape = {
+      type: 'centrale', x: p.x, y: p.y, size: state.defaults.centraleSize,
+      color: state.defaults.centraleColor, label: state.defaults.centraleLabel, layer: 'annot'
+    };
+    addShape(shape);
+    state.selectedId = shape.id;
+    updatePropertiesPanel();
+  } else if (state.tool === 'eraser') {
+    state.drawing = true;
+    state.lastErasePoint = p;
+    eraseAt(p.x, p.y);
+  }
+}
+
+function handleMouseMove(e) {
+  if (!state.imgLoaded) return;
+  const p = screenToImg(e.clientX, e.clientY);
+  document.getElementById('statusbar').textContent = `x: ${Math.round(p.x)}, y: ${Math.round(p.y)} · zoom ${Math.round(state.zoom*100)}%`;
+
+  if (state.isDraggingHandle) {
+    const shape = state.shapes.find(s => s.id === state.dragHandle.id);
+    if (!shape) return;
+    const h = state.dragHandle.handle;
+    const dx = p.x - state.dragStart.x;
+    const dy = p.y - state.dragStart.y;
+    if (h === 'move') {
+      if (shape.type === 'camera' || shape.type === 'fov' || shape.type === 'text' || shape.type === 'baie' || shape.type === 'percement' || shape.type === 'borne' || shape.type === 'porte' || shape.type === 'centrale') {
+        shape.x += dx; shape.y += dy;
+      } else if (shape.type === 'line') {
+        shape.x1 += dx; shape.y1 += dy; shape.x2 += dx; shape.y2 += dy;
+      } else if (shape.type === 'rect') {
+        shape.x += dx; shape.y += dy;
+      } else if (shape.type === 'pen' || shape.type === 'polyline') {
+        shape.points = shape.points.map(pt => [pt[0]+dx, pt[1]+dy]);
+      }
+      state.dragStart = p;
+    } else if (h === 'p1' && shape.type === 'line') { shape.x1 = p.x; shape.y1 = p.y; }
+    else if (h === 'p2' && shape.type === 'line') { shape.x2 = p.x; shape.y2 = p.y; }
+    else if (h === 'radius' && (shape.type === 'camera' || shape.type === 'fov' || shape.type === 'borne')) {
+      shape.radius = Math.max(5, Math.hypot(p.x - shape.x, p.y - shape.y));
+      if (shape.type === 'fov') {
+        shape.bearing = (Math.atan2(p.y - shape.y, p.x - shape.x) * 180 / Math.PI + 360) % 360;
+      }
+    } else if (h === 'wifiradius' && shape.type === 'borne') {
+      shape.wifiRadius = Math.max(20, Math.hypot(p.x - shape.x, p.y - shape.y));
+    } else if (h === 'rect-br' && shape.type === 'rect') {
+      shape.w = p.x - shape.x; shape.h = p.y - shape.y;
+    }
+    updatePropertiesPanel();
+    render();
+    return;
+  }
+
+  if (!state.drawing) return;
+  if (state.tool === 'pen') {
+    state.currentShape.points.push([p.x, p.y]);
+    render();
+  } else if (state.tool === 'line') {
+    state.currentShape.x2 = p.x; state.currentShape.y2 = p.y;
+    render();
+  } else if (state.tool === 'wall') {
+    if (state.wallPoints.length > 0) {
+      state.wallPoints[state.wallPoints.length - 1] = [p.x, p.y];
+      render();
+    }
+  } else if (state.tool === 'rect') {
+    state.currentShape.w = p.x - state.currentShape.x;
+    state.currentShape.h = p.y - state.currentShape.y;
+    render();
+  } else if (state.tool === 'eraser') {
+    const last = state.lastErasePoint || p;
+    const dist = Math.hypot(p.x - last.x, p.y - last.y);
+    const steps = Math.max(1, Math.ceil(dist / (state.defaults.eraserSize / 2)));
+    for (let i = 1; i <= steps; i++) {
+      const t = i / steps;
+      eraseAt(last.x + (p.x - last.x) * t, last.y + (p.y - last.y) * t);
+    }
+    state.lastErasePoint = p;
+  }
+}
+
+function handleMouseUp(e) {
+  if (state.isDraggingHandle) {
+    state.isDraggingHandle = false;
+    state.dragHandle = null;
+    pushHistory();
+    return;
+  }
+  if (!state.drawing) return;
+  if (state.tool === 'pen' || state.tool === 'line' || state.tool === 'rect') {
+    if (state.tool === 'rect' && (Math.abs(state.currentShape.w) < 3 || Math.abs(state.currentShape.h) < 3)) {
+      state.currentShape = null; state.drawing = false; render(); return;
+    }
+    addShape(state.currentShape);
+    state.currentShape = null;
+    state.drawing = false;
+  } else if (state.tool === 'eraser') {
+    state.drawing = false;
+    state.lastErasePoint = null;
+  }
+}
+
+function handleDoubleClick(e) {
+  if (state.tool === 'wall' && state.wallPoints.length >= 2) {
+    const pts = state.wallPoints.slice(0, -1); // drop the preview point
+    if (pts.length >= 2) {
+      addShape({ type: 'polyline', points: pts, stroke: state.defaults.strokeColor, width: state.defaults.strokeWidth, layer: 'trace' });
+    }
+    state.wallPoints = [];
+    state.drawing = false;
+    render();
+  }
+}
+
+function nextCameraLabel() {
+  const existing = state.shapes.filter(s => s.type === 'camera').map(s => s.label);
+  for (let i = 1; i < 100; i++) {
+    const label = 'C' + String(i).padStart(2, '0');
+    if (!existing.includes(label)) return label;
+  }
+  return 'C';
+}
+function nextBaieLabel() {
+  const existing = state.shapes.filter(s => s.type === 'baie').map(s => s.label);
+  for (let i = 1; i < 50; i++) {
+    const label = 'BAIE' + String(i).padStart(2, '0');
+    if (!existing.includes(label)) return label;
+  }
+  return 'BAIE';
+}
+function nextBorneLabel() {
+  const existing = state.shapes.filter(s => s.type === 'borne').map(s => s.label);
+  for (let i = 1; i < 50; i++) {
+    const label = 'AP' + String(i).padStart(2, '0');
+    if (!existing.includes(label)) return label;
+  }
+  return 'AP';
+}
+function nextPorteLabel() {
+  const existing = state.shapes.filter(s => s.type === 'porte').map(s => s.label);
+  for (let i = 1; i < 100; i++) {
+    const label = 'P' + String(i).padStart(2, '0');
+    if (!existing.includes(label)) return label;
+  }
+  return 'P';
+}
+
+// ==================== RENDERING ====================
+function fovPath(cx, cy, radius, bearing, aperture) {
+  if (aperture >= 360) {
+    return `M ${cx-radius} ${cy} A ${radius} ${radius} 0 1 0 ${cx+radius} ${cy} A ${radius} ${radius} 0 1 0 ${cx-radius} ${cy} Z`;
+  }
+  const half = aperture / 2;
+  const startA = (bearing - half) * Math.PI / 180;
+  const endA = (bearing + half) * Math.PI / 180;
+  const x1 = cx + radius * Math.cos(startA);
+  const y1 = cy + radius * Math.sin(startA);
+  const x2 = cx + radius * Math.cos(endA);
+  const y2 = cy + radius * Math.sin(endA);
+  const largeArc = aperture > 180 ? 1 : 0;
+  return `M ${cx} ${cy} L ${x1} ${y1} A ${radius} ${radius} 0 ${largeArc} 1 ${x2} ${y2} Z`;
+}
+
+function shapeToSVG(s, isSelected) {
+  const lay = s.layer || 'trace';
+  if (!state.layers[lay]) return '';
+  const sel = isSelected ? ' data-selected="1"' : '';
+  if (s.type === 'pen') {
+    const d = 'M ' + s.points.map(p => `${p[0]} ${p[1]}`).join(' L ');
+    return `<path data-shape-id="${s.id}"${sel} d="${d}" fill="none" stroke="${s.stroke}" stroke-width="${s.width}" stroke-linecap="round" stroke-linejoin="round"/>`;
+  }
+  if (s.type === 'line') {
+    return `<line data-shape-id="${s.id}"${sel} x1="${s.x1}" y1="${s.y1}" x2="${s.x2}" y2="${s.y2}" stroke="${s.stroke}" stroke-width="${s.width}" stroke-linecap="round"/>`;
+  }
+  if (s.type === 'polyline') {
+    const pts = s.points.map(p => `${p[0]},${p[1]}`).join(' ');
+    return `<polyline data-shape-id="${s.id}"${sel} points="${pts}" fill="none" stroke="${s.stroke}" stroke-width="${s.width}" stroke-linecap="round" stroke-linejoin="round"/>`;
+  }
+  if (s.type === 'rect') {
+    const x = Math.min(s.x, s.x + s.w), y = Math.min(s.y, s.y + s.h);
+    const w = Math.abs(s.w), h = Math.abs(s.h);
+    return `<rect data-shape-id="${s.id}"${sel} x="${x}" y="${y}" width="${w}" height="${h}" fill="${s.fill || 'none'}" stroke="${s.stroke}" stroke-width="${s.width}"/>`;
+  }
+  if (s.type === 'camera') {
+    const r = s.radius || 12;
+    return `<g data-shape-id="${s.id}"${sel}>
+      <circle cx="${s.x}" cy="${s.y}" r="${r+4}" fill="#fff"/>
+      <circle cx="${s.x}" cy="${s.y}" r="${r}" fill="${s.color}" stroke="#fff" stroke-width="2"/>
+      <circle cx="${s.x}" cy="${s.y}" r="${r*0.35}" fill="#fff"/>
+      ${s.label ? `<g><rect x="${s.x - 22}" y="${s.y - r - 22}" width="44" height="18" rx="3" fill="${s.color}"/><text x="${s.x}" y="${s.y - r - 8}" text-anchor="middle" font-family="sans-serif" font-size="13" font-weight="700" fill="#fff">${s.label}</text></g>` : ''}
+    </g>`;
+  }
+  if (s.type === 'fov') {
+    const d = fovPath(s.x, s.y, s.radius, s.bearing, s.aperture);
+    return `<g data-shape-id="${s.id}"${sel}>
+      <path d="${d}" fill="${s.color}" fill-opacity="${s.opacity}" stroke="${s.color}" stroke-opacity="${Math.min(1, s.opacity+0.3)}" stroke-width="1"/>
+    </g>`;
+  }
+  if (s.type === 'text') {
+    return `<text data-shape-id="${s.id}"${sel} x="${s.x}" y="${s.y}" font-family="sans-serif" font-size="${s.size}" font-weight="600" fill="${s.color}">${escapeXml(s.text)}</text>`;
+  }
+  if (s.type === 'baie') {
+    const sz = s.size || 30;
+    const half = sz / 2;
+    // Darker border of same color
+    return `<g data-shape-id="${s.id}"${sel}>
+      <rect x="${s.x - half}" y="${s.y - half}" width="${sz}" height="${sz}" fill="${s.color}" stroke="#000" stroke-width="1.5"/>
+      <line x1="${s.x - half + 4}" y1="${s.y - half + sz*0.25}" x2="${s.x + half - 4}" y2="${s.y - half + sz*0.25}" stroke="#fff" stroke-opacity="0.7" stroke-width="1"/>
+      <line x1="${s.x - half + 4}" y1="${s.y - half + sz*0.5}" x2="${s.x + half - 4}" y2="${s.y - half + sz*0.5}" stroke="#fff" stroke-opacity="0.7" stroke-width="1"/>
+      <line x1="${s.x - half + 4}" y1="${s.y - half + sz*0.75}" x2="${s.x + half - 4}" y2="${s.y - half + sz*0.75}" stroke="#fff" stroke-opacity="0.7" stroke-width="1"/>
+      ${s.label ? `<g><rect x="${s.x - Math.max(25, s.label.length * 4.5)}" y="${s.y + half + 2}" width="${Math.max(50, s.label.length * 9)}" height="16" rx="2" fill="${s.color}"/><text x="${s.x}" y="${s.y + half + 14}" text-anchor="middle" font-family="sans-serif" font-size="11" font-weight="700" fill="#fff">${escapeXml(s.label)}</text></g>` : ''}
+    </g>`;
+  }
+  if (s.type === 'percement') {
+    const sz = s.size || 18;
+    const half = sz / 2;
+    const w = s.width || 3;
+    return `<g data-shape-id="${s.id}"${sel}>
+      <line x1="${s.x - half}" y1="${s.y - half}" x2="${s.x + half}" y2="${s.y + half}" stroke="${s.color}" stroke-width="${w}" stroke-linecap="round"/>
+      <line x1="${s.x + half}" y1="${s.y - half}" x2="${s.x - half}" y2="${s.y + half}" stroke="${s.color}" stroke-width="${w}" stroke-linecap="round"/>
+    </g>`;
+  }
+  if (s.type === 'borne') {
+    const r = s.radius || 14;
+    const wr = s.wifiRadius || 120;
+    const wo = s.wifiOpacity !== undefined ? s.wifiOpacity : 0.25;
+    return `<g data-shape-id="${s.id}"${sel}>
+      <circle cx="${s.x}" cy="${s.y}" r="${wr}" fill="${s.color}" fill-opacity="${wo}" stroke="${s.color}" stroke-opacity="0.5" stroke-width="1" stroke-dasharray="6 4"/>
+      <circle cx="${s.x}" cy="${s.y}" r="${r+4}" fill="#fff"/>
+      <circle cx="${s.x}" cy="${s.y}" r="${r}" fill="${s.color}" stroke="#fff" stroke-width="2"/>
+      <g stroke="#fff" stroke-width="1.8" fill="none">
+        <path d="M ${s.x - r*0.5} ${s.y + r*0.15} A ${r*0.65} ${r*0.65} 0 0 1 ${s.x + r*0.5} ${s.y + r*0.15}"/>
+        <path d="M ${s.x - r*0.28} ${s.y + r*0.45} A ${r*0.35} ${r*0.35} 0 0 1 ${s.x + r*0.28} ${s.y + r*0.45}"/>
+        <circle cx="${s.x}" cy="${s.y + r*0.65}" r="${r*0.1}" fill="#fff"/>
+      </g>
+      ${s.label ? `<g><rect x="${s.x - 22}" y="${s.y - r - 22}" width="44" height="18" rx="3" fill="${s.color}"/><text x="${s.x}" y="${s.y - r - 8}" text-anchor="middle" font-family="sans-serif" font-size="13" font-weight="700" fill="#fff">${escapeXml(s.label)}</text></g>` : ''}
+    </g>`;
+  }
+  if (s.type === 'porte') {
+    const sz = s.size || 22;
+    return `<g data-shape-id="${s.id}"${sel}>
+      <circle cx="${s.x}" cy="${s.y}" r="${sz + 4}" fill="#fff"/>
+      <circle cx="${s.x}" cy="${s.y}" r="${sz}" fill="${s.color}" stroke="#fff" stroke-width="2"/>
+      <text x="${s.x}" y="${s.y + sz*0.42}" text-anchor="middle" font-family="sans-serif" font-size="${Math.round(sz*1.1)}" font-weight="800" fill="#fff">P</text>
+      ${s.label ? `<g><rect x="${s.x - 22}" y="${s.y - sz - 22}" width="44" height="18" rx="3" fill="${s.color}"/><text x="${s.x}" y="${s.y - sz - 8}" text-anchor="middle" font-family="sans-serif" font-size="13" font-weight="700" fill="#fff">${escapeXml(s.label)}</text></g>` : ''}
+    </g>`;
+  }
+  if (s.type === 'centrale') {
+    const sz = s.size || 30;
+    const half = sz / 2;
+    return `<g data-shape-id="${s.id}"${sel}>
+      <rect x="${s.x - half - 3}" y="${s.y - half - 3}" width="${sz + 6}" height="${sz + 6}" fill="#fff" rx="4"/>
+      <rect x="${s.x - half}" y="${s.y - half}" width="${sz}" height="${sz}" fill="${s.color}" stroke="#000" stroke-width="1.5" rx="3"/>
+      <line x1="${s.x - half + 4}" y1="${s.y - half + sz*0.25}" x2="${s.x + half - 4}" y2="${s.y - half + sz*0.25}" stroke="#fff" stroke-opacity="0.7" stroke-width="1"/>
+      <line x1="${s.x - half + 4}" y1="${s.y - half + sz*0.5}" x2="${s.x + half - 4}" y2="${s.y - half + sz*0.5}" stroke="#fff" stroke-opacity="0.7" stroke-width="1"/>
+      <circle cx="${s.x - half + 6}" cy="${s.y + half - 6}" r="3" fill="#4ade80"/>
+      <text x="${s.x + half*0.3}" y="${s.y + half - 3}" text-anchor="middle" font-family="sans-serif" font-size="${Math.round(sz*0.28)}" font-weight="800" fill="#fff">CA</text>
+      ${s.label ? `<g><rect x="${s.x - Math.max(25, s.label.length * 4.5)}" y="${s.y + half + 2}" width="${Math.max(50, s.label.length * 9)}" height="16" rx="2" fill="${s.color}"/><text x="${s.x}" y="${s.y + half + 14}" text-anchor="middle" font-family="sans-serif" font-size="11" font-weight="700" fill="#fff">${escapeXml(s.label)}</text></g>` : ''}
+    </g>`;
+  }
+  return '';
+}
+function escapeXml(s) { return String(s).replace(/[<>&"']/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&apos;'})[c]); }
+
+function selectionOverlay(s) {
+  if (s.type === 'camera' || s.type === 'fov') {
+    const r = s.radius || 50;
+    let handles = `<circle class="handle" data-handle="move" data-id="${s.id}" cx="${s.x}" cy="${s.y}" r="6"/>`;
+    const a = (s.bearing || 0) * Math.PI / 180;
+    const hx = s.x + r * Math.cos(a);
+    const hy = s.y + r * Math.sin(a);
+    handles += `<line x1="${s.x}" y1="${s.y}" x2="${hx}" y2="${hy}" stroke="#2a6fd1" stroke-width="1" stroke-dasharray="3 3"/>`;
+    handles += `<circle class="handle rot" data-handle="radius" data-id="${s.id}" cx="${hx}" cy="${hy}" r="6"/>`;
+    return handles;
+  }
+  if (s.type === 'borne') {
+    const r = s.radius || 14;
+    const wr = s.wifiRadius || 120;
+    let handles = `<circle class="handle" data-handle="move" data-id="${s.id}" cx="${s.x}" cy="${s.y}" r="6"/>`;
+    handles += `<line x1="${s.x}" y1="${s.y}" x2="${s.x + r}" y2="${s.y}" stroke="#16a34a" stroke-width="1" stroke-dasharray="3 3"/>`;
+    handles += `<circle class="handle" data-handle="radius" data-id="${s.id}" cx="${s.x + r}" cy="${s.y}" r="5" style="fill:#fff;stroke:#16a34a"/>`;
+    handles += `<line x1="${s.x}" y1="${s.y}" x2="${s.x + wr}" y2="${s.y}" stroke="#16a34a" stroke-width="1" stroke-dasharray="6 3" opacity="0.6"/>`;
+    handles += `<circle class="handle rot" data-handle="wifiradius" data-id="${s.id}" cx="${s.x + wr}" cy="${s.y}" r="6" style="fill:#4ade80;stroke:#fff"/>`;
+    return handles;
+  }
+  if (s.type === 'line') {
+    return `<circle class="handle" data-handle="p1" data-id="${s.id}" cx="${s.x1}" cy="${s.y1}" r="5"/><circle class="handle" data-handle="p2" data-id="${s.id}" cx="${s.x2}" cy="${s.y2}" r="5"/>`;
+  }
+  if (s.type === 'rect') {
+    return `<rect class="selection-box" x="${Math.min(s.x, s.x+s.w)}" y="${Math.min(s.y, s.y+s.h)}" width="${Math.abs(s.w)}" height="${Math.abs(s.h)}"/><circle class="handle" data-handle="move" data-id="${s.id}" cx="${s.x + s.w/2}" cy="${s.y + s.h/2}" r="5"/><circle class="handle" data-handle="rect-br" data-id="${s.id}" cx="${s.x + s.w}" cy="${s.y + s.h}" r="5"/>`;
+  }
+  if (s.type === 'baie' || s.type === 'percement') {
+    const sz = s.size || 20;
+    return `<rect class="selection-box" x="${s.x - sz/2 - 4}" y="${s.y - sz/2 - 4}" width="${sz + 8}" height="${sz + 8}"/><circle class="handle" data-handle="move" data-id="${s.id}" cx="${s.x}" cy="${s.y}" r="5"/>`;
+  }
+  if (s.type === 'porte' || s.type === 'centrale') {
+    const sz = s.size || 24;
+    return `<rect class="selection-box" x="${s.x - sz - 4}" y="${s.y - sz - 4}" width="${sz*2 + 8}" height="${sz*2 + 8}"/><circle class="handle" data-handle="move" data-id="${s.id}" cx="${s.x}" cy="${s.y}" r="5"/>`;
+  }
+  return '';
+}
+
+function render() {
+  // Sort: trace layer first, then annot
+  const order = { trace: 0, annot: 1 };
+  const sorted = [...state.shapes].sort((a, b) => (order[a.layer||'trace'] || 0) - (order[b.layer||'trace'] || 0));
+  let svg = '';
+  for (const s of sorted) {
+    svg += shapeToSVG(s, s.id === state.selectedId);
+  }
+  // preview
+  if (state.currentShape) svg += shapeToSVG(state.currentShape, false);
+  if (state.tool === 'wall' && state.wallPoints.length > 0) {
+    const pts = state.wallPoints.map(p => `${p[0]},${p[1]}`).join(' ');
+    svg += `<polyline points="${pts}" fill="none" stroke="${state.defaults.strokeColor}" stroke-width="${state.defaults.strokeWidth}" stroke-dasharray="4 3"/>`;
+    state.wallPoints.forEach(p => {
+      svg += `<circle cx="${p[0]}" cy="${p[1]}" r="3" fill="${state.defaults.strokeColor}"/>`;
+    });
+  }
+  // selection handles
+  if (state.selectedId) {
+    const s = state.shapes.find(x => x.id === state.selectedId);
+    if (s) svg += selectionOverlay(s);
+  }
+  overlay.innerHTML = svg;
+
+  // counts
+  document.getElementById('cnt-trace').textContent = state.shapes.filter(s => (s.layer||'trace') === 'trace').length;
+  document.getElementById('cnt-annot').textContent = state.shapes.filter(s => s.layer === 'annot').length;
+  document.getElementById('shape-total').textContent = state.shapes.length;
+  updateShapeList();
+}
+
+function updateShapeList() {
+  const el = document.getElementById('shape-list');
+  if (state.shapes.length === 0) { el.innerHTML = '<div style="padding:8px;font-size:12px;color:#777;">Aucun élément</div>'; return; }
+  el.innerHTML = state.shapes.map(s => {
+    const color = s.color || s.stroke || '#888';
+    const icon = { camera: '⊙', fov: '⌖', line: '╱', polyline: '⌐', rect: '▭', pen: '〜', text: 'T', baie: '▦', percement: '✕', borne: '⊕', porte: 'P', centrale: '⊟' }[s.type] || '•';
+    const label = s.label || s.text || (s.type + ' ' + s.id.replace('s',''));
+    return `<div class="shape-item ${s.id === state.selectedId ? 'selected' : ''}" onclick="selectShape('${s.id}')"><span class="dot" style="background:${color}"></span><span class="lbl">${icon} ${escapeXml(label)}</span><span class="del" onclick="event.stopPropagation();deleteShape('${s.id}')">✕</span></div>`;
+  }).join('');
+}
+window.selectShape = (id) => { state.selectedId = id; updatePropertiesPanel(); render(); };
+
+// ==================== PROPERTIES PANEL ====================
+function updatePropertiesPanel() {
+  const el = document.getElementById('prop-content');
+  const hint = document.getElementById('tool-hint');
+
+  if (state.selectedId) {
+    const s = state.shapes.find(x => x.id === state.selectedId);
+    if (s) { renderShapeProps(s, el); return; }
+  }
+
+  const toolHints = {
+    select: 'Cliquez sur un élément pour le sélectionner, glissez pour déplacer. Poignées pour redimensionner.',
+    pan: 'Glissez pour déplacer la vue. Molette pour zoomer.',
+    pen: 'Tracez à main levée sur le plan (calque Traçage).',
+    line: 'Cliquez + glissez pour tracer une ligne droite.',
+    wall: 'Cliquez successivement pour ajouter des points. Double-clic pour terminer. Esc pour annuler.',
+    rect: 'Cliquez + glissez pour tracer un rectangle.',
+    camera: 'Cliquez pour placer une caméra avec étiquette auto-incrémentée.',
+    fov: 'Cliquez pour placer un cône de vision. Modifiez l\'angle et la portée dans les propriétés.',
+    text: 'Cliquez pour ajouter un libellé texte.',
+    baie: 'Cliquez pour placer un pictogramme de baie informatique (carré coloré avec libellé).',
+    borne: 'Cliquez pour placer une borne WiFi avec son rayon de couverture. Ajustez la portée WiFi dans les propriétés.',
+    porte: 'Cliquez pour marquer une porte équipée en contrôle d\'accès (symbole P).',
+    centrale: 'Cliquez pour placer une centrale de contrôle d\'accès.',
+    percement: 'Cliquez pour marquer un percement / traversée de cloison (croix rouge).',
+    eraser: 'Glissez pour effacer (en blanc) des parties du plan importé. Règle la taille dans le panneau. Bouton « Restaurer » si besoin.',
+    delete: 'Cliquez sur un élément pour le supprimer.',
+  };
+  hint.textContent = toolHints[state.tool] || '';
+
+  // Tool-specific defaults
+  if (state.tool === 'pen' || state.tool === 'line' || state.tool === 'wall' || state.tool === 'rect') {
+    el.innerHTML = `
+      <label class="field">Couleur</label>
+      <div class="color-row"><input type="color" value="${state.defaults.strokeColor}" oninput="state.defaults.strokeColor=this.value;render()"><span style="font-size:12px;color:#999">Trait</span></div>
+      <label class="field">Épaisseur: <span id="w-val">${state.defaults.strokeWidth}</span>px</label>
+      <input type="range" min="1" max="10" step="0.5" value="${state.defaults.strokeWidth}" oninput="state.defaults.strokeWidth=parseFloat(this.value);document.getElementById('w-val').textContent=this.value">
+    `;
+  } else if (state.tool === 'camera') {
+    el.innerHTML = `
+      <label class="field">Couleur</label>
+      <div class="color-row"><input type="color" value="${state.defaults.cameraColor}" oninput="state.defaults.cameraColor=this.value"></div>
+      <label class="field">Rayon: <span id="cr-val">${state.defaults.cameraRadius}</span>px</label>
+      <input type="range" min="6" max="30" value="${state.defaults.cameraRadius}" oninput="state.defaults.cameraRadius=parseInt(this.value);document.getElementById('cr-val').textContent=this.value">
+      <div class="hint-box" style="margin-top:12px">Les étiquettes sont automatiques : C01, C02, … Modifiable en sélectionnant la caméra.</div>
+    `;
+  } else if (state.tool === 'fov') {
+    el.innerHTML = `
+      <label class="field">Couleur</label>
+      <div class="color-row"><input type="color" value="${state.defaults.fovColor}" oninput="state.defaults.fovColor=this.value"></div>
+      <label class="field">Angle d'ouverture: <span id="a-val">${state.defaults.fovAperture}</span>°</label>
+      <input type="range" min="1" max="360" value="${state.defaults.fovAperture}" oninput="state.defaults.fovAperture=parseInt(this.value);document.getElementById('a-val').textContent=this.value">
+      <label class="field">Orientation: <span id="b-val">${state.defaults.fovBearing}</span>°</label>
+      <input type="range" min="0" max="360" value="${state.defaults.fovBearing}" oninput="state.defaults.fovBearing=parseInt(this.value);document.getElementById('b-val').textContent=this.value">
+      <label class="field">Portée: <span id="r-val">${state.defaults.fovRadius}</span>px</label>
+      <input type="range" min="20" max="600" value="${state.defaults.fovRadius}" oninput="state.defaults.fovRadius=parseInt(this.value);document.getElementById('r-val').textContent=this.value">
+      <label class="field">Transparence: <span id="o-val">${Math.round(state.defaults.fovOpacity*100)}</span>%</label>
+      <input type="range" min="5" max="90" value="${state.defaults.fovOpacity*100}" oninput="state.defaults.fovOpacity=parseInt(this.value)/100;document.getElementById('o-val').textContent=this.value">
+    `;
+  } else if (state.tool === 'text') {
+    el.innerHTML = `
+      <label class="field">Couleur</label>
+      <div class="color-row"><input type="color" value="${state.defaults.textColor}" oninput="state.defaults.textColor=this.value"></div>
+      <label class="field">Taille: <span id="ts-val">${state.defaults.textSize}</span>px</label>
+      <input type="range" min="8" max="48" value="${state.defaults.textSize}" oninput="state.defaults.textSize=parseInt(this.value);document.getElementById('ts-val').textContent=this.value">
+    `;
+  } else if (state.tool === 'baie') {
+    el.innerHTML = `
+      <label class="field">Couleur de la baie</label>
+      <div class="color-row"><input type="color" value="${state.defaults.baieColor}" oninput="state.defaults.baieColor=this.value"></div>
+      <label class="field">Taille: <span id="bs-val">${state.defaults.baieSize}</span>px</label>
+      <input type="range" min="12" max="60" value="${state.defaults.baieSize}" oninput="state.defaults.baieSize=parseInt(this.value);document.getElementById('bs-val').textContent=this.value">
+      <div class="hint-box" style="margin-top:12px">Carré pictogramme pour baies informatiques. Libellés auto : BAIE01, BAIE02… Modifiables par sélection.</div>
+    `;
+  } else if (state.tool === 'borne') {
+    el.innerHTML = `
+      <label class="field">Couleur</label>
+      <div class="color-row"><input type="color" value="${state.defaults.borneColor}" oninput="state.defaults.borneColor=this.value"></div>
+      <label class="field">Rayon picto: <span id="br-val">${state.defaults.borneRadius}</span>px</label>
+      <input type="range" min="8" max="30" value="${state.defaults.borneRadius}" oninput="state.defaults.borneRadius=parseInt(this.value);document.getElementById('br-val').textContent=this.value">
+      <label class="field">Portée WiFi: <span id="bwr-val">${state.defaults.wifiRadius}</span>px</label>
+      <input type="range" min="40" max="800" value="${state.defaults.wifiRadius}" oninput="state.defaults.wifiRadius=parseInt(this.value);document.getElementById('bwr-val').textContent=this.value">
+      <label class="field">Transparence couverture: <span id="bwo-val">${Math.round(state.defaults.wifiOpacity*100)}</span>%</label>
+      <input type="range" min="5" max="60" value="${state.defaults.wifiOpacity*100}" oninput="state.defaults.wifiOpacity=parseInt(this.value)/100;document.getElementById('bwo-val').textContent=this.value">
+      <div class="hint-box" style="margin-top:12px">Libellés auto : AP01, AP02… Modifiables par sélection. La poignée verte ajuste la portée WiFi.</div>
+    `;
+  } else if (state.tool === 'porte') {
+    el.innerHTML = `
+      <label class="field">Couleur</label>
+      <div class="color-row"><input type="color" value="${state.defaults.porteColor}" oninput="state.defaults.porteColor=this.value"></div>
+      <label class="field">Taille: <span id="prt-val">${state.defaults.porteSize}</span>px</label>
+      <input type="range" min="10" max="50" value="${state.defaults.porteSize}" oninput="state.defaults.porteSize=parseInt(this.value);document.getElementById('prt-val').textContent=this.value">
+      <div class="hint-box" style="margin-top:12px">Symbole P pour les portes équipées contrôle d'accès. Libellés auto : P01, P02…</div>
+    `;
+  } else if (state.tool === 'centrale') {
+    el.innerHTML = `
+      <label class="field">Couleur</label>
+      <div class="color-row"><input type="color" value="${state.defaults.centraleColor}" oninput="state.defaults.centraleColor=this.value"></div>
+      <label class="field">Taille: <span id="cca-val">${state.defaults.centraleSize}</span>px</label>
+      <input type="range" min="16" max="60" value="${state.defaults.centraleSize}" oninput="state.defaults.centraleSize=parseInt(this.value);document.getElementById('cca-val').textContent=this.value">
+      <label class="field">Libellé par défaut</label>
+      <input type="text" value="${state.defaults.centraleLabel}" oninput="state.defaults.centraleLabel=this.value">
+      <div class="hint-box" style="margin-top:12px">Pictogramme centrale de contrôle d'accès (rack + voyant vert CA).</div>
+    `;
+  } else if (state.tool === 'percement') {
+    el.innerHTML = `
+      <label class="field">Couleur</label>
+      <div class="color-row"><input type="color" value="${state.defaults.percementColor}" oninput="state.defaults.percementColor=this.value"></div>
+      <label class="field">Taille: <span id="ps-val">${state.defaults.percementSize}</span>px</label>
+      <input type="range" min="8" max="40" value="${state.defaults.percementSize}" oninput="state.defaults.percementSize=parseInt(this.value);document.getElementById('ps-val').textContent=this.value">
+      <label class="field">Épaisseur du trait: <span id="pw-val">${state.defaults.percementWidth}</span>px</label>
+      <input type="range" min="1" max="8" step="0.5" value="${state.defaults.percementWidth}" oninput="state.defaults.percementWidth=parseFloat(this.value);document.getElementById('pw-val').textContent=this.value">
+      <div class="hint-box" style="margin-top:12px">Marque X pour les percements / traversées de cloison.</div>
+    `;
+  } else if (state.tool === 'eraser') {
+    el.innerHTML = `
+      <label class="field">Taille de la gomme: <span id="es-val">${state.defaults.eraserSize}</span>px</label>
+      <input type="range" min="4" max="100" value="${state.defaults.eraserSize}" oninput="state.defaults.eraserSize=parseInt(this.value);document.getElementById('es-val').textContent=this.value">
+      <div class="hint-box" style="margin-top:12px">La gomme efface directement le plan importé (peint en blanc). Les annotations ne sont pas touchées.</div>
+      <button class="btn danger" style="margin-top:10px;width:100%" onclick="restoreOriginalPlan()">↺ Restaurer le plan original</button>
+    `;
+  } else {
+    el.innerHTML = '<div style="font-size:13px; color:#888;">Sélectionnez un élément ou choisissez un outil.</div>';
+  }
+}
+
+function renderShapeProps(s, el) {
+  let html = `<div style="font-size:12px;color:#aaa;margin-bottom:8px;">Type : <b style="color:#ddd">${s.type}</b></div>`;
+  if (s.type === 'camera') {
+    html += `
+      <label class="field">Étiquette</label>
+      <input type="text" value="${escapeXml(s.label || '')}" oninput="updateShape('${s.id}',{label:this.value})">
+      <label class="field">Couleur</label>
+      <div class="color-row"><input type="color" value="${s.color}" oninput="updateShape('${s.id}',{color:this.value})"></div>
+      <label class="field">Rayon: <span>${s.radius}</span>px</label>
+      <input type="range" min="6" max="30" value="${s.radius}" oninput="updateShape('${s.id}',{radius:parseInt(this.value)});updatePropertiesPanel()">
+    `;
+  } else if (s.type === 'fov') {
+    html += `
+      <label class="field">Couleur</label>
+      <div class="color-row"><input type="color" value="${s.color}" oninput="updateShape('${s.id}',{color:this.value})"></div>
+      <label class="field">Angle d'ouverture: <span>${Math.round(s.aperture)}</span>°</label>
+      <input type="range" min="1" max="360" value="${s.aperture}" oninput="updateShape('${s.id}',{aperture:parseInt(this.value)});updatePropertiesPanel()">
+      <label class="field">Orientation: <span>${Math.round(s.bearing)}</span>°</label>
+      <input type="range" min="0" max="360" value="${s.bearing}" oninput="updateShape('${s.id}',{bearing:parseInt(this.value)});updatePropertiesPanel()">
+      <label class="field">Portée: <span>${Math.round(s.radius)}</span>px</label>
+      <input type="range" min="20" max="800" value="${s.radius}" oninput="updateShape('${s.id}',{radius:parseInt(this.value)});updatePropertiesPanel()">
+      <label class="field">Transparence: <span>${Math.round(s.opacity*100)}</span>%</label>
+      <input type="range" min="5" max="90" value="${s.opacity*100}" oninput="updateShape('${s.id}',{opacity:parseInt(this.value)/100});updatePropertiesPanel()">
+    `;
+  } else if (s.type === 'line' || s.type === 'pen' || s.type === 'polyline') {
+    html += `
+      <label class="field">Couleur</label>
+      <div class="color-row"><input type="color" value="${s.stroke}" oninput="updateShape('${s.id}',{stroke:this.value})"></div>
+      <label class="field">Épaisseur: <span>${s.width}</span>px</label>
+      <input type="range" min="1" max="10" step="0.5" value="${s.width}" oninput="updateShape('${s.id}',{width:parseFloat(this.value)});updatePropertiesPanel()">
+    `;
+  } else if (s.type === 'rect') {
+    html += `
+      <label class="field">Couleur trait</label>
+      <div class="color-row"><input type="color" value="${s.stroke}" oninput="updateShape('${s.id}',{stroke:this.value})"></div>
+      <label class="field">Remplissage</label>
+      <div class="color-row">
+        <input type="color" value="${s.fill === 'none' ? '#ffffff' : s.fill}" oninput="updateShape('${s.id}',{fill:this.value})">
+        <button class="btn" onclick="updateShape('${s.id}',{fill:'none'})">Aucun</button>
       </div>
-    </div>
-    <div class="tasks">
-      ${day.tasks.map(task => `
-        <div class="task${checked[task.id] ? ' done' : ''}" style="border-left:3px solid ${checked[task.id] ? '#3A2E24' : day.color}" onclick="toggleTask('${task.id}')">
-          <div class="task-icon">${task.icon}</div>
-          <div class="task-content">
-            ${task.time ? `<div class="task-time">${task.time}</div>` : ''}
-            <div class="task-text">${task.text}</div>
-          </div>
-          <div class="task-check">${checked[task.id] ? '✓' : ''}</div>
-        </div>`).join('')}
-    </div>`;
+      <label class="field">Épaisseur: <span>${s.width}</span>px</label>
+      <input type="range" min="1" max="10" step="0.5" value="${s.width}" oninput="updateShape('${s.id}',{width:parseFloat(this.value)});updatePropertiesPanel()">
+    `;
+  } else if (s.type === 'text') {
+    html += `
+      <label class="field">Texte</label>
+      <input type="text" value="${escapeXml(s.text)}" oninput="updateShape('${s.id}',{text:this.value})">
+      <label class="field">Couleur</label>
+      <div class="color-row"><input type="color" value="${s.color}" oninput="updateShape('${s.id}',{color:this.value})"></div>
+      <label class="field">Taille: <span>${s.size}</span>px</label>
+      <input type="range" min="8" max="48" value="${s.size}" oninput="updateShape('${s.id}',{size:parseInt(this.value)});updatePropertiesPanel()">
+    `;
+  } else if (s.type === 'baie') {
+    html += `
+      <label class="field">Libellé</label>
+      <input type="text" value="${escapeXml(s.label || '')}" oninput="updateShape('${s.id}',{label:this.value})">
+      <label class="field">Couleur</label>
+      <div class="color-row"><input type="color" value="${s.color}" oninput="updateShape('${s.id}',{color:this.value})"></div>
+      <label class="field">Taille: <span>${s.size}</span>px</label>
+      <input type="range" min="12" max="60" value="${s.size}" oninput="updateShape('${s.id}',{size:parseInt(this.value)});updatePropertiesPanel()">
+    `;
+  } else if (s.type === 'percement') {
+    html += `
+      <label class="field">Couleur</label>
+      <div class="color-row"><input type="color" value="${s.color}" oninput="updateShape('${s.id}',{color:this.value})"></div>
+      <label class="field">Taille: <span>${s.size}</span>px</label>
+      <input type="range" min="8" max="40" value="${s.size}" oninput="updateShape('${s.id}',{size:parseInt(this.value)});updatePropertiesPanel()">
+      <label class="field">Épaisseur: <span>${s.width}</span>px</label>
+      <input type="range" min="1" max="8" step="0.5" value="${s.width}" oninput="updateShape('${s.id}',{width:parseFloat(this.value)});updatePropertiesPanel()">
+    `;
+  } else if (s.type === 'borne') {
+    html += `
+      <label class="field">Étiquette</label>
+      <input type="text" value="${escapeXml(s.label || '')}" oninput="updateShape('${s.id}',{label:this.value})">
+      <label class="field">Couleur</label>
+      <div class="color-row"><input type="color" value="${s.color}" oninput="updateShape('${s.id}',{color:this.value})"></div>
+      <label class="field">Rayon picto: <span>${s.radius}</span>px</label>
+      <input type="range" min="8" max="30" value="${s.radius}" oninput="updateShape('${s.id}',{radius:parseInt(this.value)});updatePropertiesPanel()">
+      <label class="field">Portée WiFi: <span>${s.wifiRadius}</span>px</label>
+      <input type="range" min="40" max="800" value="${s.wifiRadius}" oninput="updateShape('${s.id}',{wifiRadius:parseInt(this.value)});updatePropertiesPanel()">
+      <label class="field">Transparence: <span>${Math.round((s.wifiOpacity||0.25)*100)}</span>%</label>
+      <input type="range" min="5" max="60" value="${(s.wifiOpacity||0.25)*100}" oninput="updateShape('${s.id}',{wifiOpacity:parseInt(this.value)/100});updatePropertiesPanel()">
+    `;
+  } else if (s.type === 'porte') {
+    html += `
+      <label class="field">Étiquette</label>
+      <input type="text" value="${escapeXml(s.label || '')}" oninput="updateShape('${s.id}',{label:this.value})">
+      <label class="field">Couleur</label>
+      <div class="color-row"><input type="color" value="${s.color}" oninput="updateShape('${s.id}',{color:this.value})"></div>
+      <label class="field">Taille: <span>${s.size}</span>px</label>
+      <input type="range" min="10" max="50" value="${s.size}" oninput="updateShape('${s.id}',{size:parseInt(this.value)});updatePropertiesPanel()">
+    `;
+  } else if (s.type === 'centrale') {
+    html += `
+      <label class="field">Libellé</label>
+      <input type="text" value="${escapeXml(s.label || '')}" oninput="updateShape('${s.id}',{label:this.value})">
+      <label class="field">Couleur</label>
+      <div class="color-row"><input type="color" value="${s.color}" oninput="updateShape('${s.id}',{color:this.value})"></div>
+      <label class="field">Taille: <span>${s.size}</span>px</label>
+      <input type="range" min="16" max="60" value="${s.size}" oninput="updateShape('${s.id}',{size:parseInt(this.value)});updatePropertiesPanel()">
+    `;
+  }
+  html += `<button class="btn danger" style="margin-top:12px;width:100%" onclick="deleteShape('${s.id}')">Supprimer cet élément</button>`;
+  el.innerHTML = html;
 }
 
-function renderRepas() {
-  const semNum = (((wn % 4) + 4) % 4) + 1;
-  document.getElementById('repas-content').innerHTML = `
-    <div class="repas-label">Solutions sans cuisine</div>
-    <div class="repas-week">Menu semaine ${semNum}/4 — change chaque semaine automatiquement</div>
-    <div class="repas-group">
-      <div class="repas-moment">Petit-déjeuner</div>
-      <div class="repas-item">☕ Yaourt + fruit + café</div>
-      <div class="repas-item">🍞 Pain complet + fromage + café</div>
-    </div>
-    <div class="repas-group">
-      <div class="repas-moment">Midi</div>
-      <div class="repas-item">🥪 Sandwich + fruit</div>
-      <div class="repas-item">🥗 Salade composée toute faite</div>
-      <div class="repas-item">🐟 Thon + pain + fruit</div>
-    </div>
-    <div class="repas-group">
-      <div class="repas-moment">Dîners cette semaine</div>
-      <div class="repas-item">Lun — ${menu.lundi}</div>
-      <div class="repas-item">Mar — ${menu.mardi}</div>
-      <div class="repas-item">Mer — ${menu.mercredi}</div>
-      <div class="repas-item">Jeu — ${menu.jeudi}</div>
-      <div class="repas-item">Ven — ${menu.vendredi}</div>
-    </div>
-    <div class="rules-box">
-      <div class="rules-title">Règles simples</div>
-      <div class="rule"><span class="rule-arrow">→</span> Eau ou café, pas de sodas</div>
-      <div class="rule"><span class="rule-arrow">→</span> Fruit à la place du gâteau</div>
-      <div class="rule"><span class="rule-arrow">→</span> Supermarché > fast food toujours</div>
-      <div class="rule"><span class="rule-arrow">→</span> Même sans appétit, mange un peu le soir</div>
-    </div>`;
-}
-
-function toggleTask(id) {
-  checked[id] = !checked[id];
-  save(); updateProgress(); renderDays(); renderDetail();
-}
-
-function showTab(tab) {
-  document.getElementById('planning-tab').style.display = tab === 'planning' ? 'block' : 'none';
-  document.getElementById('repas-tab').style.display = tab === 'repas' ? 'block' : 'none';
-  document.querySelectorAll('.tab').forEach((t, i) => {
-    t.classList.toggle('active', (i === 0 && tab === 'planning') || (i === 1 && tab === 'repas'));
+// Preset colors
+document.querySelectorAll('.preset-color').forEach(el => {
+  el.addEventListener('click', () => {
+    const c = el.dataset.color;
+    if (['pen','line','wall','rect'].includes(state.tool)) state.defaults.strokeColor = c;
+    else if (state.tool === 'camera') state.defaults.cameraColor = c;
+    else if (state.tool === 'fov') state.defaults.fovColor = c;
+    else if (state.tool === 'text') state.defaults.textColor = c;
+    else if (state.tool === 'baie') state.defaults.baieColor = c;
+    else if (state.tool === 'percement') state.defaults.percementColor = c;
+    else if (state.tool === 'borne') state.defaults.borneColor = c;
+    else if (state.tool === 'porte') state.defaults.porteColor = c;
+    else if (state.tool === 'centrale') state.defaults.centraleColor = c;
+    if (state.selectedId) {
+      const s = state.shapes.find(x => x.id === state.selectedId);
+      if (s) {
+        if ('color' in s) s.color = c;
+        if ('stroke' in s && !('color' in s)) s.stroke = c;
+      }
+      render();
+    }
+    updatePropertiesPanel();
   });
+});
+
+// Layer selection (visual highlight only)
+document.querySelectorAll('.layer-selectable').forEach(el => {
+  el.addEventListener('click', () => {
+    document.querySelectorAll('.layer-selectable').forEach(x => x.classList.remove('active-layer'));
+    el.classList.add('active-layer');
+  });
+});
+
+// Layers
+window.toggleLayer = (name) => {
+  state.layers[name] = !state.layers[name];
+  const eye = document.getElementById('eye-' + name);
+  eye.classList.toggle('visible', state.layers[name]);
+  eye.style.opacity = state.layers[name] ? '1' : '0.4';
+  if (name === 'plan') {
+    canvas.style.display = state.layers.plan ? 'block' : 'none';
+  }
+  render();
+};
+
+// ==================== EXPORT ====================
+document.getElementById('btn-export-png').addEventListener('click', () => {
+  if (!state.imgLoaded) { alert('Aucun plan chargé'); return; }
+  // Render to an offscreen canvas: image + overlay
+  const off = document.createElement('canvas');
+  off.width = state.imgWidth;
+  off.height = state.imgHeight;
+  const octx = off.getContext('2d');
+  if (state.layers.plan) octx.drawImage(canvas, 0, 0);
+  else { octx.fillStyle = '#fff'; octx.fillRect(0, 0, off.width, off.height); }
+  // Serialize SVG overlay
+  const svgStr = `<svg xmlns="http://www.w3.org/2000/svg" width="${state.imgWidth}" height="${state.imgHeight}" viewBox="0 0 ${state.imgWidth} ${state.imgHeight}">${overlay.innerHTML}</svg>`;
+  const img = new Image();
+  img.onload = () => {
+    octx.drawImage(img, 0, 0);
+    off.toBlob((blob) => {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'plan_annotated.png';
+      a.click();
+    });
+  };
+  img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgStr)));
+});
+
+document.getElementById('btn-export-svg').addEventListener('click', () => {
+  if (!state.imgLoaded) { alert('Aucun plan chargé'); return; }
+  const planB64 = canvas.toDataURL('image/png');
+  const svg = `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${state.imgWidth}" height="${state.imgHeight}" viewBox="0 0 ${state.imgWidth} ${state.imgHeight}">
+${state.layers.plan ? `<image href="${planB64}" width="${state.imgWidth}" height="${state.imgHeight}"/>` : ''}
+${overlay.innerHTML}
+</svg>`;
+  const blob = new Blob([svg], { type: 'image/svg+xml' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'plan_annotated.svg';
+  a.click();
+});
+
+// Save project (JSON with image as base64)
+document.getElementById('btn-save').addEventListener('click', async () => {
+  if (!state.imgLoaded) { alert('Aucun plan chargé'); return; }
+  const project = {
+    version: 1,
+    imgWidth: state.imgWidth,
+    imgHeight: state.imgHeight,
+    imgSrc: canvas.toDataURL('image/png'),
+    shapes: state.shapes,
+    nextId: state.nextId,
+    mode: state.mode,
+    threshold: state.threshold,
+  };
+  const blob = new Blob([JSON.stringify(project)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'plan_project_' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+
+  // also try to save to persistent storage
+  try {
+    if (window.storage) {
+      await window.storage.set('plan_project_last', JSON.stringify(project));
+    }
+  } catch(e) {}
+});
+
+document.getElementById('btn-load').addEventListener('click', async () => {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json,application/json';
+  input.onchange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => loadProject(JSON.parse(ev.target.result));
+    reader.readAsText(file);
+  };
+  input.click();
+});
+
+function loadProject(project) {
+  const img = new Image();
+  img.onload = () => {
+    state.imgWidth = project.imgWidth;
+    state.imgHeight = project.imgHeight;
+    canvas.width = state.imgWidth;
+    canvas.height = state.imgHeight;
+    overlay.setAttribute('width', state.imgWidth);
+    overlay.setAttribute('height', state.imgHeight);
+    overlay.setAttribute('viewBox', `0 0 ${state.imgWidth} ${state.imgHeight}`);
+    ctx.drawImage(img, 0, 0);
+    state.imgData = ctx.getImageData(0, 0, state.imgWidth, state.imgHeight);
+    state.imgLoaded = true;
+    state.shapes = project.shapes || [];
+    state.nextId = project.nextId || 1;
+    state.mode = project.mode || 'color';
+    state.threshold = project.threshold || 100;
+    document.getElementById('mode-select').value = state.mode;
+    document.getElementById('threshold').value = state.threshold;
+    document.getElementById('threshold-val').textContent = state.threshold;
+    document.getElementById('threshold-wrap').style.display = (state.mode === 'bw') ? 'flex' : 'none';
+    document.getElementById('empty-state').style.display = 'none';
+    document.getElementById('cnt-plan').textContent = `${state.imgWidth}×${state.imgHeight}`;
+    applyMode();
+    fitToView();
+    render();
+    pushHistory();
+  };
+  img.src = project.imgSrc;
 }
 
-updateHeader(); updateMantra(); renderDays(); renderDetail(); renderRepas(); updateProgress();
+function updateStatus() { statusbar.textContent = `Plan ${state.imgWidth}×${state.imgHeight} · ${state.shapes.length} éléments`; }
+
+// ==================== GOMME (efface le plan) ====================
+function eraseAt(x, y) {
+  if (!state.imgData) return;
+  const size = state.defaults.eraserSize;
+
+  // Paint white circle on visible canvas
+  ctx.save();
+  ctx.fillStyle = '#ffffff';
+  ctx.beginPath();
+  ctx.arc(x, y, size, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+
+  // Also modify the source imgData so erasures survive mode changes
+  const data = state.imgData.data;
+  const w = state.imgData.width;
+  const h = state.imgData.height;
+  const xi = Math.round(x);
+  const yi = Math.round(y);
+  const sizeSq = size * size;
+  const x0 = Math.max(0, xi - size);
+  const x1 = Math.min(w - 1, xi + size);
+  const y0 = Math.max(0, yi - size);
+  const y1 = Math.min(h - 1, yi + size);
+  for (let py = y0; py <= y1; py++) {
+    for (let px = x0; px <= x1; px++) {
+      const dx = px - xi;
+      const dy = py - yi;
+      if (dx * dx + dy * dy <= sizeSq) {
+        const idx = (py * w + px) * 4;
+        data[idx] = 255;
+        data[idx + 1] = 255;
+        data[idx + 2] = 255;
+        data[idx + 3] = 255;
+      }
+    }
+  }
+}
+
+function restoreOriginalPlan() {
+  if (!state.originalSrc) { alert('Plan original introuvable'); return; }
+  if (!confirm('Restaurer le plan original ? Toutes les gommes seront effacées.')) return;
+  const img = new Image();
+  img.onload = () => {
+    // Keep current rotation-adjusted size? Reset to original orientation
+    state.imgWidth = img.width;
+    state.imgHeight = img.height;
+    canvas.width = img.width;
+    canvas.height = img.height;
+    overlay.setAttribute('width', img.width);
+    overlay.setAttribute('height', img.height);
+    overlay.setAttribute('viewBox', `0 0 ${img.width} ${img.height}`);
+    ctx.drawImage(img, 0, 0);
+    state.imgData = ctx.getImageData(0, 0, img.width, img.height);
+    document.getElementById('cnt-plan').textContent = `${img.width}×${img.height}`;
+    applyMode();
+    fitToView();
+    render();
+  };
+  img.src = state.originalSrc;
+}
+
+// ==================== ROTATION ====================
+function rotatePlan(clockwise) {
+  if (!state.imgLoaded) return;
+  const oldW = state.imgWidth;
+  const oldH = state.imgHeight;
+  const newW = oldH;
+  const newH = oldW;
+
+  // Rotate the displayed canvas (current processed image)
+  const tmp = document.createElement('canvas');
+  tmp.width = oldW; tmp.height = oldH;
+  tmp.getContext('2d').drawImage(canvas, 0, 0);
+
+  canvas.width = newW;
+  canvas.height = newH;
+  ctx.save();
+  ctx.translate(newW / 2, newH / 2);
+  ctx.rotate(clockwise ? Math.PI / 2 : -Math.PI / 2);
+  ctx.drawImage(tmp, -oldW / 2, -oldH / 2);
+  ctx.restore();
+
+  // Rotate the original imgData (so subsequent mode changes keep working on rotated source)
+  const origCanvas = document.createElement('canvas');
+  origCanvas.width = oldW; origCanvas.height = oldH;
+  origCanvas.getContext('2d').putImageData(state.imgData, 0, 0);
+  const rotOrig = document.createElement('canvas');
+  rotOrig.width = newW; rotOrig.height = newH;
+  const rctx = rotOrig.getContext('2d');
+  rctx.translate(newW / 2, newH / 2);
+  rctx.rotate(clockwise ? Math.PI / 2 : -Math.PI / 2);
+  rctx.drawImage(origCanvas, -oldW / 2, -oldH / 2);
+  state.imgData = rctx.getImageData(0, 0, newW, newH);
+
+  // Update dimensions
+  state.imgWidth = newW;
+  state.imgHeight = newH;
+  overlay.setAttribute('width', newW);
+  overlay.setAttribute('height', newH);
+  overlay.setAttribute('viewBox', `0 0 ${newW} ${newH}`);
+
+  // Transform all annotations to match
+  const tx = (x, y) => clockwise ? [oldH - y, x] : [y, oldW - x];
+  for (const s of state.shapes) {
+    if (['camera','fov','text','baie','percement','borne','porte','centrale'].includes(s.type)) {
+      [s.x, s.y] = tx(s.x, s.y);
+      if (s.type === 'fov') {
+        s.bearing = ((s.bearing + (clockwise ? 90 : -90)) % 360 + 360) % 360;
+      }
+    } else if (s.type === 'line') {
+      [s.x1, s.y1] = tx(s.x1, s.y1);
+      [s.x2, s.y2] = tx(s.x2, s.y2);
+    } else if (s.type === 'rect') {
+      const [a1, b1] = tx(s.x, s.y);
+      const [a2, b2] = tx(s.x + s.w, s.y + s.h);
+      s.x = Math.min(a1, a2);
+      s.y = Math.min(b1, b2);
+      s.w = Math.abs(a2 - a1);
+      s.h = Math.abs(b2 - b1);
+    } else if (s.type === 'pen' || s.type === 'polyline') {
+      s.points = s.points.map(([x, y]) => tx(x, y));
+    }
+  }
+
+  document.getElementById('cnt-plan').textContent = `${newW}×${newH}`;
+
+  // Rotate originalSrc too so that "Restaurer" reverts to the rotated orientation
+  if (state.originalSrc) {
+    const origImg = new Image();
+    origImg.onload = () => {
+      const rc = document.createElement('canvas');
+      rc.width = newW; rc.height = newH;
+      const rctx2 = rc.getContext('2d');
+      rctx2.translate(newW / 2, newH / 2);
+      rctx2.rotate(clockwise ? Math.PI / 2 : -Math.PI / 2);
+      rctx2.drawImage(origImg, -oldW / 2, -oldH / 2);
+      state.originalSrc = rc.toDataURL('image/png');
+    };
+    origImg.src = state.originalSrc;
+  }
+
+  fitToView();
+  render();
+  pushHistory();
+}
+
+document.getElementById('btn-rot-left').addEventListener('click', () => rotatePlan(false));
+document.getElementById('btn-rot-right').addEventListener('click', () => rotatePlan(true));
+
+// Init
+updatePropertiesPanel();
+render();
+pushHistory();
+
+// Try to restore last project
+(async () => {
+  try {
+    if (window.storage) {
+      const last = await window.storage.get('plan_project_last');
+      if (last && last.value) {
+        if (confirm('Restaurer le dernier projet sauvegardé ?')) {
+          loadProject(JSON.parse(last.value));
+        }
+      }
+    }
+  } catch(e) {}
+})();
 </script>
+
 </body>
 </html>
