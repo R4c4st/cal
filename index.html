@@ -169,6 +169,10 @@ input[type=color] { width: 40px; height: 28px; background: #1a1a1a; border: 1px 
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 17 9 11 13 15 21 7"/><circle cx="3" cy="17" r="1.5" fill="currentColor"/><circle cx="9" cy="11" r="1.5" fill="currentColor"/><circle cx="13" cy="15" r="1.5" fill="currentColor"/><circle cx="21" cy="7" r="1.5" fill="currentColor"/></svg>
         <span class="tt">Mur / polyligne <span class="kbd">W</span></span>
       </div>
+      <div class="tool" data-tool="doorplan" title="Porte (plan architecte)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="20" x2="4" y2="4"/><line x1="4" y1="4" x2="15" y2="4"/><path d="M4 20 A16 16 0 0 0 20 4" stroke-dasharray="2 2"/></svg>
+        <span class="tt">Porte (plan) <span class="kbd">D</span></span>
+      </div>
       <div class="tool" data-tool="rect" title="Rectangle">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="1"/></svg>
         <span class="tt">Rectangle <span class="kbd">R</span></span>
@@ -185,6 +189,10 @@ input[type=color] { width: 40px; height: 28px; background: #1a1a1a; border: 1px 
       <div class="tool" data-tool="baie" title="Baie informatique">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="3" width="14" height="18" rx="1"/><line x1="8" y1="7" x2="16" y2="7"/><line x1="8" y1="11" x2="16" y2="11"/><line x1="8" y1="15" x2="16" y2="15"/><line x1="8" y1="19" x2="16" y2="19"/></svg>
         <span class="tt">Baie informatique <span class="kbd">I</span></span>
+      </div>
+      <div class="tool" data-tool="rj45" title="Prise RJ45">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="4" width="14" height="14" rx="1"/><line x1="9" y1="10" x2="9" y2="16"/><line x1="12" y1="10" x2="12" y2="16"/><line x1="15" y1="10" x2="15" y2="16"/></svg>
+        <span class="tt">Prise RJ45 <span class="kbd">J</span></span>
       </div>
       <div class="tool" data-tool="borne" title="Borne WiFi">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="14" r="2" fill="currentColor"/><path d="M8 11a5.4 5.4 0 0 1 8 0"/><path d="M5 8a9.4 9.4 0 0 1 14 0"/></svg>
@@ -317,6 +325,12 @@ const state = {
     strokeColor: '#ef4444',
     strokeWidth: 2,
     fillColor: 'none',
+    wallColor: '#3a3a3a',
+    wallThickness: 15,
+    wallType: 'porteur',
+    doorColor: '#92400e',
+    doorThickness: 4,
+    doorSwingFlip: false,
     cameraColor: '#378add',
     cameraRadius: 12,
     cameraLabel: 'C01',
@@ -330,6 +344,8 @@ const state = {
     baieColor: '#2a6fd1',
     baieSize: 30,
     baieLabel: 'BAIE',
+    rj45Color: '#0ea5e9',
+    rj45Size: 24,
     percementSize: 18,
     percementColor: '#ef4444',
     percementWidth: 3,
@@ -515,13 +531,13 @@ document.querySelectorAll('.tool').forEach(el => {
 function updateCursor() {
   stage.className = 'canvas-stage';
   if (state.tool === 'pan' || state.spacePressed) stage.classList.add('cursor-grab');
-  else if (['pen','line','wall','rect','camera','fov','text','baie','percement','borne','porte','centrale','eraser'].includes(state.tool)) stage.classList.add('cursor-crosshair');
+  else if (['pen','line','wall','doorplan','rect','camera','fov','text','baie','rj45','percement','borne','porte','centrale','eraser'].includes(state.tool)) stage.classList.add('cursor-crosshair');
 }
 
 // Keyboard shortcuts
 window.addEventListener('keydown', (e) => {
   if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') return;
-  const keyMap = { v: 'select', h: 'pan', b: 'pen', l: 'line', w: 'wall', r: 'rect', c: 'camera', f: 'fov', t: 'text', i: 'baie', x: 'percement', e: 'eraser', n: 'borne', a: 'porte', k: 'centrale' };
+  const keyMap = { v: 'select', h: 'pan', b: 'pen', l: 'line', w: 'wall', d: 'doorplan', r: 'rect', c: 'camera', f: 'fov', t: 'text', i: 'baie', j: 'rj45', x: 'percement', e: 'eraser', n: 'borne', a: 'porte', k: 'centrale' };
   if (keyMap[e.key.toLowerCase()]) {
     const btn = document.querySelector(`[data-tool="${keyMap[e.key.toLowerCase()]}"]`);
     if (btn) btn.click();
@@ -665,6 +681,13 @@ function handleMouseDown(e) {
     }
     state.wallPoints.push([p.x, p.y]);
     state.drawing = true;
+  } else if (state.tool === 'doorplan') {
+    state.drawing = true;
+    state.currentShape = {
+      type: 'doorplan', x1: p.x, y1: p.y, x2: p.x, y2: p.y,
+      thickness: state.defaults.doorThickness, color: state.defaults.doorColor,
+      swingFlip: state.defaults.doorSwingFlip, layer: 'trace'
+    };
   } else if (state.tool === 'rect') {
     state.drawing = true;
     state.currentShape = { type: 'rect', x: p.x, y: p.y, w: 0, h: 0, stroke: state.defaults.strokeColor, width: state.defaults.strokeWidth, fill: 'none', layer: 'trace' };
@@ -694,6 +717,14 @@ function handleMouseDown(e) {
     const shape = {
       type: 'baie', x: p.x, y: p.y, size: state.defaults.baieSize,
       color: state.defaults.baieColor, label: nextBaieLabel(), layer: 'annot'
+    };
+    addShape(shape);
+    state.selectedId = shape.id;
+    updatePropertiesPanel();
+  } else if (state.tool === 'rj45') {
+    const shape = {
+      type: 'rj45', x: p.x, y: p.y, size: state.defaults.rj45Size,
+      color: state.defaults.rj45Color, label: nextRj45Label(), layer: 'annot'
     };
     addShape(shape);
     state.selectedId = shape.id;
@@ -750,9 +781,9 @@ function handleMouseMove(e) {
     const dx = p.x - state.dragStart.x;
     const dy = p.y - state.dragStart.y;
     if (h === 'move') {
-      if (shape.type === 'camera' || shape.type === 'fov' || shape.type === 'text' || shape.type === 'baie' || shape.type === 'percement' || shape.type === 'borne' || shape.type === 'porte' || shape.type === 'centrale') {
+      if (shape.type === 'camera' || shape.type === 'fov' || shape.type === 'text' || shape.type === 'baie' || shape.type === 'rj45' || shape.type === 'percement' || shape.type === 'borne' || shape.type === 'porte' || shape.type === 'centrale') {
         shape.x += dx; shape.y += dy;
-      } else if (shape.type === 'line') {
+      } else if (shape.type === 'line' || shape.type === 'doorplan') {
         shape.x1 += dx; shape.y1 += dy; shape.x2 += dx; shape.y2 += dy;
       } else if (shape.type === 'rect') {
         shape.x += dx; shape.y += dy;
@@ -760,8 +791,8 @@ function handleMouseMove(e) {
         shape.points = shape.points.map(pt => [pt[0]+dx, pt[1]+dy]);
       }
       state.dragStart = p;
-    } else if (h === 'p1' && shape.type === 'line') { shape.x1 = p.x; shape.y1 = p.y; }
-    else if (h === 'p2' && shape.type === 'line') { shape.x2 = p.x; shape.y2 = p.y; }
+    } else if (h === 'p1' && (shape.type === 'line' || shape.type === 'doorplan')) { shape.x1 = p.x; shape.y1 = p.y; }
+    else if (h === 'p2' && (shape.type === 'line' || shape.type === 'doorplan')) { shape.x2 = p.x; shape.y2 = p.y; }
     else if (h === 'radius' && (shape.type === 'camera' || shape.type === 'fov' || shape.type === 'borne')) {
       shape.radius = Math.max(5, Math.hypot(p.x - shape.x, p.y - shape.y));
       if (shape.type === 'fov') {
@@ -782,6 +813,9 @@ function handleMouseMove(e) {
     state.currentShape.points.push([p.x, p.y]);
     render();
   } else if (state.tool === 'line') {
+    state.currentShape.x2 = p.x; state.currentShape.y2 = p.y;
+    render();
+  } else if (state.tool === 'doorplan') {
     state.currentShape.x2 = p.x; state.currentShape.y2 = p.y;
     render();
   } else if (state.tool === 'wall') {
@@ -813,8 +847,11 @@ function handleMouseUp(e) {
     return;
   }
   if (!state.drawing) return;
-  if (state.tool === 'pen' || state.tool === 'line' || state.tool === 'rect') {
+  if (state.tool === 'pen' || state.tool === 'line' || state.tool === 'rect' || state.tool === 'doorplan') {
     if (state.tool === 'rect' && (Math.abs(state.currentShape.w) < 3 || Math.abs(state.currentShape.h) < 3)) {
+      state.currentShape = null; state.drawing = false; render(); return;
+    }
+    if (state.tool === 'doorplan' && Math.hypot(state.currentShape.x2 - state.currentShape.x1, state.currentShape.y2 - state.currentShape.y1) < 5) {
       state.currentShape = null; state.drawing = false; render(); return;
     }
     addShape(state.currentShape);
@@ -830,7 +867,7 @@ function handleDoubleClick(e) {
   if (state.tool === 'wall' && state.wallPoints.length >= 2) {
     const pts = state.wallPoints.slice(0, -1); // drop the preview point
     if (pts.length >= 2) {
-      addShape({ type: 'polyline', points: pts, stroke: state.defaults.strokeColor, width: state.defaults.strokeWidth, layer: 'trace' });
+      addShape({ type: 'polyline', points: pts, stroke: state.defaults.wallColor, width: state.defaults.wallThickness, wallType: state.defaults.wallType, layer: 'trace' });
     }
     state.wallPoints = [];
     state.drawing = false;
@@ -853,6 +890,14 @@ function nextBaieLabel() {
     if (!existing.includes(label)) return label;
   }
   return 'BAIE';
+}
+function nextRj45Label() {
+  const existing = state.shapes.filter(s => s.type === 'rj45').map(s => s.label);
+  for (let i = 1; i < 200; i++) {
+    const label = 'RJ' + String(i).padStart(2, '0');
+    if (!existing.includes(label)) return label;
+  }
+  return 'RJ';
 }
 function nextBorneLabel() {
   const existing = state.shapes.filter(s => s.type === 'borne').map(s => s.label);
@@ -900,7 +945,10 @@ function shapeToSVG(s, isSelected) {
   }
   if (s.type === 'polyline') {
     const pts = s.points.map(p => `${p[0]},${p[1]}`).join(' ');
-    return `<polyline data-shape-id="${s.id}"${sel} points="${pts}" fill="none" stroke="${s.stroke}" stroke-width="${s.width}" stroke-linecap="round" stroke-linejoin="round"/>`;
+    const isCloison = s.wallType === 'cloison';
+    const dash = isCloison ? ` stroke-dasharray="${Math.max(8, s.width*1.6)} ${Math.max(5, s.width*0.8)}"` : '';
+    const cap = s.wallType ? 'stroke-linecap="square" stroke-linejoin="miter"' : 'stroke-linecap="round" stroke-linejoin="round"';
+    return `<polyline data-shape-id="${s.id}"${sel} points="${pts}" fill="none" stroke="${s.stroke}" stroke-width="${s.width}" ${cap}${dash}/>`;
   }
   if (s.type === 'rect') {
     const x = Math.min(s.x, s.x + s.w), y = Math.min(s.y, s.y + s.h);
@@ -984,6 +1032,37 @@ function shapeToSVG(s, isSelected) {
       ${s.label ? `<g><rect x="${s.x - Math.max(25, s.label.length * 4.5)}" y="${s.y + half + 2}" width="${Math.max(50, s.label.length * 9)}" height="16" rx="2" fill="${s.color}"/><text x="${s.x}" y="${s.y + half + 14}" text-anchor="middle" font-family="sans-serif" font-size="11" font-weight="700" fill="#fff">${escapeXml(s.label)}</text></g>` : ''}
     </g>`;
   }
+  if (s.type === 'rj45') {
+    const sz = s.size || 24;
+    const half = sz / 2;
+    const pinW = Math.max(1, sz * 0.07);
+    return `<g data-shape-id="${s.id}"${sel}>
+      <rect x="${s.x - half - 3}" y="${s.y - half - 3}" width="${sz + 6}" height="${sz + 6}" fill="#fff" rx="3"/>
+      <rect x="${s.x - half}" y="${s.y - half}" width="${sz}" height="${sz}" fill="${s.color}" stroke="#000" stroke-width="1.5" rx="2"/>
+      <rect x="${s.x - half*0.6}" y="${s.y - half*0.75}" width="${sz*0.6}" height="${sz*0.65}" fill="#fff" rx="1"/>
+      <line x1="${s.x - half*0.42}" y1="${s.y - half*0.1}" x2="${s.x - half*0.42}" y2="${s.y + half*0.6}" stroke="#fff" stroke-width="${pinW}"/>
+      <line x1="${s.x - half*0.14}" y1="${s.y - half*0.1}" x2="${s.x - half*0.14}" y2="${s.y + half*0.6}" stroke="#fff" stroke-width="${pinW}"/>
+      <line x1="${s.x + half*0.14}" y1="${s.y - half*0.1}" x2="${s.x + half*0.14}" y2="${s.y + half*0.6}" stroke="#fff" stroke-width="${pinW}"/>
+      <line x1="${s.x + half*0.42}" y1="${s.y - half*0.1}" x2="${s.x + half*0.42}" y2="${s.y + half*0.6}" stroke="#fff" stroke-width="${pinW}"/>
+      ${s.label ? `<g><rect x="${s.x - Math.max(22, s.label.length * 4.5)}" y="${s.y + half + 4}" width="${Math.max(44, s.label.length * 9)}" height="16" rx="2" fill="${s.color}"/><text x="${s.x}" y="${s.y + half + 16}" text-anchor="middle" font-family="sans-serif" font-size="11" font-weight="700" fill="#fff">${escapeXml(s.label)}</text></g>` : ''}
+    </g>`;
+  }
+  if (s.type === 'doorplan') {
+    const dx = s.x2 - s.x1, dy = s.y2 - s.y1;
+    const w = Math.hypot(dx, dy) || 1;
+    const ang = Math.atan2(dy, dx);
+    const sign = s.swingFlip ? -1 : 1;
+    const openAng = ang + sign * Math.PI / 2;
+    const leafX = s.x1 + w * Math.cos(openAng);
+    const leafY = s.y1 + w * Math.sin(openAng);
+    const sweepFlag = s.swingFlip ? 1 : 0;
+    const th = s.thickness || 4;
+    return `<g data-shape-id="${s.id}"${sel}>
+      <line x1="${s.x1}" y1="${s.y1}" x2="${s.x2}" y2="${s.y2}" stroke="${s.color}" stroke-width="${Math.max(1, th*0.5)}" stroke-dasharray="2 3" opacity="0.55"/>
+      <line x1="${s.x1}" y1="${s.y1}" x2="${leafX}" y2="${leafY}" stroke="${s.color}" stroke-width="${th}" stroke-linecap="round"/>
+      <path d="M ${leafX} ${leafY} A ${w} ${w} 0 0 ${sweepFlag} ${s.x2} ${s.y2}" fill="none" stroke="${s.color}" stroke-width="1" stroke-dasharray="3 3" opacity="0.7"/>
+    </g>`;
+  }
   return '';
 }
 function escapeXml(s) { return String(s).replace(/[<>&"']/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&apos;'})[c]); }
@@ -1009,13 +1088,13 @@ function selectionOverlay(s) {
     handles += `<circle class="handle rot" data-handle="wifiradius" data-id="${s.id}" cx="${s.x + wr}" cy="${s.y}" r="6" style="fill:#4ade80;stroke:#fff"/>`;
     return handles;
   }
-  if (s.type === 'line') {
+  if (s.type === 'line' || s.type === 'doorplan') {
     return `<circle class="handle" data-handle="p1" data-id="${s.id}" cx="${s.x1}" cy="${s.y1}" r="5"/><circle class="handle" data-handle="p2" data-id="${s.id}" cx="${s.x2}" cy="${s.y2}" r="5"/>`;
   }
   if (s.type === 'rect') {
     return `<rect class="selection-box" x="${Math.min(s.x, s.x+s.w)}" y="${Math.min(s.y, s.y+s.h)}" width="${Math.abs(s.w)}" height="${Math.abs(s.h)}"/><circle class="handle" data-handle="move" data-id="${s.id}" cx="${s.x + s.w/2}" cy="${s.y + s.h/2}" r="5"/><circle class="handle" data-handle="rect-br" data-id="${s.id}" cx="${s.x + s.w}" cy="${s.y + s.h}" r="5"/>`;
   }
-  if (s.type === 'baie' || s.type === 'percement') {
+  if (s.type === 'baie' || s.type === 'percement' || s.type === 'rj45') {
     const sz = s.size || 20;
     return `<rect class="selection-box" x="${s.x - sz/2 - 4}" y="${s.y - sz/2 - 4}" width="${sz + 8}" height="${sz + 8}"/><circle class="handle" data-handle="move" data-id="${s.id}" cx="${s.x}" cy="${s.y}" r="5"/>`;
   }
@@ -1038,9 +1117,9 @@ function render() {
   if (state.currentShape) svg += shapeToSVG(state.currentShape, false);
   if (state.tool === 'wall' && state.wallPoints.length > 0) {
     const pts = state.wallPoints.map(p => `${p[0]},${p[1]}`).join(' ');
-    svg += `<polyline points="${pts}" fill="none" stroke="${state.defaults.strokeColor}" stroke-width="${state.defaults.strokeWidth}" stroke-dasharray="4 3"/>`;
+    svg += `<polyline points="${pts}" fill="none" stroke="${state.defaults.wallColor}" stroke-width="${Math.max(2, state.defaults.wallThickness)}" stroke-linecap="square" stroke-dasharray="6 4" opacity="0.65"/>`;
     state.wallPoints.forEach(p => {
-      svg += `<circle cx="${p[0]}" cy="${p[1]}" r="3" fill="${state.defaults.strokeColor}"/>`;
+      svg += `<circle cx="${p[0]}" cy="${p[1]}" r="4" fill="${state.defaults.wallColor}"/>`;
     });
   }
   // selection handles
@@ -1062,7 +1141,7 @@ function updateShapeList() {
   if (state.shapes.length === 0) { el.innerHTML = '<div style="padding:8px;font-size:12px;color:#777;">Aucun élément</div>'; return; }
   el.innerHTML = state.shapes.map(s => {
     const color = s.color || s.stroke || '#888';
-    const icon = { camera: '⊙', fov: '⌖', line: '╱', polyline: '⌐', rect: '▭', pen: '〜', text: 'T', baie: '▦', percement: '✕', borne: '⊕', porte: 'P', centrale: '⊟' }[s.type] || '•';
+    const icon = { camera: '⊙', fov: '⌖', line: '╱', polyline: '⌐', rect: '▭', pen: '〜', text: 'T', baie: '▦', rj45: '▤', doorplan: '▯', percement: '✕', borne: '⊕', porte: 'P', centrale: '⊟' }[s.type] || '•';
     const label = s.label || s.text || (s.type + ' ' + s.id.replace('s',''));
     return `<div class="shape-item ${s.id === state.selectedId ? 'selected' : ''}" onclick="selectShape('${s.id}')"><span class="dot" style="background:${color}"></span><span class="lbl">${icon} ${escapeXml(label)}</span><span class="del" onclick="event.stopPropagation();deleteShape('${s.id}')">✕</span></div>`;
   }).join('');
@@ -1070,6 +1149,22 @@ function updateShapeList() {
 window.selectShape = (id) => { state.selectedId = id; updatePropertiesPanel(); render(); };
 
 // ==================== PROPERTIES PANEL ====================
+// Helper: slider + linked number input. The slider has a sane visual max,
+// but the number field accepts any value typed (no real ceiling) — this is
+// what lets every dimension be pushed much larger than the slider's range.
+function fld(o) {
+  const { id, label, unit = 'px', value, min, max, step = 1, set, after = '' } = o;
+  const v = (typeof value === 'number' && !isNaN(value)) ? value : (parseFloat(value) || 0);
+  return `
+    <label class="field">${label}: <span id="${id}-val">${v}</span>${unit}</label>
+    <div class="slider-row">
+      <input type="range" id="${id}-r" min="${min}" max="${max}" step="${step}" value="${v}" style="flex:1"
+        oninput="const v=parseFloat(this.value); ${set}; document.getElementById('${id}-val').textContent=v; const ni=document.getElementById('${id}-n'); if(ni) ni.value=v; ${after}">
+      <input type="number" id="${id}-n" min="${min}" step="${step}" value="${v}" style="width:72px"
+        oninput="let v=parseFloat(this.value); if(isNaN(v)) v=${min}; ${set}; document.getElementById('${id}-val').textContent=v; const ri=document.getElementById('${id}-r'); if(ri) ri.value=Math.min(Math.max(v,${min}),${max}); ${after}">
+    </div>`;
+}
+
 function updatePropertiesPanel() {
   const el = document.getElementById('prop-content');
   const hint = document.getElementById('tool-hint');
@@ -1084,12 +1179,14 @@ function updatePropertiesPanel() {
     pan: 'Glissez pour déplacer la vue. Molette pour zoomer.',
     pen: 'Tracez à main levée sur le plan (calque Traçage).',
     line: 'Cliquez + glissez pour tracer une ligne droite.',
-    wall: 'Cliquez successivement pour ajouter des points. Double-clic pour terminer. Esc pour annuler.',
+    wall: 'Cliquez successivement pour ajouter des points (mur ou cloison). Double-clic pour terminer. Esc pour annuler.',
+    doorplan: "Cliquez sur le gond puis glissez jusqu'au montant opposé pour tracer une porte avec son débattement.",
     rect: 'Cliquez + glissez pour tracer un rectangle.',
     camera: 'Cliquez pour placer une caméra avec étiquette auto-incrémentée.',
     fov: 'Cliquez pour placer un cône de vision. Modifiez l\'angle et la portée dans les propriétés.',
     text: 'Cliquez pour ajouter un libellé texte.',
     baie: 'Cliquez pour placer un pictogramme de baie informatique (carré coloré avec libellé).',
+    rj45: 'Cliquez pour placer une prise RJ45 avec étiquette auto-incrémentée.',
     borne: 'Cliquez pour placer une borne WiFi avec son rayon de couverture. Ajustez la portée WiFi dans les propriétés.',
     porte: 'Cliquez pour marquer une porte équipée en contrôle d\'accès (symbole P).',
     centrale: 'Cliquez pour placer une centrale de contrôle d\'accès.',
@@ -1100,75 +1197,89 @@ function updatePropertiesPanel() {
   hint.textContent = toolHints[state.tool] || '';
 
   // Tool-specific defaults
-  if (state.tool === 'pen' || state.tool === 'line' || state.tool === 'wall' || state.tool === 'rect') {
+  if (state.tool === 'pen' || state.tool === 'line' || state.tool === 'rect') {
     el.innerHTML = `
       <label class="field">Couleur</label>
       <div class="color-row"><input type="color" value="${state.defaults.strokeColor}" oninput="state.defaults.strokeColor=this.value;render()"><span style="font-size:12px;color:#999">Trait</span></div>
-      <label class="field">Épaisseur: <span id="w-val">${state.defaults.strokeWidth}</span>px</label>
-      <input type="range" min="1" max="10" step="0.5" value="${state.defaults.strokeWidth}" oninput="state.defaults.strokeWidth=parseFloat(this.value);document.getElementById('w-val').textContent=this.value">
+      ${fld({id:'sw', label:'Épaisseur', value:state.defaults.strokeWidth, min:0.5, max:60, step:0.5, set:'state.defaults.strokeWidth=v'})}
+    `;
+  } else if (state.tool === 'wall') {
+    el.innerHTML = `
+      <label class="field">Type de cloisonnement</label>
+      <select onchange="state.defaults.wallType=this.value;render()">
+        <option value="porteur" ${state.defaults.wallType==='porteur'?'selected':''}>Mur porteur</option>
+        <option value="cloison" ${state.defaults.wallType==='cloison'?'selected':''}>Cloison légère</option>
+      </select>
+      <label class="field" style="margin-top:10px">Couleur</label>
+      <div class="color-row"><input type="color" value="${state.defaults.wallColor}" oninput="state.defaults.wallColor=this.value;render()"></div>
+      ${fld({id:'wt', label:'Épaisseur du mur', value:state.defaults.wallThickness, min:1, max:150, step:1, set:'state.defaults.wallThickness=v', after:'render()'})}
+      <div class="hint-box" style="margin-top:12px">Cliquez successivement pour ajouter des points. Double-clic pour terminer, Esc pour annuler. La cloison légère est tracée en tirets, le mur porteur en trait plein épais.</div>
+    `;
+  } else if (state.tool === 'doorplan') {
+    el.innerHTML = `
+      <label class="field">Couleur</label>
+      <div class="color-row"><input type="color" value="${state.defaults.doorColor}" oninput="state.defaults.doorColor=this.value;render()"></div>
+      ${fld({id:'dt', label:'Épaisseur du vantail', value:state.defaults.doorThickness, min:1, max:60, step:0.5, set:'state.defaults.doorThickness=v', after:'render()'})}
+      <button class="btn" style="margin-top:8px;width:100%" onclick="state.defaults.doorSwingFlip=!state.defaults.doorSwingFlip;render()">↔ Inverser le sens d'ouverture</button>
+      <div class="hint-box" style="margin-top:12px">Cliquez sur le gond puis glissez jusqu'au montant opposé de l'ouverture. Le sens d'ouverture peut être inversé avant ou après le tracé.</div>
     `;
   } else if (state.tool === 'camera') {
     el.innerHTML = `
       <label class="field">Couleur</label>
       <div class="color-row"><input type="color" value="${state.defaults.cameraColor}" oninput="state.defaults.cameraColor=this.value"></div>
-      <label class="field">Rayon: <span id="cr-val">${state.defaults.cameraRadius}</span>px</label>
-      <input type="range" min="6" max="30" value="${state.defaults.cameraRadius}" oninput="state.defaults.cameraRadius=parseInt(this.value);document.getElementById('cr-val').textContent=this.value">
+      ${fld({id:'cr', label:'Rayon', value:state.defaults.cameraRadius, min:4, max:200, step:1, set:'state.defaults.cameraRadius=v'})}
       <div class="hint-box" style="margin-top:12px">Les étiquettes sont automatiques : C01, C02, … Modifiable en sélectionnant la caméra.</div>
     `;
   } else if (state.tool === 'fov') {
     el.innerHTML = `
       <label class="field">Couleur</label>
       <div class="color-row"><input type="color" value="${state.defaults.fovColor}" oninput="state.defaults.fovColor=this.value"></div>
-      <label class="field">Angle d'ouverture: <span id="a-val">${state.defaults.fovAperture}</span>°</label>
-      <input type="range" min="1" max="360" value="${state.defaults.fovAperture}" oninput="state.defaults.fovAperture=parseInt(this.value);document.getElementById('a-val').textContent=this.value">
-      <label class="field">Orientation: <span id="b-val">${state.defaults.fovBearing}</span>°</label>
-      <input type="range" min="0" max="360" value="${state.defaults.fovBearing}" oninput="state.defaults.fovBearing=parseInt(this.value);document.getElementById('b-val').textContent=this.value">
-      <label class="field">Portée: <span id="r-val">${state.defaults.fovRadius}</span>px</label>
-      <input type="range" min="20" max="600" value="${state.defaults.fovRadius}" oninput="state.defaults.fovRadius=parseInt(this.value);document.getElementById('r-val').textContent=this.value">
-      <label class="field">Transparence: <span id="o-val">${Math.round(state.defaults.fovOpacity*100)}</span>%</label>
-      <input type="range" min="5" max="90" value="${state.defaults.fovOpacity*100}" oninput="state.defaults.fovOpacity=parseInt(this.value)/100;document.getElementById('o-val').textContent=this.value">
+      ${fld({id:'fa', label:"Angle d'ouverture", unit:'°', value:state.defaults.fovAperture, min:1, max:360, step:1, set:'state.defaults.fovAperture=v'})}
+      ${fld({id:'fb', label:'Orientation', unit:'°', value:state.defaults.fovBearing, min:0, max:360, step:1, set:'state.defaults.fovBearing=v'})}
+      ${fld({id:'fr', label:'Portée', value:state.defaults.fovRadius, min:10, max:3000, step:5, set:'state.defaults.fovRadius=v'})}
+      ${fld({id:'fo', label:'Transparence', unit:'%', value:Math.round(state.defaults.fovOpacity*100), min:5, max:90, step:1, set:'state.defaults.fovOpacity=v/100'})}
     `;
   } else if (state.tool === 'text') {
     el.innerHTML = `
       <label class="field">Couleur</label>
       <div class="color-row"><input type="color" value="${state.defaults.textColor}" oninput="state.defaults.textColor=this.value"></div>
-      <label class="field">Taille: <span id="ts-val">${state.defaults.textSize}</span>px</label>
-      <input type="range" min="8" max="48" value="${state.defaults.textSize}" oninput="state.defaults.textSize=parseInt(this.value);document.getElementById('ts-val').textContent=this.value">
+      ${fld({id:'ts', label:'Taille', value:state.defaults.textSize, min:6, max:300, step:1, set:'state.defaults.textSize=v'})}
     `;
   } else if (state.tool === 'baie') {
     el.innerHTML = `
       <label class="field">Couleur de la baie</label>
       <div class="color-row"><input type="color" value="${state.defaults.baieColor}" oninput="state.defaults.baieColor=this.value"></div>
-      <label class="field">Taille: <span id="bs-val">${state.defaults.baieSize}</span>px</label>
-      <input type="range" min="12" max="60" value="${state.defaults.baieSize}" oninput="state.defaults.baieSize=parseInt(this.value);document.getElementById('bs-val').textContent=this.value">
+      ${fld({id:'bs', label:'Taille', value:state.defaults.baieSize, min:8, max:250, step:1, set:'state.defaults.baieSize=v'})}
       <div class="hint-box" style="margin-top:12px">Carré pictogramme pour baies informatiques. Libellés auto : BAIE01, BAIE02… Modifiables par sélection.</div>
+    `;
+  } else if (state.tool === 'rj45') {
+    el.innerHTML = `
+      <label class="field">Couleur</label>
+      <div class="color-row"><input type="color" value="${state.defaults.rj45Color}" oninput="state.defaults.rj45Color=this.value"></div>
+      ${fld({id:'rjs', label:'Taille', value:state.defaults.rj45Size, min:8, max:250, step:1, set:'state.defaults.rj45Size=v'})}
+      <div class="hint-box" style="margin-top:12px">Pictogramme prise RJ45. Libellés auto : RJ01, RJ02… Modifiables par sélection.</div>
     `;
   } else if (state.tool === 'borne') {
     el.innerHTML = `
       <label class="field">Couleur</label>
       <div class="color-row"><input type="color" value="${state.defaults.borneColor}" oninput="state.defaults.borneColor=this.value"></div>
-      <label class="field">Rayon picto: <span id="br-val">${state.defaults.borneRadius}</span>px</label>
-      <input type="range" min="8" max="30" value="${state.defaults.borneRadius}" oninput="state.defaults.borneRadius=parseInt(this.value);document.getElementById('br-val').textContent=this.value">
-      <label class="field">Portée WiFi: <span id="bwr-val">${state.defaults.wifiRadius}</span>px</label>
-      <input type="range" min="40" max="800" value="${state.defaults.wifiRadius}" oninput="state.defaults.wifiRadius=parseInt(this.value);document.getElementById('bwr-val').textContent=this.value">
-      <label class="field">Transparence couverture: <span id="bwo-val">${Math.round(state.defaults.wifiOpacity*100)}</span>%</label>
-      <input type="range" min="5" max="60" value="${state.defaults.wifiOpacity*100}" oninput="state.defaults.wifiOpacity=parseInt(this.value)/100;document.getElementById('bwo-val').textContent=this.value">
+      ${fld({id:'br', label:'Rayon picto', value:state.defaults.borneRadius, min:4, max:200, step:1, set:'state.defaults.borneRadius=v'})}
+      ${fld({id:'bwr', label:'Portée WiFi', value:state.defaults.wifiRadius, min:10, max:3000, step:5, set:'state.defaults.wifiRadius=v'})}
+      ${fld({id:'bwo', label:'Transparence couverture', unit:'%', value:Math.round(state.defaults.wifiOpacity*100), min:5, max:60, step:1, set:'state.defaults.wifiOpacity=v/100'})}
       <div class="hint-box" style="margin-top:12px">Libellés auto : AP01, AP02… Modifiables par sélection. La poignée verte ajuste la portée WiFi.</div>
     `;
   } else if (state.tool === 'porte') {
     el.innerHTML = `
       <label class="field">Couleur</label>
       <div class="color-row"><input type="color" value="${state.defaults.porteColor}" oninput="state.defaults.porteColor=this.value"></div>
-      <label class="field">Taille: <span id="prt-val">${state.defaults.porteSize}</span>px</label>
-      <input type="range" min="10" max="50" value="${state.defaults.porteSize}" oninput="state.defaults.porteSize=parseInt(this.value);document.getElementById('prt-val').textContent=this.value">
+      ${fld({id:'prt', label:'Taille', value:state.defaults.porteSize, min:6, max:200, step:1, set:'state.defaults.porteSize=v'})}
       <div class="hint-box" style="margin-top:12px">Symbole P pour les portes équipées contrôle d'accès. Libellés auto : P01, P02…</div>
     `;
   } else if (state.tool === 'centrale') {
     el.innerHTML = `
       <label class="field">Couleur</label>
       <div class="color-row"><input type="color" value="${state.defaults.centraleColor}" oninput="state.defaults.centraleColor=this.value"></div>
-      <label class="field">Taille: <span id="cca-val">${state.defaults.centraleSize}</span>px</label>
-      <input type="range" min="16" max="60" value="${state.defaults.centraleSize}" oninput="state.defaults.centraleSize=parseInt(this.value);document.getElementById('cca-val').textContent=this.value">
+      ${fld({id:'cca', label:'Taille', value:state.defaults.centraleSize, min:8, max:250, step:1, set:'state.defaults.centraleSize=v'})}
       <label class="field">Libellé par défaut</label>
       <input type="text" value="${state.defaults.centraleLabel}" oninput="state.defaults.centraleLabel=this.value">
       <div class="hint-box" style="margin-top:12px">Pictogramme centrale de contrôle d'accès (rack + voyant vert CA).</div>
@@ -1177,16 +1288,13 @@ function updatePropertiesPanel() {
     el.innerHTML = `
       <label class="field">Couleur</label>
       <div class="color-row"><input type="color" value="${state.defaults.percementColor}" oninput="state.defaults.percementColor=this.value"></div>
-      <label class="field">Taille: <span id="ps-val">${state.defaults.percementSize}</span>px</label>
-      <input type="range" min="8" max="40" value="${state.defaults.percementSize}" oninput="state.defaults.percementSize=parseInt(this.value);document.getElementById('ps-val').textContent=this.value">
-      <label class="field">Épaisseur du trait: <span id="pw-val">${state.defaults.percementWidth}</span>px</label>
-      <input type="range" min="1" max="8" step="0.5" value="${state.defaults.percementWidth}" oninput="state.defaults.percementWidth=parseFloat(this.value);document.getElementById('pw-val').textContent=this.value">
+      ${fld({id:'ps', label:'Taille', value:state.defaults.percementSize, min:6, max:150, step:1, set:'state.defaults.percementSize=v'})}
+      ${fld({id:'pw', label:'Épaisseur du trait', value:state.defaults.percementWidth, min:0.5, max:30, step:0.5, set:'state.defaults.percementWidth=v'})}
       <div class="hint-box" style="margin-top:12px">Marque X pour les percements / traversées de cloison.</div>
     `;
   } else if (state.tool === 'eraser') {
     el.innerHTML = `
-      <label class="field">Taille de la gomme: <span id="es-val">${state.defaults.eraserSize}</span>px</label>
-      <input type="range" min="4" max="100" value="${state.defaults.eraserSize}" oninput="state.defaults.eraserSize=parseInt(this.value);document.getElementById('es-val').textContent=this.value">
+      ${fld({id:'es', label:'Taille de la gomme', value:state.defaults.eraserSize, min:2, max:400, step:1, set:'state.defaults.eraserSize=v'})}
       <div class="hint-box" style="margin-top:12px">La gomme efface directement le plan importé (peint en blanc). Les annotations ne sont pas touchées.</div>
       <button class="btn danger" style="margin-top:10px;width:100%" onclick="restoreOriginalPlan()">↺ Restaurer le plan original</button>
     `;
@@ -1203,28 +1311,40 @@ function renderShapeProps(s, el) {
       <input type="text" value="${escapeXml(s.label || '')}" oninput="updateShape('${s.id}',{label:this.value})">
       <label class="field">Couleur</label>
       <div class="color-row"><input type="color" value="${s.color}" oninput="updateShape('${s.id}',{color:this.value})"></div>
-      <label class="field">Rayon: <span>${s.radius}</span>px</label>
-      <input type="range" min="6" max="30" value="${s.radius}" oninput="updateShape('${s.id}',{radius:parseInt(this.value)});updatePropertiesPanel()">
+      ${fld({id:'scr', label:'Rayon', value:s.radius, min:4, max:200, step:1, set:`updateShape('${s.id}',{radius:v})`, after:'updatePropertiesPanel()'})}
     `;
   } else if (s.type === 'fov') {
     html += `
       <label class="field">Couleur</label>
       <div class="color-row"><input type="color" value="${s.color}" oninput="updateShape('${s.id}',{color:this.value})"></div>
-      <label class="field">Angle d'ouverture: <span>${Math.round(s.aperture)}</span>°</label>
-      <input type="range" min="1" max="360" value="${s.aperture}" oninput="updateShape('${s.id}',{aperture:parseInt(this.value)});updatePropertiesPanel()">
-      <label class="field">Orientation: <span>${Math.round(s.bearing)}</span>°</label>
-      <input type="range" min="0" max="360" value="${s.bearing}" oninput="updateShape('${s.id}',{bearing:parseInt(this.value)});updatePropertiesPanel()">
-      <label class="field">Portée: <span>${Math.round(s.radius)}</span>px</label>
-      <input type="range" min="20" max="800" value="${s.radius}" oninput="updateShape('${s.id}',{radius:parseInt(this.value)});updatePropertiesPanel()">
-      <label class="field">Transparence: <span>${Math.round(s.opacity*100)}</span>%</label>
-      <input type="range" min="5" max="90" value="${s.opacity*100}" oninput="updateShape('${s.id}',{opacity:parseInt(this.value)/100});updatePropertiesPanel()">
+      ${fld({id:'sfa', label:"Angle d'ouverture", unit:'°', value:Math.round(s.aperture), min:1, max:360, step:1, set:`updateShape('${s.id}',{aperture:v})`, after:'updatePropertiesPanel()'})}
+      ${fld({id:'sfb', label:'Orientation', unit:'°', value:Math.round(s.bearing), min:0, max:360, step:1, set:`updateShape('${s.id}',{bearing:v})`, after:'updatePropertiesPanel()'})}
+      ${fld({id:'sfr', label:'Portée', value:Math.round(s.radius), min:10, max:3000, step:5, set:`updateShape('${s.id}',{radius:v})`, after:'updatePropertiesPanel()'})}
+      ${fld({id:'sfo', label:'Transparence', unit:'%', value:Math.round(s.opacity*100), min:5, max:90, step:1, set:`updateShape('${s.id}',{opacity:v/100})`, after:'updatePropertiesPanel()'})}
     `;
-  } else if (s.type === 'line' || s.type === 'pen' || s.type === 'polyline') {
+  } else if (s.type === 'line' || s.type === 'pen') {
     html += `
       <label class="field">Couleur</label>
       <div class="color-row"><input type="color" value="${s.stroke}" oninput="updateShape('${s.id}',{stroke:this.value})"></div>
-      <label class="field">Épaisseur: <span>${s.width}</span>px</label>
-      <input type="range" min="1" max="10" step="0.5" value="${s.width}" oninput="updateShape('${s.id}',{width:parseFloat(this.value)});updatePropertiesPanel()">
+      ${fld({id:'slw', label:'Épaisseur', value:s.width, min:0.5, max:60, step:0.5, set:`updateShape('${s.id}',{width:v})`, after:'updatePropertiesPanel()'})}
+    `;
+  } else if (s.type === 'polyline') {
+    html += `
+      <label class="field">Type</label>
+      <select onchange="updateShape('${s.id}',{wallType:this.value});updatePropertiesPanel()">
+        <option value="porteur" ${s.wallType!=='cloison'?'selected':''}>Mur porteur</option>
+        <option value="cloison" ${s.wallType==='cloison'?'selected':''}>Cloison légère</option>
+      </select>
+      <label class="field" style="margin-top:10px">Couleur</label>
+      <div class="color-row"><input type="color" value="${s.stroke}" oninput="updateShape('${s.id}',{stroke:this.value})"></div>
+      ${fld({id:'swt', label:'Épaisseur du mur', value:s.width, min:1, max:150, step:1, set:`updateShape('${s.id}',{width:v})`, after:'updatePropertiesPanel()'})}
+    `;
+  } else if (s.type === 'doorplan') {
+    html += `
+      <label class="field">Couleur</label>
+      <div class="color-row"><input type="color" value="${s.color}" oninput="updateShape('${s.id}',{color:this.value})"></div>
+      ${fld({id:'sdt', label:'Épaisseur du vantail', value:s.thickness, min:1, max:60, step:0.5, set:`updateShape('${s.id}',{thickness:v})`, after:'updatePropertiesPanel()'})}
+      <button class="btn" style="margin-top:8px;width:100%" onclick="updateShape('${s.id}',{swingFlip:${!s.swingFlip}});updatePropertiesPanel()">↔ Inverser le sens d'ouverture</button>
     `;
   } else if (s.type === 'rect') {
     html += `
@@ -1235,8 +1355,7 @@ function renderShapeProps(s, el) {
         <input type="color" value="${s.fill === 'none' ? '#ffffff' : s.fill}" oninput="updateShape('${s.id}',{fill:this.value})">
         <button class="btn" onclick="updateShape('${s.id}',{fill:'none'})">Aucun</button>
       </div>
-      <label class="field">Épaisseur: <span>${s.width}</span>px</label>
-      <input type="range" min="1" max="10" step="0.5" value="${s.width}" oninput="updateShape('${s.id}',{width:parseFloat(this.value)});updatePropertiesPanel()">
+      ${fld({id:'srw', label:'Épaisseur', value:s.width, min:0.5, max:60, step:0.5, set:`updateShape('${s.id}',{width:v})`, after:'updatePropertiesPanel()'})}
     `;
   } else if (s.type === 'text') {
     html += `
@@ -1244,8 +1363,7 @@ function renderShapeProps(s, el) {
       <input type="text" value="${escapeXml(s.text)}" oninput="updateShape('${s.id}',{text:this.value})">
       <label class="field">Couleur</label>
       <div class="color-row"><input type="color" value="${s.color}" oninput="updateShape('${s.id}',{color:this.value})"></div>
-      <label class="field">Taille: <span>${s.size}</span>px</label>
-      <input type="range" min="8" max="48" value="${s.size}" oninput="updateShape('${s.id}',{size:parseInt(this.value)});updatePropertiesPanel()">
+      ${fld({id:'sts', label:'Taille', value:s.size, min:6, max:300, step:1, set:`updateShape('${s.id}',{size:v})`, after:'updatePropertiesPanel()'})}
     `;
   } else if (s.type === 'baie') {
     html += `
@@ -1253,17 +1371,22 @@ function renderShapeProps(s, el) {
       <input type="text" value="${escapeXml(s.label || '')}" oninput="updateShape('${s.id}',{label:this.value})">
       <label class="field">Couleur</label>
       <div class="color-row"><input type="color" value="${s.color}" oninput="updateShape('${s.id}',{color:this.value})"></div>
-      <label class="field">Taille: <span>${s.size}</span>px</label>
-      <input type="range" min="12" max="60" value="${s.size}" oninput="updateShape('${s.id}',{size:parseInt(this.value)});updatePropertiesPanel()">
+      ${fld({id:'sbs', label:'Taille', value:s.size, min:8, max:250, step:1, set:`updateShape('${s.id}',{size:v})`, after:'updatePropertiesPanel()'})}
+    `;
+  } else if (s.type === 'rj45') {
+    html += `
+      <label class="field">Libellé</label>
+      <input type="text" value="${escapeXml(s.label || '')}" oninput="updateShape('${s.id}',{label:this.value})">
+      <label class="field">Couleur</label>
+      <div class="color-row"><input type="color" value="${s.color}" oninput="updateShape('${s.id}',{color:this.value})"></div>
+      ${fld({id:'srjs', label:'Taille', value:s.size, min:8, max:250, step:1, set:`updateShape('${s.id}',{size:v})`, after:'updatePropertiesPanel()'})}
     `;
   } else if (s.type === 'percement') {
     html += `
       <label class="field">Couleur</label>
       <div class="color-row"><input type="color" value="${s.color}" oninput="updateShape('${s.id}',{color:this.value})"></div>
-      <label class="field">Taille: <span>${s.size}</span>px</label>
-      <input type="range" min="8" max="40" value="${s.size}" oninput="updateShape('${s.id}',{size:parseInt(this.value)});updatePropertiesPanel()">
-      <label class="field">Épaisseur: <span>${s.width}</span>px</label>
-      <input type="range" min="1" max="8" step="0.5" value="${s.width}" oninput="updateShape('${s.id}',{width:parseFloat(this.value)});updatePropertiesPanel()">
+      ${fld({id:'sps', label:'Taille', value:s.size, min:6, max:150, step:1, set:`updateShape('${s.id}',{size:v})`, after:'updatePropertiesPanel()'})}
+      ${fld({id:'spw', label:'Épaisseur', value:s.width, min:0.5, max:30, step:0.5, set:`updateShape('${s.id}',{width:v})`, after:'updatePropertiesPanel()'})}
     `;
   } else if (s.type === 'borne') {
     html += `
@@ -1271,12 +1394,9 @@ function renderShapeProps(s, el) {
       <input type="text" value="${escapeXml(s.label || '')}" oninput="updateShape('${s.id}',{label:this.value})">
       <label class="field">Couleur</label>
       <div class="color-row"><input type="color" value="${s.color}" oninput="updateShape('${s.id}',{color:this.value})"></div>
-      <label class="field">Rayon picto: <span>${s.radius}</span>px</label>
-      <input type="range" min="8" max="30" value="${s.radius}" oninput="updateShape('${s.id}',{radius:parseInt(this.value)});updatePropertiesPanel()">
-      <label class="field">Portée WiFi: <span>${s.wifiRadius}</span>px</label>
-      <input type="range" min="40" max="800" value="${s.wifiRadius}" oninput="updateShape('${s.id}',{wifiRadius:parseInt(this.value)});updatePropertiesPanel()">
-      <label class="field">Transparence: <span>${Math.round((s.wifiOpacity||0.25)*100)}</span>%</label>
-      <input type="range" min="5" max="60" value="${(s.wifiOpacity||0.25)*100}" oninput="updateShape('${s.id}',{wifiOpacity:parseInt(this.value)/100});updatePropertiesPanel()">
+      ${fld({id:'sbr', label:'Rayon picto', value:s.radius, min:4, max:200, step:1, set:`updateShape('${s.id}',{radius:v})`, after:'updatePropertiesPanel()'})}
+      ${fld({id:'sbwr', label:'Portée WiFi', value:s.wifiRadius, min:10, max:3000, step:5, set:`updateShape('${s.id}',{wifiRadius:v})`, after:'updatePropertiesPanel()'})}
+      ${fld({id:'sbwo', label:'Transparence', unit:'%', value:Math.round((s.wifiOpacity||0.25)*100), min:5, max:60, step:1, set:`updateShape('${s.id}',{wifiOpacity:v/100})`, after:'updatePropertiesPanel()'})}
     `;
   } else if (s.type === 'porte') {
     html += `
@@ -1284,8 +1404,7 @@ function renderShapeProps(s, el) {
       <input type="text" value="${escapeXml(s.label || '')}" oninput="updateShape('${s.id}',{label:this.value})">
       <label class="field">Couleur</label>
       <div class="color-row"><input type="color" value="${s.color}" oninput="updateShape('${s.id}',{color:this.value})"></div>
-      <label class="field">Taille: <span>${s.size}</span>px</label>
-      <input type="range" min="10" max="50" value="${s.size}" oninput="updateShape('${s.id}',{size:parseInt(this.value)});updatePropertiesPanel()">
+      ${fld({id:'sprt', label:'Taille', value:s.size, min:6, max:200, step:1, set:`updateShape('${s.id}',{size:v})`, after:'updatePropertiesPanel()'})}
     `;
   } else if (s.type === 'centrale') {
     html += `
@@ -1293,8 +1412,7 @@ function renderShapeProps(s, el) {
       <input type="text" value="${escapeXml(s.label || '')}" oninput="updateShape('${s.id}',{label:this.value})">
       <label class="field">Couleur</label>
       <div class="color-row"><input type="color" value="${s.color}" oninput="updateShape('${s.id}',{color:this.value})"></div>
-      <label class="field">Taille: <span>${s.size}</span>px</label>
-      <input type="range" min="16" max="60" value="${s.size}" oninput="updateShape('${s.id}',{size:parseInt(this.value)});updatePropertiesPanel()">
+      ${fld({id:'scca', label:'Taille', value:s.size, min:8, max:250, step:1, set:`updateShape('${s.id}',{size:v})`, after:'updatePropertiesPanel()'})}
     `;
   }
   html += `<button class="btn danger" style="margin-top:12px;width:100%" onclick="deleteShape('${s.id}')">Supprimer cet élément</button>`;
@@ -1305,11 +1423,14 @@ function renderShapeProps(s, el) {
 document.querySelectorAll('.preset-color').forEach(el => {
   el.addEventListener('click', () => {
     const c = el.dataset.color;
-    if (['pen','line','wall','rect'].includes(state.tool)) state.defaults.strokeColor = c;
+    if (['pen','line','rect'].includes(state.tool)) state.defaults.strokeColor = c;
+    else if (state.tool === 'wall') state.defaults.wallColor = c;
+    else if (state.tool === 'doorplan') state.defaults.doorColor = c;
     else if (state.tool === 'camera') state.defaults.cameraColor = c;
     else if (state.tool === 'fov') state.defaults.fovColor = c;
     else if (state.tool === 'text') state.defaults.textColor = c;
     else if (state.tool === 'baie') state.defaults.baieColor = c;
+    else if (state.tool === 'rj45') state.defaults.rj45Color = c;
     else if (state.tool === 'percement') state.defaults.percementColor = c;
     else if (state.tool === 'borne') state.defaults.borneColor = c;
     else if (state.tool === 'porte') state.defaults.porteColor = c;
@@ -1565,12 +1686,12 @@ function rotatePlan(clockwise) {
   // Transform all annotations to match
   const tx = (x, y) => clockwise ? [oldH - y, x] : [y, oldW - x];
   for (const s of state.shapes) {
-    if (['camera','fov','text','baie','percement','borne','porte','centrale'].includes(s.type)) {
+    if (['camera','fov','text','baie','rj45','percement','borne','porte','centrale'].includes(s.type)) {
       [s.x, s.y] = tx(s.x, s.y);
       if (s.type === 'fov') {
         s.bearing = ((s.bearing + (clockwise ? 90 : -90)) % 360 + 360) % 360;
       }
-    } else if (s.type === 'line') {
+    } else if (s.type === 'line' || s.type === 'doorplan') {
       [s.x1, s.y1] = tx(s.x1, s.y1);
       [s.x2, s.y2] = tx(s.x2, s.y2);
     } else if (s.type === 'rect') {
