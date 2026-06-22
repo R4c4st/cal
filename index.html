@@ -206,8 +206,54 @@ input[type=color] { width: 40px; height: 28px; background: #1a1a1a; border: 1px 
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><line x1="7" y1="9" x2="17" y2="9"/><line x1="7" y1="12" x2="17" y2="12"/><circle cx="7" cy="16" r="1.5" fill="currentColor"/><text x="15" y="17.5" text-anchor="middle" font-family="sans-serif" font-size="6" font-weight="700" fill="currentColor">CA</text></svg>
         <span class="tt">Centrale CA <span class="kbd">K</span></span>
       </div>
+      <div class="divider"></div>
+      <div class="tool" data-tool="badge" title="Lecteur de badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="3" width="16" height="18" rx="2"/><rect x="7" y="7" width="10" height="7" rx="1"/><line x1="7" y1="10" x2="17" y2="10"/><circle cx="12" cy="17" r="1.5" fill="currentColor"/></svg>
+        <span class="tt">Lecteur de badge <span class="kbd">G</span></span>
+      </div>
+      <div class="tool" data-tool="alarme" title="Centrale alarme">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span class="tt">Centrale alarme <span class="kbd">M</span></span>
+      </div>
+      <div class="tool" data-tool="ir" title="Détecteur IR">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="15" r="3"/><path d="M6 9a8 8 0 0 1 12 0"/><path d="M3 6a12 12 0 0 1 18 0"/></svg>
+        <span class="tt">Détecteur IR <span class="kbd">Q</span></span>
+      </div>
+      <div class="tool" data-tool="clavier" title="Clavier / Digicode">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="8" r="1" fill="currentColor"/><circle cx="12" cy="8" r="1" fill="currentColor"/><circle cx="15" cy="8" r="1" fill="currentColor"/><circle cx="9" cy="12" r="1" fill="currentColor"/><circle cx="12" cy="12" r="1" fill="currentColor"/><circle cx="15" cy="12" r="1" fill="currentColor"/><circle cx="9" cy="16" r="1" fill="currentColor"/><rect x="10.5" y="15" width="4" height="2" rx="1" fill="currentColor"/></svg>
+        <span class="tt">Clavier / Digicode <span class="kbd">P</span></span>
+      </div>
+      <div class="tool" data-tool="sirene" title="Sirène">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5H6a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h1l1 3h6l1-3h1a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-5z"/><path d="M8 19h8"/><path d="M18 5a5 5 0 0 1 0 9"/><path d="M20 3a8 8 0 0 1 0 13"/></svg>
+        <span class="tt">Sirène <span class="kbd">S</span></span>
+      </div>
+      <div class="tool" data-tool="hp" title="Haut-parleur">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+        <span class="tt">Haut-parleur <span class="kbd">U</span></span>
+      </div>
+      <div class="tool" data-tool="onduleur" title="Onduleur (UPS)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg>
+        <span class="tt">Onduleur / UPS <span class="kbd">O</span></span>
+      </div>
       <div class="tool" data-tool="percement" title="Percement (croix rouge)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="3" stroke-linecap="round"><line x1="5" y1="5" x2="19" y2="19"/><line x1="19" y1="5" x2="5" y2="19"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <!-- Corps de la perceuse (horizontal, pointe à gauche) -->
+          <!-- Corps principal -->
+          <rect x="10" y="7" width="10" height="6" rx="1.5" fill="currentColor" stroke="currentColor" stroke-width="0.5" opacity="0.9"/>
+          <!-- Poignée pistolet vers le bas -->
+          <path d="M13 13 L12.5 18 L15.5 18 L15 13" fill="currentColor" stroke="currentColor" stroke-width="0.5" opacity="0.9"/>
+          <!-- Gâchette -->
+          <line x1="13.5" y1="13.5" x2="13" y2="16.5" stroke="#aaa" stroke-width="1"/>
+          <!-- Chuck / mandrin (avant de la perceuse) -->
+          <rect x="7.5" y="8.5" width="3" height="3" rx="0.5" fill="currentColor" stroke="currentColor" stroke-width="0.5" opacity="0.7"/>
+          <!-- Foret (ligne rouge pointant à gauche) -->
+          <line x1="2.5" y1="10" x2="7.5" y2="10" stroke="#ef4444" stroke-width="2" stroke-linecap="round"/>
+          <!-- Pointe foret (triangle) -->
+          <polygon points="2.5,10 4.5,8.5 4.5,11.5" fill="#ef4444"/>
+          <!-- Petite croix rouge en bas à droite (symbole percement) -->
+          <line x1="19" y1="17.5" x2="22" y2="20.5" stroke="#ef4444" stroke-width="1.8"/>
+          <line x1="22" y1="17.5" x2="19" y2="20.5" stroke="#ef4444" stroke-width="1.8"/>
+        </svg>
         <span class="tt">Percement <span class="kbd">X</span></span>
       </div>
       <div class="tool" data-tool="text" title="Texte / libellé">
@@ -361,6 +407,20 @@ const state = {
     centraleColor: '#7c3aed',
     centraleSize: 30,
     centraleLabel: 'CCA',
+    badgeColor: '#0f766e',
+    badgeSize: 26,
+    alarmeColor: '#dc2626',
+    alarmeSize: 26,
+    irColor: '#7c3aed',
+    irSize: 26,
+    clavierColor: '#475569',
+    clavierSize: 26,
+    sireneColor: '#f59e0b',
+    sireneSize: 26,
+    hpColor: '#1d4ed8',
+    hpSize: 26,
+    onduleurColor: '#166534',
+    onduleurSize: 30,
   },
   history: [],
   historyIndex: -1,
@@ -531,13 +591,13 @@ document.querySelectorAll('.tool').forEach(el => {
 function updateCursor() {
   stage.className = 'canvas-stage';
   if (state.tool === 'pan' || state.spacePressed) stage.classList.add('cursor-grab');
-  else if (['pen','line','wall','doorplan','rect','camera','fov','text','baie','rj45','percement','borne','porte','centrale','eraser'].includes(state.tool)) stage.classList.add('cursor-crosshair');
+  else if (['pen','line','wall','doorplan','rect','camera','fov','text','baie','rj45','percement','borne','porte','centrale','badge','alarme','ir','clavier','sirene','hp','onduleur','eraser'].includes(state.tool)) stage.classList.add('cursor-crosshair');
 }
 
 // Keyboard shortcuts
 window.addEventListener('keydown', (e) => {
   if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') return;
-  const keyMap = { v: 'select', h: 'pan', b: 'pen', l: 'line', w: 'wall', d: 'doorplan', r: 'rect', c: 'camera', f: 'fov', t: 'text', i: 'baie', j: 'rj45', x: 'percement', e: 'eraser', n: 'borne', a: 'porte', k: 'centrale' };
+  const keyMap = { v: 'select', h: 'pan', b: 'pen', l: 'line', w: 'wall', d: 'doorplan', r: 'rect', c: 'camera', f: 'fov', t: 'text', i: 'baie', j: 'rj45', x: 'percement', e: 'eraser', n: 'borne', a: 'porte', k: 'centrale', g: 'badge', m: 'alarme', q: 'ir', p: 'clavier', s: 'sirene', u: 'hp', o: 'onduleur' };
   if (keyMap[e.key.toLowerCase()]) {
     const btn = document.querySelector(`[data-tool="${keyMap[e.key.toLowerCase()]}"]`);
     if (btn) btn.click();
@@ -762,6 +822,27 @@ function handleMouseDown(e) {
     addShape(shape);
     state.selectedId = shape.id;
     updatePropertiesPanel();
+  } else if (state.tool === 'badge') {
+    const shape = { type: 'badge', x: p.x, y: p.y, size: state.defaults.badgeSize, color: state.defaults.badgeColor, label: nextLabel('badge','BDG'), layer: 'annot' };
+    addShape(shape); state.selectedId = shape.id; updatePropertiesPanel();
+  } else if (state.tool === 'alarme') {
+    const shape = { type: 'alarme', x: p.x, y: p.y, size: state.defaults.alarmeSize, color: state.defaults.alarmeColor, label: nextLabel('alarme','AL'), layer: 'annot' };
+    addShape(shape); state.selectedId = shape.id; updatePropertiesPanel();
+  } else if (state.tool === 'ir') {
+    const shape = { type: 'ir', x: p.x, y: p.y, size: state.defaults.irSize, color: state.defaults.irColor, label: nextLabel('ir','IR'), layer: 'annot' };
+    addShape(shape); state.selectedId = shape.id; updatePropertiesPanel();
+  } else if (state.tool === 'clavier') {
+    const shape = { type: 'clavier', x: p.x, y: p.y, size: state.defaults.clavierSize, color: state.defaults.clavierColor, label: nextLabel('clavier','CLV'), layer: 'annot' };
+    addShape(shape); state.selectedId = shape.id; updatePropertiesPanel();
+  } else if (state.tool === 'sirene') {
+    const shape = { type: 'sirene', x: p.x, y: p.y, size: state.defaults.sireneSize, color: state.defaults.sireneColor, label: nextLabel('sirene','SIR'), layer: 'annot' };
+    addShape(shape); state.selectedId = shape.id; updatePropertiesPanel();
+  } else if (state.tool === 'hp') {
+    const shape = { type: 'hp', x: p.x, y: p.y, size: state.defaults.hpSize, color: state.defaults.hpColor, label: nextLabel('hp','HP'), layer: 'annot' };
+    addShape(shape); state.selectedId = shape.id; updatePropertiesPanel();
+  } else if (state.tool === 'onduleur') {
+    const shape = { type: 'onduleur', x: p.x, y: p.y, size: state.defaults.onduleurSize, color: state.defaults.onduleurColor, label: nextLabel('onduleur','UPS'), layer: 'annot' };
+    addShape(shape); state.selectedId = shape.id; updatePropertiesPanel();
   } else if (state.tool === 'eraser') {
     state.drawing = true;
     state.lastErasePoint = p;
@@ -781,7 +862,7 @@ function handleMouseMove(e) {
     const dx = p.x - state.dragStart.x;
     const dy = p.y - state.dragStart.y;
     if (h === 'move') {
-      if (shape.type === 'camera' || shape.type === 'fov' || shape.type === 'text' || shape.type === 'baie' || shape.type === 'rj45' || shape.type === 'percement' || shape.type === 'borne' || shape.type === 'porte' || shape.type === 'centrale') {
+      if (shape.type === 'camera' || shape.type === 'fov' || shape.type === 'text' || shape.type === 'baie' || shape.type === 'rj45' || shape.type === 'percement' || shape.type === 'borne' || shape.type === 'porte' || shape.type === 'centrale' || shape.type === 'badge' || shape.type === 'alarme' || shape.type === 'ir' || shape.type === 'clavier' || shape.type === 'sirene' || shape.type === 'hp' || shape.type === 'onduleur') {
         shape.x += dx; shape.y += dy;
       } else if (shape.type === 'line' || shape.type === 'doorplan') {
         shape.x1 += dx; shape.y1 += dy; shape.x2 += dx; shape.y2 += dy;
@@ -914,6 +995,15 @@ function nextPorteLabel() {
     if (!existing.includes(label)) return label;
   }
   return 'P';
+}
+// Generic auto-label generator for simple types
+function nextLabel(type, prefix) {
+  const existing = state.shapes.filter(s => s.type === type).map(s => s.label);
+  for (let i = 1; i < 200; i++) {
+    const label = prefix + String(i).padStart(2, '0');
+    if (!existing.includes(label)) return label;
+  }
+  return prefix;
 }
 
 // ==================== RENDERING ====================
@@ -1063,6 +1153,103 @@ function shapeToSVG(s, isSelected) {
       <path d="M ${leafX} ${leafY} A ${w} ${w} 0 0 ${sweepFlag} ${s.x2} ${s.y2}" fill="none" stroke="${s.color}" stroke-width="1" stroke-dasharray="3 3" opacity="0.7"/>
     </g>`;
   }
+  // ---- Helper inline pour le badge libellé ----
+  function pictoLbl(s, half) {
+    if (!s.label) return '';
+    const lw = Math.max(44, s.label.length * 9);
+    return `<g><rect x="${s.x - lw/2}" y="${s.y+half+3}" width="${lw}" height="16" rx="2" fill="${s.color}"/><text x="${s.x}" y="${s.y+half+15}" text-anchor="middle" font-family="sans-serif" font-size="11" font-weight="700" fill="#fff">${escapeXml(s.label)}</text></g>`;
+  }
+  if (s.type === 'badge') {
+    const sz = s.size || 26; const half = sz/2;
+    return `<g data-shape-id="${s.id}"${sel}>
+      <rect x="${s.x-half-3}" y="${s.y-half-3}" width="${sz+6}" height="${sz+6}" fill="#fff" rx="3"/>
+      <rect x="${s.x-half}" y="${s.y-half}" width="${sz}" height="${sz}" fill="${s.color}" stroke="#000" stroke-width="1.5" rx="2"/>
+      <rect x="${s.x-half*0.55}" y="${s.y-half*0.62}" width="${sz*0.55}" height="${sz*0.45}" rx="1" fill="#fff" opacity="0.9"/>
+      <rect x="${s.x-half*0.55}" y="${s.y-half*0.08}" width="${sz*0.55}" height="${sz*0.1}" fill="#888" opacity="0.4"/>
+      <circle cx="${s.x+half*0.62}" cy="${s.y+half*0.55}" r="${Math.max(2,sz*0.1)}" fill="#4ade80"/>
+      ${pictoLbl(s,half)}
+    </g>`;
+  }
+  if (s.type === 'alarme') {
+    const sz = s.size || 26; const half = sz/2; const br = half*0.42;
+    return `<g data-shape-id="${s.id}"${sel}>
+      <rect x="${s.x-half-3}" y="${s.y-half-3}" width="${sz+6}" height="${sz+6}" fill="#fff" rx="3"/>
+      <rect x="${s.x-half}" y="${s.y-half}" width="${sz}" height="${sz}" fill="${s.color}" stroke="#000" stroke-width="1.5" rx="2"/>
+      <path d="M ${s.x-br} ${s.y+br*0.25} Q ${s.x-br} ${s.y-br*1.05} ${s.x} ${s.y-br*1.15} Q ${s.x+br} ${s.y-br*1.05} ${s.x+br} ${s.y+br*0.25} Z" fill="#fff"/>
+      <rect x="${s.x-br-sz*0.06}" y="${s.y+br*0.24}" width="${br*2+sz*0.12}" height="${sz*0.11}" rx="1" fill="#fff"/>
+      <circle cx="${s.x}" cy="${s.y+br*0.62}" r="${Math.max(1.5,sz*0.08)}" fill="#fff"/>
+      ${pictoLbl(s,half)}
+    </g>`;
+  }
+  if (s.type === 'ir') {
+    const sz = s.size || 26; const half = sz/2;
+    return `<g data-shape-id="${s.id}"${sel}>
+      <circle cx="${s.x}" cy="${s.y}" r="${half+3}" fill="#fff"/>
+      <circle cx="${s.x}" cy="${s.y}" r="${half}" fill="${s.color}" stroke="#000" stroke-width="1.5"/>
+      <ellipse cx="${s.x}" cy="${s.y+half*0.2}" rx="${half*0.5}" ry="${half*0.38}" fill="#fff" opacity="0.9"/>
+      <path d="M ${s.x-half*0.76} ${s.y-half*0.28} A ${half*0.76} ${half*0.76} 0 0 1 ${s.x+half*0.76} ${s.y-half*0.28}" fill="none" stroke="#fff" stroke-width="${Math.max(1.2,sz*0.055)}" opacity="0.65"/>
+      <path d="M ${s.x-half*0.5} ${s.y-half*0.5} A ${half*0.5} ${half*0.5} 0 0 1 ${s.x+half*0.5} ${s.y-half*0.5}" fill="none" stroke="#fff" stroke-width="${Math.max(1.5,sz*0.07)}" opacity="0.9"/>
+      ${pictoLbl(s,half)}
+    </g>`;
+  }
+  if (s.type === 'clavier') {
+    const sz = s.size || 26; const half = sz/2;
+    const ks = Math.max(2.5,sz*0.14); const gap = Math.max(1.2,sz*0.055);
+    const gw = ks*3+gap*2; const gh = ks*4+gap*3;
+    const sx0 = s.x-gw/2; const sy0 = s.y-gh/2;
+    let keys = '';
+    for (let r = 0; r < 3; r++) for (let c = 0; c < 3; c++)
+      keys += `<rect x="${sx0+c*(ks+gap)}" y="${sy0+r*(ks+gap)}" width="${ks}" height="${ks}" rx="0.8" fill="#fff" opacity="0.85"/>`;
+    keys += `<rect x="${sx0}" y="${sy0+3*(ks+gap)}" width="${gw}" height="${ks}" rx="0.8" fill="#fff" opacity="0.85"/>`;
+    return `<g data-shape-id="${s.id}"${sel}>
+      <rect x="${s.x-half-3}" y="${s.y-half-3}" width="${sz+6}" height="${sz+6}" fill="#fff" rx="3"/>
+      <rect x="${s.x-half}" y="${s.y-half}" width="${sz}" height="${sz}" fill="${s.color}" stroke="#000" stroke-width="1.5" rx="2"/>
+      ${keys}
+      ${pictoLbl(s,half)}
+    </g>`;
+  }
+  if (s.type === 'sirene') {
+    const sz = s.size || 26; const half = sz/2;
+    const r1=half*0.28, r2=half*0.55, r3=half*0.82;
+    return `<g data-shape-id="${s.id}"${sel}>
+      <circle cx="${s.x}" cy="${s.y}" r="${half+3}" fill="#fff"/>
+      <circle cx="${s.x}" cy="${s.y}" r="${half}" fill="${s.color}" stroke="#000" stroke-width="1.5"/>
+      <circle cx="${s.x}" cy="${s.y}" r="${r1}" fill="#fff"/>
+      <path d="M ${s.x+r2*0.5} ${s.y-r2*0.87} A ${r2} ${r2} 0 0 1 ${s.x+r2} ${s.y}" fill="none" stroke="#fff" stroke-width="${Math.max(1.5,sz*0.07)}" stroke-linecap="round"/>
+      <path d="M ${s.x+r3*0.5} ${s.y-r3*0.87} A ${r3} ${r3} 0 0 1 ${s.x+r3} ${s.y}" fill="none" stroke="#fff" stroke-width="${Math.max(1.2,sz*0.055)}" stroke-linecap="round" opacity="0.65"/>
+      <path d="M ${s.x-r2} ${s.y} A ${r2} ${r2} 0 0 1 ${s.x-r2*0.5} ${s.y-r2*0.87}" fill="none" stroke="#fff" stroke-width="${Math.max(1.5,sz*0.07)}" stroke-linecap="round"/>
+      <path d="M ${s.x-r3} ${s.y} A ${r3} ${r3} 0 0 1 ${s.x-r3*0.5} ${s.y-r3*0.87}" fill="none" stroke="#fff" stroke-width="${Math.max(1.2,sz*0.055)}" stroke-linecap="round" opacity="0.65"/>
+      ${pictoLbl(s,half)}
+    </g>`;
+  }
+  if (s.type === 'hp') {
+    const sz = s.size || 26; const half = sz/2;
+    const cw=half*0.35; const ch=half*0.55; const spX=s.x-half*0.1;
+    const r1=ch*0.68, r2=ch*0.95;
+    return `<g data-shape-id="${s.id}"${sel}>
+      <circle cx="${s.x}" cy="${s.y}" r="${half+3}" fill="#fff"/>
+      <circle cx="${s.x}" cy="${s.y}" r="${half}" fill="${s.color}" stroke="#000" stroke-width="1.5"/>
+      <polygon points="${spX-cw},${s.y-ch*0.42} ${spX-cw},${s.y+ch*0.42} ${spX-cw-half*0.26},${s.y+ch*0.75} ${spX-cw-half*0.26},${s.y-ch*0.75}" fill="#fff"/>
+      <polygon points="${spX-cw},${s.y-ch*0.42} ${spX+cw*0.45},${s.y-ch*0.92} ${spX+cw*0.45},${s.y+ch*0.92} ${spX-cw},${s.y+ch*0.42}" fill="#fff"/>
+      <path d="M ${spX+cw*0.55} ${s.y-r1*0.8} A ${r1} ${r1} 0 0 1 ${spX+cw*0.55} ${s.y+r1*0.8}" fill="none" stroke="#fff" stroke-width="${Math.max(1.5,sz*0.07)}" stroke-linecap="round"/>
+      <path d="M ${spX+cw*0.8} ${s.y-r2*0.8} A ${r2} ${r2} 0 0 1 ${spX+cw*0.8} ${s.y+r2*0.8}" fill="none" stroke="#fff" stroke-width="${Math.max(1.2,sz*0.055)}" stroke-linecap="round" opacity="0.65"/>
+      ${pictoLbl(s,half)}
+    </g>`;
+  }
+  if (s.type === 'onduleur') {
+    const sz = s.size || 30; const half = sz/2;
+    const bw=half*0.48; const bh=half*0.68; const bx=s.x-bw*0.75; const by=s.y-bh*0.6;
+    const midX = bx+bw/2;
+    return `<g data-shape-id="${s.id}"${sel}>
+      <rect x="${s.x-half-3}" y="${s.y-half-3}" width="${sz+6}" height="${sz+6}" fill="#fff" rx="4"/>
+      <rect x="${s.x-half}" y="${s.y-half}" width="${sz}" height="${sz}" fill="${s.color}" stroke="#000" stroke-width="1.5" rx="3"/>
+      <rect x="${bx}" y="${by}" width="${bw}" height="${bh}" rx="1.5" fill="#fff" opacity="0.85"/>
+      <rect x="${bx+bw}" y="${by+bh*0.3}" width="${sz*0.055}" height="${bh*0.4}" rx="1" fill="#fff" opacity="0.85"/>
+      <path d="M ${midX+sz*0.06} ${s.y-sz*0.11} L ${midX-sz*0.04} ${s.y+sz*0.02} L ${midX+sz*0.06} ${s.y+sz*0.02} L ${midX-sz*0.06} ${s.y+sz*0.15}" fill="none" stroke="${s.color}" stroke-width="${Math.max(1.5,sz*0.065)}" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="${s.x-half*0.55}" cy="${s.y+half*0.6}" r="${Math.max(2,sz*0.09)}" fill="#4ade80"/>
+      ${pictoLbl(s,half)}
+    </g>`;
+  }
   return '';
 }
 function escapeXml(s) { return String(s).replace(/[<>&"']/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&apos;'})[c]); }
@@ -1094,7 +1281,7 @@ function selectionOverlay(s) {
   if (s.type === 'rect') {
     return `<rect class="selection-box" x="${Math.min(s.x, s.x+s.w)}" y="${Math.min(s.y, s.y+s.h)}" width="${Math.abs(s.w)}" height="${Math.abs(s.h)}"/><circle class="handle" data-handle="move" data-id="${s.id}" cx="${s.x + s.w/2}" cy="${s.y + s.h/2}" r="5"/><circle class="handle" data-handle="rect-br" data-id="${s.id}" cx="${s.x + s.w}" cy="${s.y + s.h}" r="5"/>`;
   }
-  if (s.type === 'baie' || s.type === 'percement' || s.type === 'rj45') {
+  if (s.type === 'baie' || s.type === 'percement' || s.type === 'rj45' || s.type === 'badge' || s.type === 'alarme' || s.type === 'ir' || s.type === 'clavier' || s.type === 'sirene' || s.type === 'hp' || s.type === 'onduleur') {
     const sz = s.size || 20;
     return `<rect class="selection-box" x="${s.x - sz/2 - 4}" y="${s.y - sz/2 - 4}" width="${sz + 8}" height="${sz + 8}"/><circle class="handle" data-handle="move" data-id="${s.id}" cx="${s.x}" cy="${s.y}" r="5"/>`;
   }
@@ -1141,7 +1328,7 @@ function updateShapeList() {
   if (state.shapes.length === 0) { el.innerHTML = '<div style="padding:8px;font-size:12px;color:#777;">Aucun élément</div>'; return; }
   el.innerHTML = state.shapes.map(s => {
     const color = s.color || s.stroke || '#888';
-    const icon = { camera: '⊙', fov: '⌖', line: '╱', polyline: '⌐', rect: '▭', pen: '〜', text: 'T', baie: '▦', rj45: '▤', doorplan: '▯', percement: '✕', borne: '⊕', porte: 'P', centrale: '⊟' }[s.type] || '•';
+    const icon = { camera: '⊙', fov: '⌖', line: '╱', polyline: '⌐', rect: '▭', pen: '〜', text: 'T', baie: '▦', rj45: '▤', doorplan: '▯', percement: '✕', borne: '⊕', porte: 'P', centrale: '⊟', badge: '⊡', alarme: '🔔', ir: '◉', clavier: '⊞', sirene: '◈', hp: '◀', onduleur: '⚡' }[s.type] || '•';
     const label = s.label || s.text || (s.type + ' ' + s.id.replace('s',''));
     return `<div class="shape-item ${s.id === state.selectedId ? 'selected' : ''}" onclick="selectShape('${s.id}')"><span class="dot" style="background:${color}"></span><span class="lbl">${icon} ${escapeXml(label)}</span><span class="del" onclick="event.stopPropagation();deleteShape('${s.id}')">✕</span></div>`;
   }).join('');
@@ -1190,6 +1377,13 @@ function updatePropertiesPanel() {
     borne: 'Cliquez pour placer une borne WiFi avec son rayon de couverture. Ajustez la portée WiFi dans les propriétés.',
     porte: 'Cliquez pour marquer une porte équipée en contrôle d\'accès (symbole P).',
     centrale: 'Cliquez pour placer une centrale de contrôle d\'accès.',
+    badge: 'Cliquez pour placer un lecteur de badge (contrôle d\'accès). Libellés auto : BDG01…',
+    alarme: 'Cliquez pour placer une centrale alarme. Libellés auto : AL01…',
+    ir: 'Cliquez pour placer un détecteur IR / PIR. Libellés auto : IR01…',
+    clavier: 'Cliquez pour placer un clavier / digicode. Libellés auto : CLV01…',
+    sirene: 'Cliquez pour placer une sirène. Libellés auto : SIR01…',
+    hp: 'Cliquez pour placer un haut-parleur. Libellés auto : HP01…',
+    onduleur: 'Cliquez pour placer un onduleur / UPS. Libellés auto : UPS01…',
     percement: 'Cliquez pour marquer un percement / traversée de cloison (croix rouge).',
     eraser: 'Glissez pour effacer (en blanc) des parties du plan importé. Règle la taille dans le panneau. Bouton « Restaurer » si besoin.',
     delete: 'Cliquez sur un élément pour le supprimer.',
@@ -1283,6 +1477,15 @@ function updatePropertiesPanel() {
       <label class="field">Libellé par défaut</label>
       <input type="text" value="${state.defaults.centraleLabel}" oninput="state.defaults.centraleLabel=this.value">
       <div class="hint-box" style="margin-top:12px">Pictogramme centrale de contrôle d'accès (rack + voyant vert CA).</div>
+    `;
+  } else if (['badge','alarme','ir','clavier','sirene','hp','onduleur'].includes(state.tool)) {
+    const defs = { badge:{c:'badgeColor',s:'badgeSize',n:'Lecteur de badge',hint:'Badge reader mural — libellés auto BDG01, BDG02…'}, alarme:{c:'alarmeColor',s:'alarmeSize',n:'Centrale alarme',hint:'Centrale alarme — libellés auto AL01, AL02…'}, ir:{c:'irColor',s:'irSize',n:'Détecteur IR/PIR',hint:'Détecteur infrarouge passif — libellés auto IR01, IR02…'}, clavier:{c:'clavierColor',s:'clavierSize',n:'Clavier / Digicode',hint:'Clavier numérique / digicode — libellés auto CLV01…'}, sirene:{c:'sireneColor',s:'sireneSize',n:'Sirène',hint:'Sirène intérieure ou extérieure — libellés auto SIR01…'}, hp:{c:'hpColor',s:'hpSize',n:'Haut-parleur',hint:'Haut-parleur / sono — libellés auto HP01…'}, onduleur:{c:'onduleurColor',s:'onduleurSize',n:'Onduleur / UPS',hint:'Onduleur d\'alimentation — libellés auto UPS01…'} };
+    const d = defs[state.tool];
+    el.innerHTML = `
+      <label class="field">Couleur — ${d.n}</label>
+      <div class="color-row"><input type="color" value="${state.defaults[d.c]}" oninput="state.defaults['${d.c}']=this.value"></div>
+      ${fld({id:'np_s', label:'Taille', value:state.defaults[d.s], min:8, max:250, step:1, set:`state.defaults['${d.s}']=v`})}
+      <div class="hint-box" style="margin-top:12px">${d.hint}</div>
     `;
   } else if (state.tool === 'percement') {
     el.innerHTML = `
@@ -1414,6 +1617,14 @@ function renderShapeProps(s, el) {
       <div class="color-row"><input type="color" value="${s.color}" oninput="updateShape('${s.id}',{color:this.value})"></div>
       ${fld({id:'scca', label:'Taille', value:s.size, min:8, max:250, step:1, set:`updateShape('${s.id}',{size:v})`, after:'updatePropertiesPanel()'})}
     `;
+  } else if (['badge','alarme','ir','clavier','sirene','hp','onduleur'].includes(s.type)) {
+    html += `
+      <label class="field">Libellé</label>
+      <input type="text" value="${escapeXml(s.label || '')}" oninput="updateShape('${s.id}',{label:this.value})">
+      <label class="field">Couleur</label>
+      <div class="color-row"><input type="color" value="${s.color}" oninput="updateShape('${s.id}',{color:this.value})"></div>
+      ${fld({id:'snp_s', label:'Taille', value:s.size, min:8, max:250, step:1, set:`updateShape('${s.id}',{size:v})`, after:'updatePropertiesPanel()'})}
+    `;
   }
   html += `<button class="btn danger" style="margin-top:12px;width:100%" onclick="deleteShape('${s.id}')">Supprimer cet élément</button>`;
   el.innerHTML = html;
@@ -1435,6 +1646,13 @@ document.querySelectorAll('.preset-color').forEach(el => {
     else if (state.tool === 'borne') state.defaults.borneColor = c;
     else if (state.tool === 'porte') state.defaults.porteColor = c;
     else if (state.tool === 'centrale') state.defaults.centraleColor = c;
+    else if (state.tool === 'badge') state.defaults.badgeColor = c;
+    else if (state.tool === 'alarme') state.defaults.alarmeColor = c;
+    else if (state.tool === 'ir') state.defaults.irColor = c;
+    else if (state.tool === 'clavier') state.defaults.clavierColor = c;
+    else if (state.tool === 'sirene') state.defaults.sireneColor = c;
+    else if (state.tool === 'hp') state.defaults.hpColor = c;
+    else if (state.tool === 'onduleur') state.defaults.onduleurColor = c;
     if (state.selectedId) {
       const s = state.shapes.find(x => x.id === state.selectedId);
       if (s) {
@@ -1686,7 +1904,7 @@ function rotatePlan(clockwise) {
   // Transform all annotations to match
   const tx = (x, y) => clockwise ? [oldH - y, x] : [y, oldW - x];
   for (const s of state.shapes) {
-    if (['camera','fov','text','baie','rj45','percement','borne','porte','centrale'].includes(s.type)) {
+    if (['camera','fov','text','baie','rj45','percement','borne','porte','centrale','badge','alarme','ir','clavier','sirene','hp','onduleur'].includes(s.type)) {
       [s.x, s.y] = tx(s.x, s.y);
       if (s.type === 'fov') {
         s.bearing = ((s.bearing + (clockwise ? 90 : -90)) % 360 + 360) % 360;
