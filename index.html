@@ -4,91 +4,294 @@
 <meta charset="UTF-8">
 <title>Plan Annotator — OCI Connect</title>
 <style>
+:root {
+  --bg-0: #141517;
+  --bg-1: #1a1b1e;
+  --bg-2: #1f2024;
+  --bg-3: #26272c;
+  --bg-hover: #2a2b30;
+  --border: #2c2e33;
+  --border-light: #34363c;
+  --text-0: #e8eaed;
+  --text-1: #b4b7bd;
+  --text-2: #82858c;
+  --text-3: #5a5d63;
+  --accent: #3b82f6;
+  --accent-hover: #4f8ff7;
+  --accent-dim: #1e3a5f;
+  --accent-soft: #16293f;
+  --accent-text: #7fb2ff;
+  --danger: #ef4444;
+  --success: #22c55e;
+  --warn: #f59e0b;
+  --radius: 7px;
+  --radius-lg: 10px;
+  --shadow: 0 4px 20px rgba(0,0,0,0.4);
+  --shadow-lg: 0 12px 40px rgba(0,0,0,0.55);
+}
 * { box-sizing: border-box; }
-html, body { margin: 0; padding: 0; height: 100%; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #1a1a1a; color: #e5e5e5; overflow: hidden; user-select: none; }
+html, body { margin: 0; padding: 0; height: 100%; font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; background: var(--bg-0); color: var(--text-0); overflow: hidden; user-select: none; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
 .app { display: flex; flex-direction: column; height: 100vh; }
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--bg-3); border-radius: 4px; border: 2px solid var(--bg-1); }
+::-webkit-scrollbar-thumb:hover { background: var(--border-light); }
 
-/* Top bar */
-.topbar { height: 48px; background: #232323; border-bottom: 1px solid #333; display: flex; align-items: center; padding: 0 12px; gap: 6px; flex-shrink: 0; }
-.topbar .brand { font-weight: 600; font-size: 14px; margin-right: 16px; color: #fff; }
-.topbar .sep { width: 1px; height: 24px; background: #3a3a3a; margin: 0 4px; }
+/* ===== TOPBAR ===== */
+.topbar { height: 46px; background: linear-gradient(180deg, var(--bg-2), var(--bg-1)); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 10px; gap: 3px; flex-shrink: 0; box-shadow: 0 1px 0 rgba(255,255,255,0.02); z-index: 50; }
+.topbar .brand { font-weight: 700; font-size: 14px; color: var(--text-0); margin-right: 12px; white-space: nowrap; letter-spacing: -0.4px; display: flex; align-items: center; gap: 6px; }
+.topbar .brand::before { content: ''; width: 9px; height: 9px; border-radius: 2px; background: linear-gradient(135deg, var(--accent), #8b5cf6); box-shadow: 0 0 8px rgba(59,130,246,0.5); }
+.topbar .sep { width: 1px; height: 22px; background: var(--border); margin: 0 5px; }
 .topbar .spacer { flex: 1; }
-.btn { background: #333; color: #e5e5e5; border: 1px solid #3a3a3a; padding: 6px 12px; border-radius: 5px; cursor: pointer; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; }
-.btn:hover { background: #3a3a3a; border-color: #4a4a4a; }
-.btn.primary { background: #2a6fd1; border-color: #2a6fd1; color: white; }
-.btn.primary:hover { background: #3580e0; }
-.btn.danger:hover { background: #c0392b; border-color: #c0392b; color: white; }
 
-/* Workspace */
-.workspace { flex: 1; display: flex; overflow: hidden; }
+.tbtn {
+  height: 32px; min-width: 32px; padding: 0 9px;
+  background: transparent; border: 1px solid transparent;
+  color: var(--text-2); border-radius: var(--radius); cursor: pointer;
+  font-size: 12px; font-weight: 500; display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+  transition: all 0.13s ease; white-space: nowrap; font-family: inherit;
+}
+.tbtn:hover { background: var(--bg-3); color: var(--text-0); }
+.tbtn:active { transform: translateY(0.5px); }
+.tbtn.primary { background: var(--accent); border-color: var(--accent); color: #fff; box-shadow: 0 2px 8px rgba(59,130,246,0.3); }
+.tbtn.primary:hover { background: var(--accent-hover); box-shadow: 0 3px 12px rgba(59,130,246,0.4); }
+.tbtn.on { background: var(--accent-soft); border-color: var(--accent); color: var(--accent-text); }
+.tbtn svg { width: 14px; height: 14px; flex-shrink: 0; }
+.tbtn .lbl { font-size: 12px; }
 
-/* Sidebar */
-.sidebar { width: 56px; background: #232323; border-right: 1px solid #333; display: flex; flex-direction: column; padding: 6px 0; gap: 2px; flex-shrink: 0; }
-.tool { width: 44px; height: 44px; margin: 0 auto; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #999; position: relative; }
-.tool:hover { background: #2e2e2e; color: #ddd; }
-.tool.active { background: #2a6fd1; color: white; }
-.tool svg { width: 20px; height: 20px; }
-.tool .tt { position: absolute; left: 52px; top: 50%; transform: translateY(-50%); background: #111; color: #ddd; font-size: 12px; padding: 4px 8px; border-radius: 4px; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity 0.15s; z-index: 100; }
-.tool:hover .tt { opacity: 1; }
-.sidebar .divider { height: 1px; background: #333; margin: 6px 10px; }
+.tb-group { position: relative; display: inline-flex; align-items: center; }
+.tb-dropdown {
+  position: absolute; top: calc(100% + 5px); left: 0; z-index: 500;
+  background: var(--bg-2); border: 1px solid var(--border-light); border-radius: var(--radius-lg);
+  padding: 6px; min-width: 180px; box-shadow: var(--shadow-lg);
+  display: none; flex-direction: column; gap: 1px;
+  animation: ddFade 0.12s ease;
+}
+@keyframes ddFade { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+.tb-group:hover .tb-dropdown, .tb-group:focus-within .tb-dropdown { display: flex; }
+.tb-dropdown .dd-item {
+  display: flex; align-items: center; gap: 9px; padding: 7px 10px;
+  border-radius: 6px; cursor: pointer; font-size: 12.5px; color: var(--text-1);
+  white-space: nowrap; transition: background 0.1s, color 0.1s;
+}
+.tb-dropdown .dd-item:hover { background: var(--bg-hover); color: var(--text-0); }
+.tb-dropdown .dd-item svg { width: 15px; height: 15px; flex-shrink: 0; opacity: 0.8; }
+.tb-dropdown .dd-sep { height: 1px; background: var(--border); margin: 4px 2px; }
+.dd-title { font-size: 9px; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.9px; padding: 5px 10px 3px; font-weight: 700; }
+.tbtn.has-dropdown::after { content: '▾'; font-size: 9px; margin-left: 1px; color: var(--text-3); }
+
+.tb-select { background: var(--bg-0); border: 1px solid var(--border); color: var(--text-1); padding: 0 8px; height: 30px; border-radius: 6px; font-size: 12px; cursor: pointer; font-family: inherit; }
+.tb-select:focus { outline: none; border-color: var(--accent); }
+
+.workspace { flex: 1; display: flex; overflow: hidden; position: relative; }
+
+/* ===== SIDEBAR avec effet DOCK ===== */
+.sidebar {
+  width: 56px; background: linear-gradient(180deg, var(--bg-2), var(--bg-1));
+  border-right: 1px solid var(--border); display: flex; flex-direction: column;
+  padding: 10px 0; gap: 3px; flex-shrink: 0;
+  overflow-y: auto; overflow-x: visible; scrollbar-width: none; z-index: 30;
+}
+.sidebar::-webkit-scrollbar { display: none; }
+.tool {
+  width: 40px; height: 40px; margin: 0 auto; border-radius: 11px;
+  display: flex; align-items: center; justify-content: center; cursor: pointer;
+  color: var(--text-2); position: relative;
+  transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.13s, color 0.13s, box-shadow 0.13s;
+  transform-origin: center left;
+  will-change: transform;
+}
+.tool:hover { background: var(--bg-3); color: var(--text-0); }
+.tool.active { background: var(--accent); color: #fff; box-shadow: 0 2px 12px rgba(59,130,246,0.45); }
+.tool svg { width: 19px; height: 19px; transition: width 0.18s, height 0.18s; }
+/* Effet dock : grossissement progressif piloté en JS via --scale */
+.tool { transform: scale(var(--dock-scale, 1)); }
+.tool.active { z-index: 5; }
+.sidebar .divider { width: 28px; height: 1px; background: var(--border); margin: 5px auto; flex-shrink: 0; }
+
+/* Tooltip global (position fixed, jamais coupé) */
+#tool-tooltip {
+  position: fixed; z-index: 99999; pointer-events: none;
+  background: var(--bg-0); color: var(--text-0); font-size: 12.5px;
+  padding: 8px 12px; border-radius: 9px; white-space: nowrap;
+  border: 1px solid var(--border-light); box-shadow: var(--shadow-lg);
+  display: none; align-items: center; gap: 10px;
+  opacity: 0; transform: translateX(-6px);
+  transition: opacity 0.13s ease, transform 0.13s ease;
+}
+#tool-tooltip.show { display: flex; opacity: 1; transform: translateX(0); }
+#tool-tooltip::before {
+  content: ''; position: absolute; right: 100%; top: 50%; transform: translateY(-50%);
+  border: 6px solid transparent; border-right-color: var(--border-light);
+}
+#tool-tooltip::after {
+  content: ''; position: absolute; right: calc(100% - 1.5px); top: 50%; transform: translateY(-50%);
+  border: 6px solid transparent; border-right-color: var(--bg-0);
+}
+#tool-tooltip .tt-label { font-weight: 600; color: var(--text-0); }
+#tool-tooltip .tt-key { background: var(--bg-2); border: 1px solid var(--border-light); border-radius: 5px; padding: 2px 8px; font-family: ui-monospace, monospace; font-size: 11px; color: var(--text-1); min-width: 20px; text-align: center; }
 
 /* Canvas area */
-.canvas-area { flex: 1; position: relative; overflow: hidden; background: #2a2a2a; background-image: linear-gradient(45deg, #252525 25%, transparent 25%), linear-gradient(-45deg, #252525 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #252525 75%), linear-gradient(-45deg, transparent 75%, #252525 75%); background-size: 20px 20px; background-position: 0 0, 0 10px, 10px -10px, -10px 0; }
-.canvas-stage { position: absolute; transform-origin: 0 0; }
+.canvas-area { flex: 1; position: relative; overflow: hidden; background:
+  radial-gradient(circle at 30% 20%, rgba(59,130,246,0.04), transparent 40%),
+  #1c1d20;
+  background-image:
+  radial-gradient(circle at 30% 20%, rgba(59,130,246,0.04), transparent 40%),
+  linear-gradient(var(--bg-0) 1px, transparent 1px),
+  linear-gradient(90deg, var(--bg-0) 1px, transparent 1px);
+  background-size: auto, 22px 22px, 22px 22px;
+}
+.canvas-stage { position: absolute; transform-origin: 0 0; box-shadow: 0 8px 40px rgba(0,0,0,0.5); }
 .canvas-stage canvas, .canvas-stage svg { position: absolute; top: 0; left: 0; display: block; }
 .canvas-stage svg { pointer-events: auto; }
 
-.empty-state { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 12px; color: #777; pointer-events: none; }
-.empty-state svg { width: 64px; height: 64px; opacity: 0.3; }
-.empty-state .hint { font-size: 14px; }
+.empty-state { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 16px; color: var(--text-3); pointer-events: none; }
+.empty-state svg { width: 60px; height: 60px; opacity: 0.25; }
+.empty-state .hint { font-size: 14px; color: var(--text-2); }
+.empty-state .btn { pointer-events: auto; }
 
 /* Status bar */
-.statusbar { position: absolute; bottom: 12px; left: 12px; background: rgba(0,0,0,0.7); color: #ccc; font-size: 11px; padding: 6px 10px; border-radius: 4px; font-variant-numeric: tabular-nums; pointer-events: none; z-index: 10; }
-.zoom-controls { position: absolute; bottom: 12px; right: 12px; display: flex; gap: 4px; z-index: 10; }
-.zoom-controls .btn { padding: 6px 10px; background: rgba(0,0,0,0.7); border-color: transparent; }
+.statusbar { position: absolute; bottom: 12px; left: 12px; background: rgba(10,11,13,0.8); backdrop-filter: blur(8px); color: var(--text-1); font-size: 11px; padding: 6px 11px; border-radius: 7px; font-variant-numeric: tabular-nums; pointer-events: none; z-index: 10; border: 1px solid var(--border); }
+.zoom-controls { position: absolute; bottom: 12px; right: 12px; display: flex; gap: 3px; z-index: 10; background: rgba(10,11,13,0.8); backdrop-filter: blur(8px); padding: 3px; border-radius: 9px; border: 1px solid var(--border); }
+.zoom-controls .btn { background: transparent; border: none; padding: 5px 9px; }
+.zoom-controls .btn:hover { background: var(--bg-3); }
 
 /* Right panel */
-.rightpanel { width: 300px; background: #232323; border-left: 1px solid #333; overflow-y: auto; flex-shrink: 0; }
-.panel-section { border-bottom: 1px solid #2e2e2e; padding: 14px 14px; }
-.panel-section h3 { margin: 0 0 10px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; color: #888; font-weight: 600; }
-label.field { font-size: 12px; color: #aaa; display: block; margin: 8px 0 4px; }
-input[type=text], input[type=number], select { background: #1a1a1a; border: 1px solid #3a3a3a; color: #e5e5e5; padding: 6px 8px; border-radius: 4px; font-size: 13px; width: 100%; font-family: inherit; }
-input[type=text]:focus, input[type=number]:focus, select:focus { outline: none; border-color: #2a6fd1; }
-input[type=range] { width: 100%; accent-color: #2a6fd1; }
-input[type=color] { width: 40px; height: 28px; background: #1a1a1a; border: 1px solid #3a3a3a; border-radius: 4px; padding: 2px; cursor: pointer; }
-.slider-row { display: flex; gap: 10px; align-items: center; }
-.slider-row .value { min-width: 48px; text-align: right; font-variant-numeric: tabular-nums; font-size: 12px; color: #ccc; }
-.color-row { display: flex; gap: 8px; align-items: center; }
-.preset-colors { display: flex; gap: 4px; margin-top: 6px; flex-wrap: wrap; }
-.preset-color { width: 22px; height: 22px; border-radius: 4px; cursor: pointer; border: 2px solid transparent; }
-.preset-color:hover { border-color: #666; }
+.rightpanel { width: 290px; background: linear-gradient(180deg, var(--bg-1), var(--bg-0)); border-left: 1px solid var(--border); overflow-y: auto; flex-shrink: 0; }
+.panel-section { border-bottom: 1px solid var(--border); padding: 14px; }
+.panel-section h3 { margin: 0 0 10px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.9px; color: var(--text-2); font-weight: 700; }
+label.field { font-size: 11.5px; color: var(--text-1); display: block; margin: 8px 0 4px; font-weight: 500; }
+input[type=text], input[type=number], select { background: var(--bg-0); border: 1px solid var(--border); color: var(--text-0); padding: 6px 9px; border-radius: 6px; font-size: 12.5px; width: 100%; font-family: inherit; transition: border-color 0.12s; }
+input[type=text]:focus, input[type=number]:focus, select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(59,130,246,0.12); }
+input[type=range] { width: 100%; accent-color: var(--accent); }
+input[type=color] { width: 38px; height: 28px; background: var(--bg-0); border: 1px solid var(--border); border-radius: 6px; padding: 2px; cursor: pointer; }
+.slider-row { display: flex; gap: 9px; align-items: center; }
+.slider-row .value { min-width: 46px; text-align: right; font-variant-numeric: tabular-nums; font-size: 11.5px; color: var(--text-1); }
+.color-row { display: flex; gap: 7px; align-items: center; }
+.preset-colors { display: flex; gap: 5px; margin-top: 6px; flex-wrap: wrap; }
+.preset-color { width: 22px; height: 22px; border-radius: 6px; cursor: pointer; border: 2px solid transparent; transition: transform 0.1s; }
+.preset-color:hover { border-color: var(--border-light); transform: scale(1.12); }
 .preset-color.active { border-color: #fff; }
 
-.layer-row { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 4px; margin-bottom: 4px; }
-.layer-row:hover { background: #2a2a2a; }
-.layer-row.layer-selectable { cursor: pointer; border: 1px solid transparent; }
-.layer-row.active-layer { background: #1d3a5f; border-color: #2a6fd1; }
-.layer-row.active-layer .name { color: #fff; font-weight: 600; }
-.layers-top { background: #1e1e1e; border-bottom: 2px solid #2a6fd1; }
-.layer-row .eye { cursor: pointer; color: #888; width: 18px; height: 18px; }
-.layer-row .eye.visible { color: #ddd; }
-.layer-row .name { flex: 1; font-size: 13px; }
-.layer-row .count { font-size: 11px; color: #777; }
+.layer-row { display: flex; align-items: center; gap: 8px; padding: 5px 6px; border-radius: 6px; margin-bottom: 3px; }
+.layer-row:hover { background: var(--bg-3); }
 
 .shape-list { max-height: 200px; overflow-y: auto; }
-.shape-item { display: flex; align-items: center; gap: 6px; padding: 5px 8px; border-radius: 4px; font-size: 12px; cursor: pointer; }
-.shape-item:hover { background: #2a2a2a; }
-.shape-item.selected { background: #2a6fd1; }
-.shape-item .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-.shape-item .lbl { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.shape-item .del { color: #999; cursor: pointer; padding: 2px; }
-.shape-item .del:hover { color: #e74c3c; }
+.shape-item { display: flex; align-items: center; gap: 6px; padding: 5px 7px; border-radius: 6px; font-size: 11.5px; cursor: pointer; transition: background 0.1s; }
+.shape-item:hover { background: var(--bg-3); }
+.shape-item.selected { background: var(--accent-soft); }
+.shape-item .dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+.shape-item .lbl { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-1); }
+.shape-item .del { color: var(--text-3); cursor: pointer; padding: 1px; font-size: 12px; }
+.shape-item .del:hover { color: var(--danger); }
 
-.kbd { background: #111; padding: 1px 5px; border-radius: 3px; font-size: 11px; font-family: monospace; color: #ccc; border: 1px solid #333; }
-.hint-box { background: #1e1e1e; border-left: 2px solid #2a6fd1; padding: 8px 10px; font-size: 12px; color: #bbb; margin-top: 6px; line-height: 1.5; }
-
-/* File input hidden */
+.kbd { background: var(--bg-0); padding: 1px 5px; border-radius: 4px; font-size: 10px; font-family: ui-monospace, monospace; color: var(--text-1); border: 1px solid var(--border); }
+.hint-box { background: var(--accent-soft); border-left: 3px solid var(--accent); padding: 9px 11px; font-size: 11.5px; color: var(--text-1); margin-top: 6px; line-height: 1.6; border-radius: 0 6px 6px 0; }
+.btn { background: var(--bg-3); color: var(--text-0); border: 1px solid var(--border); padding: 6px 11px; border-radius: 6px; cursor: pointer; font-size: 12px; display: inline-flex; align-items: center; gap: 6px; font-family: inherit; transition: all 0.12s; }
+.btn:hover { background: var(--bg-hover); border-color: var(--border-light); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn.primary:hover { background: var(--accent-hover); }
+.btn.danger:hover { background: var(--danger); border-color: var(--danger); color: #fff; }
 #file-input { display: none; }
+
+/* Drag & drop hover */
+.canvas-area.drag-hover::after {
+  content: '📄  Déposez votre image ou PDF';
+  position: absolute; inset: 12px; z-index: 40;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; font-weight: 600; color: var(--accent-text);
+  background: rgba(59,130,246,0.08); backdrop-filter: blur(2px);
+  border: 2px dashed var(--accent); border-radius: 14px;
+  pointer-events: none;
+}
+
+/* Overlay de chargement import */
+#import-overlay {
+  position: fixed; inset: 0; z-index: 2000;
+  background: rgba(10,11,13,0.78); backdrop-filter: blur(4px);
+  display: none; align-items: center; justify-content: center;
+}
+#import-overlay .io-box {
+  background: var(--bg-2); border: 1px solid var(--border-light);
+  border-radius: 14px; padding: 28px 36px; text-align: center;
+  box-shadow: var(--shadow-lg); display: flex; flex-direction: column; align-items: center; gap: 16px;
+}
+#import-overlay .io-spinner {
+  width: 36px; height: 36px; border-radius: 50%;
+  border: 3px solid var(--bg-3); border-top-color: var(--accent);
+  animation: ioSpin 0.7s linear infinite;
+}
+@keyframes ioSpin { to { transform: rotate(360deg); } }
+#import-overlay .io-msg { font-size: 13px; color: var(--text-1); }
+.canvas-stage.cursor-crosshair svg { cursor: crosshair; }
+.canvas-stage.cursor-grab svg { cursor: grab; }
+.canvas-stage.cursor-grabbing svg { cursor: grabbing; }
+.canvas-stage.cursor-move svg { cursor: move; }
+.handle { fill: #fff; stroke: var(--accent); stroke-width: 2; cursor: pointer; }
+.handle.rot { fill: var(--success); stroke: #fff; }
+.selection-box { fill: none; stroke: var(--accent); stroke-width: 1; stroke-dasharray: 4 3; }
+
+/* ===== CALQUES DYNAMIQUES ===== */
+.dyn-layer-row { display: flex; align-items: center; gap: 6px; padding: 5px 7px; border-radius: 6px; margin-bottom: 2px; cursor: pointer; border: 1.5px solid transparent; transition: background 0.1s; }
+.dyn-layer-row:hover { background: var(--bg-3); }
+.dyn-layer-row.active { background: var(--accent-soft); border-color: var(--accent); }
+.dyn-layer-row .ly-eye { width: 15px; height: 15px; cursor: pointer; color: var(--text-2); flex-shrink: 0; }
+.dyn-layer-row .ly-eye.on { color: var(--text-0); }
+.dyn-layer-row .ly-name { flex: 1; font-size: 11.5px; color: var(--text-1); outline: none; background: transparent; border: none; cursor: pointer; padding: 0; font-family: inherit; min-width: 0; }
+.dyn-layer-row.active .ly-name { color: #fff; font-weight: 600; }
+.dyn-layer-row .ly-name:focus { background: var(--bg-0); border-radius: 3px; padding: 1px 4px; cursor: text; }
+.dyn-layer-row .ly-count { font-size: 9px; color: var(--text-3); flex-shrink: 0; }
+.dyn-layer-row .ly-del { font-size: 12px; color: var(--text-3); cursor: pointer; flex-shrink: 0; padding: 1px 3px; border-radius: 3px; }
+.dyn-layer-row .ly-del:hover { color: var(--danger); }
+.ly-img-badge { font-size: 8px; background: var(--accent-soft); color: var(--accent-text); border-radius: 3px; padding: 1px 4px; flex-shrink: 0; }
+.layers-toolbar { display: flex; gap: 4px; margin-bottom: 6px; }
+.layers-toolbar .btn { padding: 4px 8px; font-size: 11px; }
+.ly-opaque-range { width: 100%; accent-color: var(--accent); height: 3px; }
+.dyn-layer-row.dragging { opacity: 0.4; }
+.dyn-layer-row.drag-over { border-color: var(--success) !important; background: #0e2020 !important; }
+.layers-top { background: var(--bg-1); border-bottom: 2px solid var(--accent); }
+
+/* ===== GRILLE / MESURE ===== */
+#minimap { position: absolute; bottom: 44px; right: 12px; width: 156px; height: 104px; background: rgba(10,11,13,0.85); backdrop-filter: blur(8px); border: 1px solid var(--border-light); border-radius: 9px; overflow: hidden; z-index: 20; cursor: pointer; display:none; box-shadow: var(--shadow); }
+#minimap canvas { width: 100%; height: 100%; display: block; }
+#minimap-viewport { position: absolute; top: 0; left: 0; border: 2px solid var(--accent); border-radius: 3px; pointer-events: none; opacity: 0.9; background: rgba(59,130,246,0.12); }
+
+/* ===== FILTRE PHOTO panel ===== */
+.filter-panel { background: var(--bg-0); border-radius: 8px; padding: 10px; margin-top: 6px; }
+.filter-panel .frow { display:flex; justify-content:space-between; align-items:center; margin-bottom:2px; font-size:10.5px; color:var(--text-2); }
+.filter-panel input[type=range] { width: 100%; margin-bottom: 4px; accent-color: var(--warn); }
+
+/* ===== MODAL ===== */
+.modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); z-index: 1000; display: flex; align-items: center; justify-content: center; animation: ddFade 0.15s ease; }
+.modal-box { background: var(--bg-2); border: 1px solid var(--border-light); border-radius: 14px; padding: 24px; min-width: 320px; box-shadow: var(--shadow-lg); }
+.modal-box h2 { margin: 0 0 16px; font-size: 15px; color: var(--text-0); font-weight: 600; }
+.modal-box label { font-size: 11.5px; color: var(--text-1); display: block; margin-bottom: 4px; }
+.modal-box input { width: 100%; margin-bottom: 14px; }
+.modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 8px; }
+
+/* ===== PALETTE CONTEXTUELLE CLIC DROIT ===== */
+#ctx-menu {
+  position: fixed; z-index: 9999; display: none;
+  background: var(--bg-2); border: 1px solid var(--border-light); border-radius: 14px;
+  box-shadow: var(--shadow-lg);
+  padding: 9px; min-width: 290px; max-width: 350px;
+  font-family: inherit; user-select: none;
+}
+#ctx-menu.visible { display: block; animation: ctxFadeIn 0.12s ease; }
+@keyframes ctxFadeIn { from { opacity:0; transform:scale(0.96) translateY(-4px); } to { opacity:1; transform:scale(1) translateY(0); } }
+.ctx-section { margin-bottom: 4px; }
+.ctx-section-title { font-size: 9px; text-transform: uppercase; letter-spacing: 0.9px; color: var(--text-3); padding: 4px 8px; font-weight: 700; }
+.ctx-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 3px; padding: 0 2px; }
+.ctx-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 8px 4px; border-radius: 9px; cursor: pointer; color: var(--text-1); border: 1.5px solid transparent; min-height: 54px; transition: all 0.1s; }
+.ctx-btn:hover { background: var(--bg-hover); color: var(--text-0); border-color: var(--border-light); transform: translateY(-1px); }
+.ctx-btn.active-tool { background: var(--accent-soft); border-color: var(--accent); color: var(--accent-text); }
+.ctx-btn svg { width: 19px; height: 19px; flex-shrink: 0; }
+.ctx-btn span { font-size: 9.5px; text-align: center; line-height: 1.2; white-space: nowrap; }
+.ctx-divider { height: 1px; background: #252525; margin: 3px 6px; }
+.ctx-search { width: 100%; background: #111; border: 1px solid #2a2a2a; color: #e5e5e5; padding: 5px 9px; border-radius: 6px; font-size: 11px; margin-bottom: 5px; font-family: inherit; outline: none; }
+.ctx-search:focus { border-color: #2a6fd1; }
+.ctx-search::placeholder { color: #3a3a3a; }
+.ctx-btn.hidden { display: none; }
 
 /* SVG cursor feedback */
 .canvas-stage.cursor-crosshair svg { cursor: crosshair; }
@@ -103,185 +306,164 @@ input[type=color] { width: 40px; height: 28px; background: #1a1a1a; border: 1px 
 </style>
 </head>
 <body>
+<div id="tool-tooltip"></div>
 
 <div class="app">
   <div class="topbar">
     <div class="brand">◆ Plan Annotator</div>
-    <button class="btn" id="btn-import"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Importer plan</button>
-    <input type="file" id="file-input" accept="image/*">
-    <div class="sep"></div>
 
-    <label style="font-size:12px; color:#aaa;">Mode:</label>
-    <select id="mode-select" style="width:auto;">
-      <option value="color">Couleur</option>
-      <option value="bw">Noir & blanc</option>
-      <option value="gray">Niveaux de gris</option>
-      <option value="invert">Inversé</option>
-    </select>
+    <!-- FICHIER -->
+    <div class="tb-group">
+      <button class="tbtn has-dropdown"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><span class="lbl">Fichier</span></button>
+      <div class="tb-dropdown">
+        <div class="dd-item" onclick="document.getElementById('file-input').click()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Importer plan (image / PDF)…</div>
+        <div class="dd-sep"></div>
+        <div class="dd-item" id="dd-save"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>Sauvegarder <kbd class="kbd">Ctrl+S</kbd></div>
+        <div class="dd-item" id="dd-load"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>Charger un projet…</div>
+      </div>
+    </div>
+    <input type="file" id="file-input" accept="image/*,application/pdf,.pdf">
 
-    <div id="threshold-wrap" style="display:none; align-items:center; gap:8px;">
-      <label style="font-size:12px; color:#aaa;">Seuil:</label>
-      <input type="range" id="threshold" min="50" max="200" value="100" style="width:100px;">
-      <span id="threshold-val" style="font-size:12px; color:#ccc; width:30px;">100</span>
+    <!-- IMAGE -->
+    <div class="tb-group">
+      <button class="tbtn has-dropdown"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg><span class="lbl">Image</span></button>
+      <div class="tb-dropdown">
+        <div class="dd-title">Affichage</div>
+        <div class="dd-item" style="gap:6px">
+          <select id="mode-select" class="tb-select" style="flex:1">
+            <option value="color">Couleur</option>
+            <option value="bw">N&amp;B</option>
+            <option value="gray">Gris</option>
+            <option value="invert">Inversé</option>
+          </select>
+        </div>
+        <div class="dd-item" id="threshold-wrap" style="display:none;gap:6px">
+          <span style="font-size:11px;color:#888">Seuil</span>
+          <input type="range" id="threshold" min="50" max="200" value="100" style="flex:1;width:auto">
+          <span id="threshold-val" style="font-size:11px;color:#ccc;min-width:24px">100</span>
+        </div>
+        <div class="dd-sep"></div>
+        <div class="dd-item" onclick="rotatePlan(false)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><polyline points="3 3 3 8 8 8"/></svg>Rotation ↺ 90°</div>
+        <div class="dd-item" onclick="rotatePlan(true)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><polyline points="21 3 21 8 16 8"/></svg>Rotation ↻ 90°</div>
+        <div class="dd-item" onclick="toggleFiltersPanel()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="13.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="10.5" r="2.5"/><circle cx="8.5" cy="7.5" r="2.5"/><circle cx="6.5" cy="12.5" r="2.5"/><path d="M12 2a10 10 0 0 0 0 20 2.5 2.5 0 0 0 2-4 2.5 2.5 0 0 1 2-4h2a4 4 0 0 0 4-4 10 10 0 0 0-10-8z"/></svg>Filtres photo…</div>
+      </div>
     </div>
 
+    <!-- VUE -->
+    <div class="tb-group">
+      <button class="tbtn has-dropdown"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><span class="lbl">Vue</span></button>
+      <div class="tb-dropdown">
+        <div class="dd-item" onclick="toggleGrid()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Grille <span id="grid-lbl" style="margin-left:auto;color:#555">off</span></div>
+        <div class="dd-item" style="padding-left:28px;gap:6px">
+          Pas :
+          <select id="grid-size-sel" class="tb-select" style="flex:1" onchange="state.grid.size=parseInt(this.value);renderGrid()">
+            <option value="10">10px</option><option value="20" selected>20px</option><option value="50">50px</option><option value="100">100px</option>
+          </select>
+        </div>
+        <div class="dd-item" onclick="toggleSnap()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v4m0 12v4M2 12h4m12 0h4"/></svg>Accrochage <span id="snap-lbl" style="margin-left:auto;color:#555">off</span></div>
+        <div class="dd-sep"></div>
+        <div class="dd-item" onclick="toggleMinimap()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><rect x="13" y="13" width="6" height="6" rx="1" fill="currentColor"/></svg>Minimap <span id="minimap-lbl" style="margin-left:auto;color:#555">off</span></div>
+        <div class="dd-item" onclick="fitToView()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>Ajuster à l'écran</div>
+      </div>
+    </div>
+
+    <!-- MESURE -->
+    <button class="tbtn" id="btn-measure" onclick="activateMeasure()" title="Outil mesure / échelle">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="2" y1="12" x2="22" y2="12"/><line x1="2" y1="9" x2="2" y2="15"/><line x1="22" y1="9" x2="22" y2="15"/></svg>
+      <span class="lbl">Mesure</span>
+    </button>
+
     <div class="sep"></div>
-    <button class="btn" id="btn-rot-left" title="Rotation 90° antihoraire">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><polyline points="3 3 3 8 8 8"/></svg>
-      90° ↺
-    </button>
-    <button class="btn" id="btn-rot-right" title="Rotation 90° horaire">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><polyline points="21 3 21 8 16 8"/></svg>
-      ↻ 90°
-    </button>
+
+    <!-- ÉDITION -->
+    <button class="tbtn" id="btn-undo" title="Annuler Ctrl+Z"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg></button>
+    <button class="tbtn" id="btn-redo" title="Rétablir Ctrl+Y"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button>
+
+    <!-- EXPORT -->
+    <div class="tb-group">
+      <button class="tbtn has-dropdown"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span class="lbl">Export</span></button>
+      <div class="tb-dropdown" style="right:0;left:auto">
+        <div class="dd-item" id="btn-export-png"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg>Exporter PNG</div>
+        <div class="dd-item" id="btn-export-svg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>Exporter SVG</div>
+        <div class="dd-item" onclick="exportPDF()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Exporter PDF</div>
+        <div class="dd-sep"></div>
+        <div class="dd-item" onclick="generateLegend()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Générer la légende</div>
+      </div>
+    </div>
 
     <div class="spacer"></div>
-
-    <button class="btn" id="btn-undo" title="Annuler (Ctrl+Z)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg></button>
-    <button class="btn" id="btn-redo" title="Rétablir (Ctrl+Y)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button>
-    <div class="sep"></div>
-    <button class="btn" id="btn-export-png">Export PNG</button>
-    <button class="btn" id="btn-export-svg">Export SVG</button>
-    <button class="btn primary" id="btn-save">💾 Sauver</button>
-    <button class="btn" id="btn-load">📂 Charger</button>
+    <button class="tbtn primary" id="btn-save"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg><span class="lbl">Sauver</span></button>
+    <button class="tbtn" id="btn-load" title="Charger un projet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></button>
   </div>
 
   <div class="workspace">
-    <div class="sidebar">
-      <div class="tool active" data-tool="select" title="Sélection / Déplacer">
-        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 2l14 10-6 1.5 3 7-3 1.5-3-7-5 4.5z"/></svg>
-        <span class="tt">Sélection <span class="kbd">V</span></span>
-      </div>
-      <div class="tool" data-tool="pan" title="Pan">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 11V6a2 2 0 0 0-4 0v6M14 10V4a2 2 0 0 0-4 0v8M10 10V5a2 2 0 0 0-4 0v10M6 13c-2 0-2 2-2 2 0 3 3 7 8 7h2a8 8 0 0 0 8-8V8a2 2 0 1 0-4 0v4"/></svg>
-        <span class="tt">Déplacer la vue <span class="kbd">H</span></span>
-      </div>
+    <!-- SIDEBAR COMPLÈTE -->
+    <div class="sidebar" id="sidebar">
+      <div class="tool active" data-name="Sélection" data-key="V" data-tool="select"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 2l14 10-6 1.5 3 7-3 1.5-3-7-5 4.5z"/></svg></div>
+      <div class="tool" data-name="Vue" data-key="H" data-tool="pan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 11V6a2 2 0 0 0-4 0v6M14 10V4a2 2 0 0 0-4 0v8M10 10V5a2 2 0 0 0-4 0v10M6 13c-2 0-2 2-2 2 0 3 3 7 8 7h2a8 8 0 0 0 8-8V8a2 2 0 1 0-4 0v4"/></svg></div>
       <div class="divider"></div>
-      <div class="tool" data-tool="pen" title="Pinceau libre">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>
-        <span class="tt">Pinceau <span class="kbd">B</span></span>
-      </div>
-      <div class="tool" data-tool="line" title="Ligne droite">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="20" x2="20" y2="4"/></svg>
-        <span class="tt">Ligne <span class="kbd">L</span></span>
-      </div>
-      <div class="tool" data-tool="wall" title="Mur (polyligne)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 17 9 11 13 15 21 7"/><circle cx="3" cy="17" r="1.5" fill="currentColor"/><circle cx="9" cy="11" r="1.5" fill="currentColor"/><circle cx="13" cy="15" r="1.5" fill="currentColor"/><circle cx="21" cy="7" r="1.5" fill="currentColor"/></svg>
-        <span class="tt">Mur / polyligne <span class="kbd">W</span></span>
-      </div>
-      <div class="tool" data-tool="doorplan" title="Porte (plan architecte)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="20" x2="4" y2="4"/><line x1="4" y1="4" x2="15" y2="4"/><path d="M4 20 A16 16 0 0 0 20 4" stroke-dasharray="2 2"/></svg>
-        <span class="tt">Porte (plan) <span class="kbd">D</span></span>
-      </div>
-      <div class="tool" data-tool="rect" title="Rectangle">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="1"/></svg>
-        <span class="tt">Rectangle <span class="kbd">R</span></span>
-      </div>
+      <div class="tool" data-name="Pinceau" data-key="B" data-tool="pen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/></svg></div>
+      <div class="tool" data-name="Ligne" data-key="L" data-tool="line"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="20" x2="20" y2="4"/></svg></div>
+      <div class="tool" data-name="Mur" data-key="W" data-tool="wall"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 17 9 11 13 15 21 7"/><circle cx="3" cy="17" r="1.5" fill="currentColor"/><circle cx="9" cy="11" r="1.5" fill="currentColor"/><circle cx="13" cy="15" r="1.5" fill="currentColor"/><circle cx="21" cy="7" r="1.5" fill="currentColor"/></svg></div>
+      <div class="tool" data-name="Porte plan" data-key="D" data-tool="doorplan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="20" x2="4" y2="4"/><line x1="4" y1="4" x2="15" y2="4"/><path d="M4 20 A16 16 0 0 0 20 4" stroke-dasharray="2 2"/></svg></div>
+      <div class="tool" data-name="Rectangle" data-key="R" data-tool="rect"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="1"/></svg></div>
+      <div class="tool" data-name="Cercle" data-key="Y" data-tool="circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/></svg></div>
+      <div class="tool" data-name="Flèche" data-key="Z" data-tool="arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="20" x2="20" y2="4"/><polyline points="14 4 20 4 20 10"/></svg></div>
+      <div class="tool" data-name="Surbrillance" data-key="2" data-tool="highlight"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="9" width="18" height="9" rx="2" fill="currentColor" fill-opacity="0.3"/></svg></div>
       <div class="divider"></div>
-      <div class="tool" data-tool="camera" title="Caméra (point)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg>
-        <span class="tt">Caméra <span class="kbd">C</span></span>
-      </div>
-      <div class="tool" data-tool="fov" title="Cône de vision">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 12 L22 6 A12 12 0 0 1 22 18 Z" fill="currentColor" fill-opacity="0.3"/><circle cx="12" cy="12" r="2" fill="currentColor"/></svg>
-        <span class="tt">Angle de vue <span class="kbd">F</span></span>
-      </div>
-      <div class="tool" data-tool="baie" title="Baie informatique">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="3" width="14" height="18" rx="1"/><line x1="8" y1="7" x2="16" y2="7"/><line x1="8" y1="11" x2="16" y2="11"/><line x1="8" y1="15" x2="16" y2="15"/><line x1="8" y1="19" x2="16" y2="19"/></svg>
-        <span class="tt">Baie informatique <span class="kbd">I</span></span>
-      </div>
-      <div class="tool" data-tool="rj45" title="Prise RJ45">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="4" width="14" height="14" rx="1"/><line x1="9" y1="10" x2="9" y2="16"/><line x1="12" y1="10" x2="12" y2="16"/><line x1="15" y1="10" x2="15" y2="16"/></svg>
-        <span class="tt">Prise RJ45 <span class="kbd">J</span></span>
-      </div>
-      <div class="tool" data-tool="borne" title="Borne WiFi">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="14" r="2" fill="currentColor"/><path d="M8 11a5.4 5.4 0 0 1 8 0"/><path d="M5 8a9.4 9.4 0 0 1 14 0"/></svg>
-        <span class="tt">Borne WiFi <span class="kbd">N</span></span>
-      </div>
-      <div class="tool" data-tool="porte" title="Porte contrôle d'accès">
-        <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><text x="12" y="17" text-anchor="middle" font-family="sans-serif" font-size="13" font-weight="700" fill="currentColor">P</text></svg>
-        <span class="tt">Porte accès <span class="kbd">A</span></span>
-      </div>
-      <div class="tool" data-tool="centrale" title="Centrale contrôle d'accès">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><line x1="7" y1="9" x2="17" y2="9"/><line x1="7" y1="12" x2="17" y2="12"/><circle cx="7" cy="16" r="1.5" fill="currentColor"/><text x="15" y="17.5" text-anchor="middle" font-family="sans-serif" font-size="6" font-weight="700" fill="currentColor">CA</text></svg>
-        <span class="tt">Centrale CA <span class="kbd">K</span></span>
-      </div>
+      <div class="tool" data-name="Texte" data-key="T" data-tool="text"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg></div>
+      <div class="tool" data-name="Note" data-key="3" data-tool="bubble"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" fill="currentColor" fill-opacity="0.15"/></svg></div>
+      <div class="tool" data-name="Numéro" data-key="5" data-tool="numero"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9" fill="currentColor" fill-opacity="0.2"/><text x="12" y="17" text-anchor="middle" font-family="sans-serif" font-size="12" font-weight="800" fill="currentColor">1</text></svg></div>
+      <div class="tool" data-name="Cotation" data-key="4" data-tool="cote"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="9" x2="3" y2="15"/><line x1="21" y1="9" x2="21" y2="15"/></svg></div>
+      <div class="tool" data-name="Câble" data-key="7" data-tool="cable"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="12" r="2.5" fill="currentColor" fill-opacity="0.4"/><circle cx="19" cy="12" r="2.5" fill="currentColor" fill-opacity="0.4"/><path d="M7.5 12 C 11 6, 13 18, 16.5 12" stroke-width="2"/></svg></div>
+      <div class="tool" data-name="Image" data-key="6" data-tool="stamp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="13" rx="2"/><circle cx="9" cy="8" r="2"/><path d="M21 14l-5-5L5 21"/></svg></div>
       <div class="divider"></div>
-      <div class="tool" data-tool="badge" title="Lecteur de badge">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="3" width="16" height="18" rx="2"/><rect x="7" y="7" width="10" height="7" rx="1"/><line x1="7" y1="10" x2="17" y2="10"/><circle cx="12" cy="17" r="1.5" fill="currentColor"/></svg>
-        <span class="tt">Lecteur de badge <span class="kbd">G</span></span>
-      </div>
-      <div class="tool" data-tool="alarme" title="Centrale alarme">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-        <span class="tt">Centrale alarme <span class="kbd">M</span></span>
-      </div>
-      <div class="tool" data-tool="ir" title="Détecteur IR">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="15" r="3"/><path d="M6 9a8 8 0 0 1 12 0"/><path d="M3 6a12 12 0 0 1 18 0"/></svg>
-        <span class="tt">Détecteur IR <span class="kbd">Q</span></span>
-      </div>
-      <div class="tool" data-tool="clavier" title="Clavier / Digicode">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="8" r="1" fill="currentColor"/><circle cx="12" cy="8" r="1" fill="currentColor"/><circle cx="15" cy="8" r="1" fill="currentColor"/><circle cx="9" cy="12" r="1" fill="currentColor"/><circle cx="12" cy="12" r="1" fill="currentColor"/><circle cx="15" cy="12" r="1" fill="currentColor"/><circle cx="9" cy="16" r="1" fill="currentColor"/><rect x="10.5" y="15" width="4" height="2" rx="1" fill="currentColor"/></svg>
-        <span class="tt">Clavier / Digicode <span class="kbd">P</span></span>
-      </div>
-      <div class="tool" data-tool="sirene" title="Sirène">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5H6a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h1l1 3h6l1-3h1a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-5z"/><path d="M8 19h8"/><path d="M18 5a5 5 0 0 1 0 9"/><path d="M20 3a8 8 0 0 1 0 13"/></svg>
-        <span class="tt">Sirène <span class="kbd">S</span></span>
-      </div>
-      <div class="tool" data-tool="hp" title="Haut-parleur">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
-        <span class="tt">Haut-parleur <span class="kbd">U</span></span>
-      </div>
-      <div class="tool" data-tool="onduleur" title="Onduleur (UPS)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg>
-        <span class="tt">Onduleur / UPS <span class="kbd">O</span></span>
-      </div>
-      <div class="tool" data-tool="percement" title="Percement (croix rouge)">
-        <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round">
-          <!-- Corps de la perceuse (horizontal, pointe à gauche) -->
-          <!-- Corps principal -->
-          <rect x="10" y="7" width="10" height="6" rx="1.5" fill="currentColor" stroke="currentColor" stroke-width="0.5" opacity="0.9"/>
-          <!-- Poignée pistolet vers le bas -->
-          <path d="M13 13 L12.5 18 L15.5 18 L15 13" fill="currentColor" stroke="currentColor" stroke-width="0.5" opacity="0.9"/>
-          <!-- Gâchette -->
-          <line x1="13.5" y1="13.5" x2="13" y2="16.5" stroke="#aaa" stroke-width="1"/>
-          <!-- Chuck / mandrin (avant de la perceuse) -->
-          <rect x="7.5" y="8.5" width="3" height="3" rx="0.5" fill="currentColor" stroke="currentColor" stroke-width="0.5" opacity="0.7"/>
-          <!-- Foret (ligne rouge pointant à gauche) -->
-          <line x1="2.5" y1="10" x2="7.5" y2="10" stroke="#ef4444" stroke-width="2" stroke-linecap="round"/>
-          <!-- Pointe foret (triangle) -->
-          <polygon points="2.5,10 4.5,8.5 4.5,11.5" fill="#ef4444"/>
-          <!-- Petite croix rouge en bas à droite (symbole percement) -->
-          <line x1="19" y1="17.5" x2="22" y2="20.5" stroke="#ef4444" stroke-width="1.8"/>
-          <line x1="22" y1="17.5" x2="19" y2="20.5" stroke="#ef4444" stroke-width="1.8"/>
-        </svg>
-        <span class="tt">Percement <span class="kbd">X</span></span>
-      </div>
-      <div class="tool" data-tool="text" title="Texte / libellé">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
-        <span class="tt">Texte <span class="kbd">T</span></span>
-      </div>
+      <div class="tool" data-name="Caméra" data-key="C" data-tool="camera"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg></div>
+      <div class="tool" data-name="Angle vue" data-key="F" data-tool="fov"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 12 L22 6 A12 12 0 0 1 22 18 Z" fill="currentColor" fill-opacity="0.3"/><circle cx="12" cy="12" r="2" fill="currentColor"/></svg></div>
+      <div class="tool" data-name="Baie info" data-key="I" data-tool="baie"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="3" width="14" height="18" rx="1"/><line x1="8" y1="7" x2="16" y2="7"/><line x1="8" y1="11" x2="16" y2="11"/><line x1="8" y1="15" x2="16" y2="15"/></svg></div>
+      <div class="tool" data-name="RJ45" data-key="J" data-tool="rj45"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="4" width="14" height="14" rx="1"/><line x1="9" y1="10" x2="9" y2="16"/><line x1="12" y1="10" x2="12" y2="16"/><line x1="15" y1="10" x2="15" y2="16"/></svg></div>
+      <div class="tool" data-name="WiFi AP" data-key="N" data-tool="borne"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="14" r="2" fill="currentColor"/><path d="M8 11a5.4 5.4 0 0 1 8 0"/><path d="M5 8a9.4 9.4 0 0 1 14 0"/></svg></div>
+      <div class="tool" data-name="HP" data-key="U" data-tool="hp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg></div>
+      <div class="tool" data-name="UPS" data-key="O" data-tool="onduleur"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg></div>
       <div class="divider"></div>
-      <div class="tool" data-tool="eraser" title="Gomme (effacer le plan)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 20H7l-4-4 11-11 9 9z"/><line x1="14" y1="8" x2="8" y2="14"/></svg>
-        <span class="tt">Gomme plan <span class="kbd">E</span></span>
-      </div>
-      <div class="tool" data-tool="delete" title="Supprimer">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-        <span class="tt">Supprimer <span class="kbd">Del</span></span>
-      </div>
+      <div class="tool" data-name="Porte CA" data-key="A" data-tool="porte"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><text x="12" y="17" text-anchor="middle" font-family="sans-serif" font-size="11" font-weight="700" fill="currentColor">P</text></svg></div>
+      <div class="tool" data-name="Lecteur badge" data-key="G" data-tool="badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="3" width="16" height="18" rx="2"/><rect x="7" y="7" width="10" height="7" rx="1"/><line x1="7" y1="10" x2="17" y2="10"/><circle cx="12" cy="17" r="1.5" fill="currentColor"/></svg></div>
+      <div class="tool" data-name="Centrale CA" data-key="K" data-tool="centrale"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><line x1="7" y1="9" x2="17" y2="9"/><line x1="7" y1="12" x2="17" y2="12"/><circle cx="7" cy="16" r="1.5" fill="currentColor"/></svg></div>
+      <div class="tool" data-name="Digicode" data-key="P" data-tool="clavier"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="8" r="1" fill="currentColor"/><circle cx="12" cy="8" r="1" fill="currentColor"/><circle cx="15" cy="8" r="1" fill="currentColor"/><circle cx="9" cy="12" r="1" fill="currentColor"/><circle cx="12" cy="12" r="1" fill="currentColor"/><circle cx="15" cy="12" r="1" fill="currentColor"/></svg></div>
+      <div class="tool" data-name="Alarme" data-key="M" data-tool="alarme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
+      <div class="tool" data-name="Détect. IR" data-key="Q" data-tool="ir"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="15" r="3"/><path d="M6 9a8 8 0 0 1 12 0"/><path d="M3 6a12 12 0 0 1 18 0"/></svg></div>
+      <div class="tool" data-name="Sirène" data-key="S" data-tool="sirene"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5H6a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h1l1 3h6l1-3h1a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-5z"/><path d="M8 19h8"/></svg></div>
+      <div class="divider"></div>
+      <div class="tool" data-name="Percement" data-key="X" data-tool="percement"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="5" x2="19" y2="19" stroke="#ef4444" stroke-width="3" stroke-linecap="round"/><line x1="19" y1="5" x2="5" y2="19" stroke="#ef4444" stroke-width="3" stroke-linecap="round"/></svg></div>
+      <div class="tool" data-name="Gomme" data-key="E" data-tool="eraser"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 20H7l-4-4 11-11 9 9z"/><line x1="14" y1="8" x2="8" y2="14"/></svg></div>
+      <div class="tool" data-name="Supprimer" data-key="Del" data-tool="delete"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></div>
     </div>
+
+    <!-- PALETTE CONTEXTUELLE CLIC DROIT — hors du workspace pour ne pas casser le flex -->
+    <!-- déplacée en dehors ci-dessous -->
+
+    <!-- ÎLOT FLOTTANT — hors du workspace -->
+    <!-- déplacé en dehors ci-dessous -->
 
     <div class="canvas-area" id="canvas-area">
       <div class="canvas-stage" id="stage">
         <canvas id="plan-canvas"></canvas>
+        <svg id="grid-svg" style="position:absolute;top:0;left:0;pointer-events:none;display:none;" xmlns="http://www.w3.org/2000/svg"></svg>
+        <svg id="extra-layers-svg" style="position:absolute;top:0;left:0;pointer-events:none;" xmlns="http://www.w3.org/2000/svg"></svg>
         <svg id="overlay" xmlns="http://www.w3.org/2000/svg"></svg>
+        <svg id="measure-svg" style="position:absolute;top:0;left:0;pointer-events:none;" xmlns="http://www.w3.org/2000/svg"></svg>
       </div>
       <div class="empty-state" id="empty-state">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg>
-        <div class="hint">Importez un plan pour commencer</div>
+        <div class="hint">Importez un plan (image ou PDF) pour commencer</div>
         <button class="btn primary" onclick="document.getElementById('file-input').click()">Importer un plan</button>
+        <div style="font-size:11px;color:var(--text-3);margin-top:-4px">ou glissez-déposez un fichier ici</div>
       </div>
       <div class="statusbar" id="statusbar">— Aucun plan chargé —</div>
+      <div id="minimap">
+        <canvas id="minimap-canvas" width="160" height="110"></canvas>
+        <div id="minimap-viewport"></div>
+      </div>
       <div class="zoom-controls">
         <button class="btn" onclick="zoomOut()">−</button>
         <button class="btn" onclick="zoomReset()" id="zoom-val">100%</button>
@@ -291,26 +473,28 @@ input[type=color] { width: 40px; height: 28px; background: #1a1a1a; border: 1px 
     </div>
 
     <div class="rightpanel">
-      <div class="panel-section layers-top">
-        <h3 style="color:#2a6fd1;">▤ Calques</h3>
-        <div class="layer-row layer-selectable" data-layer="plan">
-          <svg class="eye visible" id="eye-plan" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" onclick="event.stopPropagation();toggleLayer('plan')"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-          <span class="name">Plan importé (fond)</span>
-          <span class="count" id="cnt-plan">—</span>
+      <div class="panel-section layers-top" id="layers-panel">
+        <h3 style="color:#2a6fd1;display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+          <span>▤ Calques</span>
+          <span style="font-size:10px;color:#666;font-weight:400">actif = clic</span>
+        </h3>
+        <!-- Calque fond (plan importé) — toujours en premier, non-déplaçable -->
+        <div class="dyn-layer-row" id="layer-row-bg" style="border-color:#333;margin-bottom:6px;">
+          <svg class="ly-eye on" id="eye-bg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" onclick="event.stopPropagation();toggleBgLayer()" style="cursor:pointer"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          <span class="ly-name" style="color:#888;cursor:default">Plan importé (fond)</span>
+          <span class="ly-count" id="cnt-plan">—</span>
         </div>
-        <div class="layer-row layer-selectable active-layer" data-layer="trace">
-          <svg class="eye visible" id="eye-trace" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" onclick="event.stopPropagation();toggleLayer('trace')"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-          <span class="name">Traçage / murs</span>
-          <span class="count" id="cnt-trace">0</span>
+        <div style="border-top:1px solid #2e2e2e;margin-bottom:8px;"></div>
+        <!-- Calques dynamiques -->
+        <div id="dyn-layers-list"></div>
+        <!-- Barre d'outils calques -->
+        <div class="layers-toolbar">
+          <button class="btn" style="flex:1;font-size:11px" onclick="addLayer()">+ Calque</button>
+          <button class="btn" style="font-size:11px" onclick="addImageLayer()" title="Ajouter un calque avec image de fond">🖼 Image</button>
+          <button class="btn" style="font-size:11px" onclick="duplicateLayer()" title="Dupliquer le calque actif">⎘</button>
         </div>
-        <div class="layer-row layer-selectable" data-layer="annot">
-          <svg class="eye visible" id="eye-annot" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" onclick="event.stopPropagation();toggleLayer('annot')"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-          <span class="name">Caméras / baies / bornes / CA</span>
-          <span class="count" id="cnt-annot">0</span>
-        </div>
-        <div style="font-size:11px;color:#888;margin-top:8px;line-height:1.4">
-          <b style="color:#2a6fd1">Œil</b> = visibilité du calque · cliquez un calque pour le mettre en évidence.<br>
-          Les outils de traçage vont sur le calque <b>Traçage</b>, les pictogrammes sur <b>Annotations</b>.
+        <div style="font-size:10px;color:#666;line-height:1.4;margin-top:2px;">
+          Cliquez pour activer · 🖼 = calque avec image · glissez pour réordonner
         </div>
       </div>
 
@@ -342,12 +526,86 @@ input[type=color] { width: 40px; height: 28px; background: #1a1a1a; border: 1px 
         <h3>Aide</h3>
         <div class="hint-box" id="tool-hint">Importez un plan, choisissez un outil à gauche, cliquez sur le plan pour placer. <span class="kbd">Esc</span> pour annuler une action en cours. <span class="kbd">Space+drag</span> pour panner, <span class="kbd">molette</span> pour zoomer.</div>
       </div>
+
+      <div class="panel-section" id="filters-panel" style="display:none">
+        <h3 style="color:#e67e22">🎨 Filtres photo</h3>
+        <div class="filter-panel">
+          <div class="frow"><span>Luminosité</span><span id="fv-brightness">100%</span></div>
+          <input type="range" id="f-brightness" min="0" max="300" value="100" oninput="applyFilters()">
+          <div class="frow"><span>Contraste</span><span id="fv-contrast">100%</span></div>
+          <input type="range" id="f-contrast" min="0" max="300" value="100" oninput="applyFilters()">
+          <div class="frow"><span>Saturation</span><span id="fv-saturation">100%</span></div>
+          <input type="range" id="f-saturation" min="0" max="300" value="100" oninput="applyFilters()">
+          <div class="frow"><span>Netteté</span><span id="fv-sharpen">0</span></div>
+          <input type="range" id="f-sharpen" min="0" max="10" step="0.5" value="0" oninput="applyFilters()">
+          <div class="frow"><span>Flou</span><span id="fv-blur">0px</span></div>
+          <input type="range" id="f-blur" min="0" max="20" step="0.5" value="0" oninput="applyFilters()">
+          <div class="frow"><span>Sépia</span><span id="fv-sepia">0%</span></div>
+          <input type="range" id="f-sepia" min="0" max="100" value="0" oninput="applyFilters()">
+          <div class="frow"><span>Teinte (°)</span><span id="fv-hue">0°</span></div>
+          <input type="range" id="f-hue" min="0" max="360" value="0" oninput="applyFilters()">
+          <button class="btn" style="width:100%;margin-top:8px;font-size:12px" onclick="resetFilters()">↺ Réinitialiser filtres</button>
+          <button class="btn primary" style="width:100%;margin-top:4px;font-size:12px" onclick="bakeFilters()">⬇ Appliquer (fusion)</button>
+        </div>
+        <div style="font-size:10px;color:#666;margin-top:6px;line-height:1.4">Les filtres CSS sont non-destructifs. "Appliquer" les fusionne définitivement dans le plan.</div>
+      </div>
     </div>
   </div>
 </div>
 
+<!-- PALETTE CONTEXTUELLE - position:fixed, hors du flux -->
+<div id="ctx-menu">
+  <input class="ctx-search" id="ctx-search" placeholder="🔍  Rechercher un outil…" oninput="filterCtxMenu(this.value)" autocomplete="off">
+  <div class="ctx-section"><div class="ctx-section-title">✏️ Traçage</div><div class="ctx-grid">
+    <div class="ctx-btn" data-tool="pen" data-search="pinceau dessin crayon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/></svg><span>Pinceau</span></div>
+    <div class="ctx-btn" data-tool="line" data-search="ligne droite"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="20" x2="20" y2="4"/></svg><span>Ligne</span></div>
+    <div class="ctx-btn" data-tool="wall" data-search="mur cloison"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 17 9 11 13 15 21 7"/><circle cx="3" cy="17" r="1.5" fill="currentColor"/></svg><span>Mur</span></div>
+    <div class="ctx-btn" data-tool="doorplan" data-search="porte plan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="20" x2="4" y2="4"/><line x1="4" y1="4" x2="15" y2="4"/><path d="M4 20 A16 16 0 0 0 20 4" stroke-dasharray="2 2"/></svg><span>Porte</span></div>
+    <div class="ctx-btn" data-tool="rect" data-search="rectangle carré"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="1"/></svg><span>Rect.</span></div>
+    <div class="ctx-btn" data-tool="circle" data-search="cercle ellipse"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/></svg><span>Cercle</span></div>
+    <div class="ctx-btn" data-tool="arrow" data-search="flèche direction"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="20" x2="20" y2="4"/><polyline points="14 4 20 4 20 10"/></svg><span>Flèche</span></div>
+    <div class="ctx-btn" data-tool="highlight" data-search="surbrillance zone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="9" width="18" height="9" rx="2" fill="currentColor" fill-opacity="0.3"/></svg><span>Surligner</span></div>
+  </div></div>
+  <div class="ctx-divider"></div>
+  <div class="ctx-section"><div class="ctx-section-title">💬 Annotations</div><div class="ctx-grid">
+    <div class="ctx-btn" data-tool="text" data-search="texte libellé"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg><span>Texte</span></div>
+    <div class="ctx-btn" data-tool="bubble" data-search="bulle note post-it"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" fill="currentColor" fill-opacity="0.2"/></svg><span>Note</span></div>
+    <div class="ctx-btn" data-tool="numero" data-search="numéro repère"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9" fill="currentColor" fill-opacity="0.2"/><text x="12" y="17" text-anchor="middle" font-family="sans-serif" font-size="12" font-weight="800" fill="currentColor">1</text></svg><span>Numéro</span></div>
+    <div class="ctx-btn" data-tool="cote" data-search="cotation mesure distance"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="9" x2="3" y2="15"/><line x1="21" y1="9" x2="21" y2="15"/></svg><span>Cotation</span></div>
+    <div class="ctx-btn" data-tool="cable" data-search="câble liaison"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="12" r="2.5" fill="currentColor" fill-opacity="0.4"/><circle cx="19" cy="12" r="2.5" fill="currentColor" fill-opacity="0.4"/><path d="M7.5 12 C 11 6, 13 18, 16.5 12" stroke-width="2"/></svg><span>Câble</span></div>
+    <div class="ctx-btn" data-tool="percement" data-search="percement traversée"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="5" x2="19" y2="19" stroke="#ef4444" stroke-width="3" stroke-linecap="round"/><line x1="19" y1="5" x2="5" y2="19" stroke="#ef4444" stroke-width="3" stroke-linecap="round"/></svg><span>Percement</span></div>
+    <div class="ctx-btn" data-tool="stamp" data-search="image photo logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="13" rx="2"/><circle cx="9" cy="8" r="2"/><path d="M21 14l-5-5L5 21"/></svg><span>Image</span></div>
+  </div></div>
+  <div class="ctx-divider"></div>
+  <div class="ctx-section"><div class="ctx-section-title">📷 Vidéo &amp; Réseau</div><div class="ctx-grid">
+    <div class="ctx-btn" data-tool="camera" data-search="caméra vidéo surveillance"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg><span>Caméra</span></div>
+    <div class="ctx-btn" data-tool="fov" data-search="angle vue champ"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 12 L22 6 A12 12 0 0 1 22 18 Z" fill="currentColor" fill-opacity="0.3"/><circle cx="12" cy="12" r="2" fill="currentColor"/></svg><span>Angle vue</span></div>
+    <div class="ctx-btn" data-tool="baie" data-search="baie rack serveur"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="3" width="14" height="18" rx="1"/><line x1="8" y1="7" x2="16" y2="7"/><line x1="8" y1="11" x2="16" y2="11"/></svg><span>Baie</span></div>
+    <div class="ctx-btn" data-tool="rj45" data-search="rj45 prise réseau"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="4" width="14" height="14" rx="1"/><line x1="9" y1="10" x2="9" y2="16"/><line x1="12" y1="10" x2="12" y2="16"/><line x1="15" y1="10" x2="15" y2="16"/></svg><span>RJ45</span></div>
+    <div class="ctx-btn" data-tool="borne" data-search="wifi borne ap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="14" r="2" fill="currentColor"/><path d="M8 11a5.4 5.4 0 0 1 8 0"/><path d="M5 8a9.4 9.4 0 0 1 14 0"/></svg><span>WiFi AP</span></div>
+    <div class="ctx-btn" data-tool="onduleur" data-search="ups onduleur alimentation"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg><span>UPS</span></div>
+    <div class="ctx-btn" data-tool="hp" data-search="haut-parleur audio son"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg><span>HP</span></div>
+  </div></div>
+  <div class="ctx-divider"></div>
+  <div class="ctx-section"><div class="ctx-section-title">🔐 Accès &amp; Sécurité</div><div class="ctx-grid">
+    <div class="ctx-btn" data-tool="porte" data-search="porte contrôle accès CA"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><text x="12" y="17" text-anchor="middle" font-family="sans-serif" font-size="11" font-weight="700" fill="currentColor">P</text></svg><span>Porte CA</span></div>
+    <div class="ctx-btn" data-tool="badge" data-search="badge lecteur rfid"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="3" width="16" height="18" rx="2"/><rect x="7" y="7" width="10" height="7" rx="1"/><line x1="7" y1="10" x2="17" y2="10"/><circle cx="12" cy="17" r="1.5" fill="currentColor"/></svg><span>Lecteur</span></div>
+    <div class="ctx-btn" data-tool="centrale" data-search="centrale contrôle accès CA"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><line x1="7" y1="9" x2="17" y2="9"/><line x1="7" y1="12" x2="17" y2="12"/><circle cx="7" cy="16" r="1.5" fill="currentColor"/></svg><span>Centrale</span></div>
+    <div class="ctx-btn" data-tool="clavier" data-search="clavier digicode code pin"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="8" r="1" fill="currentColor"/><circle cx="12" cy="8" r="1" fill="currentColor"/><circle cx="15" cy="8" r="1" fill="currentColor"/><circle cx="9" cy="12" r="1" fill="currentColor"/><circle cx="12" cy="12" r="1" fill="currentColor"/><circle cx="15" cy="12" r="1" fill="currentColor"/></svg><span>Digicode</span></div>
+    <div class="ctx-btn" data-tool="alarme" data-search="alarme centrale sécurité"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span>Alarme</span></div>
+    <div class="ctx-btn" data-tool="ir" data-search="ir détecteur infrarouge pir"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="15" r="3"/><path d="M6 9a8 8 0 0 1 12 0"/><path d="M3 6a12 12 0 0 1 18 0"/></svg><span>Détect. IR</span></div>
+    <div class="ctx-btn" data-tool="sirene" data-search="sirène sonore alerte"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5H6a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h1l1 3h6l1-3h1a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-5z"/><path d="M8 19h8"/></svg><span>Sirène</span></div>
+  </div></div>
+</div>
+
+<!-- ÎLOT FLOTTANT - position:fixed, hors du flux -->
 <script>
 // ==================== STATE ====================
+// ---- Gestionnaire de calques dynamiques ----
+// Chaque calque: { id, name, visible, opacity, locked, imgSrc (optionnel), imgData (optionnel) }
+let layerIdSeq = 1;
+function newLayerId() { return 'ly' + (layerIdSeq++); }
+
 const state = {
   tool: 'select',
   mode: 'color',
@@ -366,7 +624,29 @@ const state = {
   drawing: false,
   currentShape: null,
   wallPoints: [],
-  layers: { plan: true, trace: true, annot: true },
+  // Calques dynamiques
+  dynLayers: [
+    { id: 'trace', name: 'Traçage / Murs', visible: true, opacity: 1, locked: false },
+    { id: 'annot', name: 'Annotations', visible: true, opacity: 1, locked: false },
+  ],
+  activeLayerId: 'annot',   // calque courant pour nouveaux pictos
+  bgVisible: true,           // visibilité du plan de fond
+  // Compat shapeToSVG — layers object utilisé pour filtre visibilité
+  get layers() {
+    const obj = { plan: state.bgVisible };
+    for (const ly of state.dynLayers) obj[ly.id] = ly.visible;
+    return obj;
+  },
+  // Grille
+  grid: { show: false, size: 20, snap: false },
+  // Mesure
+  measure: {
+    active: false,
+    drawing: false,
+    p1: null, p2: null,
+    scale: null,   // { px, real, unit } — px pixels correspondent à real unités
+    unit: 'm',
+  },
   defaults: {
     strokeColor: '#ef4444',
     strokeWidth: 2,
@@ -421,7 +701,28 @@ const state = {
     hpSize: 26,
     onduleurColor: '#166534',
     onduleurSize: 30,
+    // Nouveaux outils
+    circleColor: '#2a6fd1',
+    circleWidth: 2,
+    circleFill: 'none',
+    arrowColor: '#ef4444',
+    arrowWidth: 2,
+    highlightColor: '#fef08a',
+    highlightOpacity: 0.45,
+    bubbleColor: '#fef08a',
+    bubbleBorder: '#ca8a04',
+    coteColor: '#111111',
+    coteWidth: 1.5,
+    numeroColor: '#e67e22',
+    numeroSize: 22,
+    cableColor: '#6366f1',
+    cableWidth: 2,
+    cableLabel: '',
   },
+  // Filtres photo (CSS non-destructifs)
+  filters: { brightness: 100, contrast: 100, saturation: 100, sharpen: 0, blur: 0, sepia: 0, hue: 0 },
+  // Minimap
+  minimap: { show: false },
   history: [],
   historyIndex: -1,
   isDraggingHandle: false,
@@ -437,27 +738,158 @@ const overlay = document.getElementById('overlay');
 const stage = document.getElementById('stage');
 const canvasArea = document.getElementById('canvas-area');
 const statusbar = document.getElementById('statusbar');
+const gridSvg = document.getElementById('grid-svg');
+const extraLayersSvg = document.getElementById('extra-layers-svg');
+const measureSvg = document.getElementById('measure-svg');
 
-// ==================== IMAGE IMPORT ====================
-document.getElementById('btn-import').addEventListener('click', () => document.getElementById('file-input').click());
+// ==================== IMAGE / PDF IMPORT ====================
+// Bouton import (géré via onclick inline dans le dropdown)
 document.getElementById('file-input').addEventListener('change', (e) => {
   const file = e.target.files[0];
   if (!file) return;
-  const reader = new FileReader();
-  reader.onload = (ev) => loadImage(ev.target.result);
-  reader.readAsDataURL(file);
+  handleImportedFile(file);
 });
 
 // drag and drop
-canvasArea.addEventListener('dragover', (e) => { e.preventDefault(); });
+canvasArea.addEventListener('dragover', (e) => { e.preventDefault(); canvasArea.classList.add('drag-hover'); });
+canvasArea.addEventListener('dragleave', (e) => { canvasArea.classList.remove('drag-hover'); });
 canvasArea.addEventListener('drop', (e) => {
   e.preventDefault();
+  canvasArea.classList.remove('drag-hover');
   const file = e.dataTransfer.files[0];
-  if (!file || !file.type.startsWith('image/')) return;
-  const reader = new FileReader();
-  reader.onload = (ev) => loadImage(ev.target.result);
-  reader.readAsDataURL(file);
+  if (!file) return;
+  handleImportedFile(file);
 });
+
+function handleImportedFile(file) {
+  const isPdf = file.type === 'application/pdf' || /\.pdf$/i.test(file.name);
+  if (isPdf) {
+    importPDF(file);
+  } else if (file.type.startsWith('image/') || /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(file.name)) {
+    const reader = new FileReader();
+    reader.onload = (ev) => loadImage(ev.target.result);
+    reader.readAsDataURL(file);
+  } else {
+    alert('Format non supporté. Importez une image (PNG, JPG…) ou un PDF.');
+  }
+}
+
+// ---- Chargement PDF.js à la demande ----
+let pdfJsLoading = null;
+function ensurePdfJs() {
+  if (window.pdfjsLib) return Promise.resolve(window.pdfjsLib);
+  if (pdfJsLoading) return pdfJsLoading;
+  pdfJsLoading = new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+    s.onload = () => {
+      if (window.pdfjsLib) {
+        window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        resolve(window.pdfjsLib);
+      } else reject(new Error('pdfjsLib introuvable'));
+    };
+    s.onerror = () => reject(new Error('Échec du chargement de PDF.js (connexion requise)'));
+    document.head.appendChild(s);
+  });
+  return pdfJsLoading;
+}
+
+async function importPDF(file) {
+  let pdfjsLib;
+  showImportOverlay('Chargement du moteur PDF…');
+  try {
+    pdfjsLib = await ensurePdfJs();
+  } catch (err) {
+    hideImportOverlay();
+    alert("Impossible de charger le lecteur PDF.\nUne connexion internet est requise au premier import PDF.\n\nAstuce : ouvrez le PDF dans un visualiseur, exportez la page en PNG/JPG, puis importez l'image.");
+    return;
+  }
+  try {
+    showImportOverlay('Lecture du PDF…');
+    const buf = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+    const numPages = pdf.numPages;
+    let pageNum = 1;
+    if (numPages > 1) {
+      hideImportOverlay();
+      pageNum = await askPdfPage(numPages);
+      if (!pageNum) return; // annulé
+      showImportOverlay(`Rendu de la page ${pageNum}…`);
+    }
+    await renderPdfPageToCanvas(pdf, pageNum);
+    hideImportOverlay();
+  } catch (err) {
+    hideImportOverlay();
+    alert('Erreur lors de la lecture du PDF : ' + err.message);
+  }
+}
+
+async function renderPdfPageToCanvas(pdf, pageNum) {
+  const page = await pdf.getPage(pageNum);
+  // Échelle pour une bonne résolution (cap à ~3000px de large pour rester raisonnable)
+  const baseViewport = page.getViewport({ scale: 1 });
+  const targetWidth = 2200;
+  let scale = targetWidth / baseViewport.width;
+  scale = Math.min(Math.max(scale, 1), 4);
+  const viewport = page.getViewport({ scale });
+
+  const tmp = document.createElement('canvas');
+  tmp.width = Math.round(viewport.width);
+  tmp.height = Math.round(viewport.height);
+  const tctx = tmp.getContext('2d');
+  // Fond blanc (les PDF ont souvent un fond transparent)
+  tctx.fillStyle = '#ffffff';
+  tctx.fillRect(0, 0, tmp.width, tmp.height);
+  await page.render({ canvasContext: tctx, viewport }).promise;
+  loadImage(tmp.toDataURL('image/png'));
+}
+
+// Sélecteur de page pour PDF multi-pages
+function askPdfPage(numPages) {
+  return new Promise((resolve) => {
+    const modal = document.createElement('div');
+    modal.className = 'modal-backdrop';
+    modal.innerHTML = `
+      <div class="modal-box">
+        <h2>📄 PDF de ${numPages} pages</h2>
+        <label>Quelle page importer comme plan ?</label>
+        <input type="number" id="pdf-page-num" min="1" max="${numPages}" value="1" autofocus>
+        <div class="modal-actions">
+          <button class="btn" id="pdf-cancel">Annuler</button>
+          <button class="btn primary" id="pdf-ok">Importer cette page →</button>
+        </div>
+      </div>`;
+    document.body.appendChild(modal);
+    const input = modal.querySelector('#pdf-page-num');
+    input.focus(); input.select();
+    const cleanup = (val) => { modal.remove(); resolve(val); };
+    modal.querySelector('#pdf-ok').onclick = () => {
+      let n = parseInt(input.value) || 1;
+      n = Math.min(Math.max(n, 1), numPages);
+      cleanup(n);
+    };
+    modal.querySelector('#pdf-cancel').onclick = () => cleanup(null);
+    input.onkeydown = (e) => { if (e.key === 'Enter') modal.querySelector('#pdf-ok').click(); if (e.key === 'Escape') cleanup(null); };
+    modal.onclick = (e) => { if (e.target === modal) cleanup(null); };
+  });
+}
+
+// Overlay de chargement
+function showImportOverlay(msg) {
+  let ov = document.getElementById('import-overlay');
+  if (!ov) {
+    ov = document.createElement('div');
+    ov.id = 'import-overlay';
+    ov.innerHTML = `<div class="io-box"><div class="io-spinner"></div><div class="io-msg"></div></div>`;
+    document.body.appendChild(ov);
+  }
+  ov.querySelector('.io-msg').textContent = msg;
+  ov.style.display = 'flex';
+}
+function hideImportOverlay() {
+  const ov = document.getElementById('import-overlay');
+  if (ov) ov.style.display = 'none';
+}
 
 function loadImage(src) {
   const img = new Image();
@@ -469,6 +901,15 @@ function loadImage(src) {
     overlay.setAttribute('width', img.width);
     overlay.setAttribute('height', img.height);
     overlay.setAttribute('viewBox', `0 0 ${img.width} ${img.height}`);
+    gridSvg.setAttribute('width', img.width);
+    gridSvg.setAttribute('height', img.height);
+    gridSvg.setAttribute('viewBox', `0 0 ${img.width} ${img.height}`);
+    extraLayersSvg.setAttribute('width', img.width);
+    extraLayersSvg.setAttribute('height', img.height);
+    extraLayersSvg.setAttribute('viewBox', `0 0 ${img.width} ${img.height}`);
+    measureSvg.setAttribute('width', img.width);
+    measureSvg.setAttribute('height', img.height);
+    measureSvg.setAttribute('viewBox', `0 0 ${img.width} ${img.height}`);
     ctx.drawImage(img, 0, 0);
     state.imgData = ctx.getImageData(0, 0, img.width, img.height);
     state.originalSrc = src;  // keep original for restore
@@ -478,6 +919,7 @@ function loadImage(src) {
     applyMode();
     fitToView();
     updateStatus();
+    renderGrid();
   };
   img.src = src;
 }
@@ -575,38 +1017,786 @@ function screenToImg(clientX, clientY) {
   return { x, y };
 }
 
-// ==================== TOOLS ====================
-document.querySelectorAll('.tool').forEach(el => {
-  el.addEventListener('click', () => {
-    document.querySelectorAll('.tool').forEach(t => t.classList.remove('active'));
-    el.classList.add('active');
-    state.tool = el.dataset.tool;
-    state.wallPoints = [];
-    state.selectedId = null;
-    render();
-    updatePropertiesPanel();
-    updateCursor();
-  });
+// Outils sidebar fixes (select, pan, eraser, delete)
+document.querySelectorAll('.tool[data-tool]').forEach(el => {
+  el.addEventListener('click', () => selectTool(el.dataset.tool));
 });
+
+// ==================== TOOLTIP GLOBAL + EFFET DOCK ====================
+(function() {
+  const sidebar = document.getElementById('sidebar');
+  const tooltip = document.getElementById('tool-tooltip');
+  if (!sidebar || !tooltip) return;
+  const tools = Array.from(sidebar.querySelectorAll('.tool[data-name]'));
+
+  // ---- Tooltip au survol ----
+  let activeTool = null;
+  function showTooltip(el) {
+    const name = el.dataset.name || '';
+    const key = el.dataset.key || '';
+    tooltip.innerHTML = `<span class="tt-label">${name}</span>` + (key ? `<span class="tt-key">${key}</span>` : '');
+    const r = el.getBoundingClientRect();
+    tooltip.style.left = (r.right + 12) + 'px';
+    tooltip.style.top = (r.top + r.height / 2) + 'px';
+    tooltip.style.transform = 'translateY(-50%)';
+    tooltip.classList.add('show');
+  }
+  function hideTooltip() { tooltip.classList.remove('show'); }
+
+  tools.forEach(el => {
+    el.addEventListener('mouseenter', () => { activeTool = el; showTooltip(el); });
+    el.addEventListener('mouseleave', () => { if (activeTool === el) { activeTool = null; hideTooltip(); } });
+  });
+
+  // ---- Effet dock magnétique (façon macOS) ----
+  const DOCK_RANGE = 90;   // portée d'influence en px
+  const DOCK_MAX = 1.45;   // grossissement max de l'icône survolée
+  let rafPending = false;
+  let lastY = null;
+
+  function applyDock(mouseY) {
+    tools.forEach(el => {
+      const r = el.getBoundingClientRect();
+      const center = r.top + r.height / 2;
+      const dist = Math.abs(mouseY - center);
+      let scale = 1;
+      if (dist < DOCK_RANGE) {
+        // courbe cosinus douce : 1 → DOCK_MAX
+        const t = 1 - dist / DOCK_RANGE;
+        scale = 1 + (DOCK_MAX - 1) * (0.5 - 0.5 * Math.cos(t * Math.PI));
+      }
+      el.style.setProperty('--dock-scale', scale.toFixed(3));
+    });
+  }
+  function resetDock() {
+    tools.forEach(el => el.style.setProperty('--dock-scale', '1'));
+  }
+
+  sidebar.addEventListener('mousemove', (e) => {
+    lastY = e.clientY;
+    if (!rafPending) {
+      rafPending = true;
+      requestAnimationFrame(() => { rafPending = false; if (lastY !== null) applyDock(lastY); });
+    }
+    // repositionner le tooltip si l'icône sous la souris a grossi
+    if (activeTool) {
+      const r = activeTool.getBoundingClientRect();
+      tooltip.style.left = (r.right + 12) + 'px';
+      tooltip.style.top = (r.top + r.height / 2) + 'px';
+    }
+  });
+  sidebar.addEventListener('mouseleave', () => { lastY = null; resetDock(); hideTooltip(); activeTool = null; });
+})();
+
 function updateCursor() {
   stage.className = 'canvas-stage';
   if (state.tool === 'pan' || state.spacePressed) stage.classList.add('cursor-grab');
-  else if (['pen','line','wall','doorplan','rect','camera','fov','text','baie','rj45','percement','borne','porte','centrale','badge','alarme','ir','clavier','sirene','hp','onduleur','eraser'].includes(state.tool)) stage.classList.add('cursor-crosshair');
+  else if (['pen','line','wall','doorplan','rect','camera','fov','text','baie','rj45','percement','borne','porte','centrale','badge','alarme','ir','clavier','sirene','hp','onduleur','eraser','measure','circle','arrow','highlight','bubble','cote','numero','stamp','cable'].includes(state.tool)) stage.classList.add('cursor-crosshair');
 }
 
-// Keyboard shortcuts
+// ==================== PALETTE CONTEXTUELLE CLIC DROIT ====================
+const ctxMenu = document.getElementById('ctx-menu');
+let ctxLastX = 0, ctxLastY = 0;
+
+// Définition des icônes pour le bouton outil actif dans la sidebar
+const TOOL_ICONS = {
+  pen: `<path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/>`,
+  line: `<line x1="4" y1="20" x2="20" y2="4"/>`,
+  wall: `<polyline points="3 17 9 11 13 15 21 7"/><circle cx="3" cy="17" r="1.5" fill="currentColor"/>`,
+  doorplan: `<line x1="4" y1="20" x2="4" y2="4"/><line x1="4" y1="4" x2="15" y2="4"/><path d="M4 20 A16 16 0 0 0 20 4" stroke-dasharray="2 2"/>`,
+  rect: `<rect x="4" y="4" width="16" height="16" rx="1"/>`,
+  circle: `<circle cx="12" cy="12" r="9"/>`,
+  arrow: `<line x1="4" y1="20" x2="20" y2="4"/><polyline points="14 4 20 4 20 10"/>`,
+  highlight: `<rect x="3" y="9" width="18" height="9" rx="2" fill="currentColor" fill-opacity="0.3"/><line x1="8" y1="7" x2="16" y2="7" stroke-width="3" stroke-linecap="round"/>`,
+  text: `<polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/>`,
+  bubble: `<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" fill="currentColor" fill-opacity="0.2"/>`,
+  numero: `<circle cx="12" cy="12" r="9" fill="currentColor" fill-opacity="0.2"/>`,
+  cote: `<line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="9" x2="3" y2="15"/><line x1="21" y1="9" x2="21" y2="15"/>`,
+  cable: `<circle cx="5" cy="12" r="3" fill="currentColor" fill-opacity="0.4"/><circle cx="19" cy="12" r="3" fill="currentColor" fill-opacity="0.4"/><path d="M8 12 C 11 6, 13 18, 16 12" stroke-width="2"/>`,
+  percement: `<line x1="5" y1="5" x2="19" y2="19" stroke="#ef4444" stroke-width="3" stroke-linecap="round"/><line x1="19" y1="5" x2="5" y2="19" stroke="#ef4444" stroke-width="3" stroke-linecap="round"/>`,
+  stamp: `<rect x="3" y="3" width="18" height="14" rx="2"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/>`,
+  camera: `<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3" fill="currentColor"/>`,
+  fov: `<path d="M12 12 L22 6 A12 12 0 0 1 22 18 Z" fill="currentColor" fill-opacity="0.3"/><circle cx="12" cy="12" r="2" fill="currentColor"/>`,
+  baie: `<rect x="5" y="3" width="14" height="18" rx="1"/><line x1="8" y1="7" x2="16" y2="7"/><line x1="8" y1="11" x2="16" y2="11"/><line x1="8" y1="15" x2="16" y2="15"/>`,
+  rj45: `<rect x="5" y="4" width="14" height="14" rx="1"/><line x1="9" y1="10" x2="9" y2="16"/><line x1="12" y1="10" x2="12" y2="16"/><line x1="15" y1="10" x2="15" y2="16"/>`,
+  borne: `<circle cx="12" cy="14" r="2" fill="currentColor"/><path d="M8 11a5.4 5.4 0 0 1 8 0"/><path d="M5 8a9.4 9.4 0 0 1 14 0"/>`,
+  onduleur: `<rect x="2" y="7" width="20" height="14" rx="2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/>`,
+  hp: `<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>`,
+  porte: `<circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" fill="none"/>`,
+  badge: `<rect x="4" y="3" width="16" height="18" rx="2"/><rect x="7" y="7" width="10" height="7" rx="1"/><line x1="7" y1="10" x2="17" y2="10"/>`,
+  centrale: `<rect x="3" y="5" width="18" height="14" rx="2"/><line x1="7" y1="9" x2="17" y2="9"/><line x1="7" y1="12" x2="17" y2="12"/>`,
+  clavier: `<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="8" r="1" fill="currentColor"/><circle cx="12" cy="8" r="1" fill="currentColor"/><circle cx="15" cy="8" r="1" fill="currentColor"/>`,
+  alarme: `<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>`,
+  ir: `<circle cx="12" cy="15" r="3"/><path d="M6 9a8 8 0 0 1 12 0"/>`,
+  sirene: `<path d="M11 5H6a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h1l1 3h6l1-3h1a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-5z"/><path d="M8 19h8"/>`,
+};
+const TOOL_NAMES = {
+  pen:'Pinceau', line:'Ligne', wall:'Mur', doorplan:'Porte', rect:'Rectangle',
+  circle:'Cercle', arrow:'Flèche', highlight:'Surbrillance', text:'Texte',
+  bubble:'Note', numero:'Numéro', cote:'Cotation', cable:'Câble',
+  percement:'Percement', stamp:'Image', camera:'Caméra', fov:'Angle vue',
+  baie:'Baie', rj45:'RJ45', borne:'WiFi AP', onduleur:'UPS', hp:'HP',
+  porte:'Porte CA', badge:'Lecteur', centrale:'Centrale CA', clavier:'Digicode',
+  alarme:'Alarme', ir:'Détect. IR', sirene:'Sirène',
+  select:'Sélection', pan:'Vue', eraser:'Gomme', delete:'Supprimer',
+};
+
+function updateActiveTool(tool) {
+  const iconEl = document.getElementById('active-tool-icon');
+  const nameEl = document.getElementById('active-tool-name');
+  const icon = TOOL_ICONS[tool];
+  if (iconEl && icon) iconEl.innerHTML = icon;
+  if (nameEl) nameEl.textContent = TOOL_NAMES[tool] || tool;
+  // Mettre à jour les ctx-btn
+  document.querySelectorAll('.ctx-btn').forEach(b => {
+    b.classList.toggle('active-tool', b.dataset.tool === tool);
+  });
+}
+
+function openContextMenu(x, y, centered) {
+  // Réinitialiser la recherche
+  const search = document.getElementById('ctx-search');
+  search.value = '';
+  filterCtxMenu('');
+  
+  if (centered) {
+    // Centrer dans le canvas
+    const rect = canvasArea.getBoundingClientRect();
+    x = rect.left + rect.width / 2;
+    y = rect.top + rect.height / 2;
+  }
+  ctxLastX = x;
+  ctxLastY = y;
+
+  // Positionner intelligemment (éviter de dépasser l'écran)
+  const menuW = 300, menuH = 500;
+  let left = x + 4;
+  let top = y - 10;
+  if (left + menuW > window.innerWidth - 10) left = x - menuW - 4;
+  if (top + menuH > window.innerHeight - 10) top = window.innerHeight - menuH - 10;
+  if (top < 10) top = 10;
+
+  ctxMenu.style.left = left + 'px';
+  ctxMenu.style.top = top + 'px';
+  ctxMenu.classList.add('visible');
+
+  // Focus sur la recherche
+  setTimeout(() => search.focus(), 60);
+}
+window.openContextMenu = openContextMenu;
+
+function closeContextMenu() {
+  ctxMenu.classList.remove('visible');
+}
+
+// Clic droit sur le canvas
+canvasArea.addEventListener('contextmenu', (e) => {
+  e.preventDefault();
+  // En mode mesure on ne veut pas la palette
+  if (state.measure && state.measure.active) return;
+  openContextMenu(e.clientX, e.clientY);
+});
+
+// Fermer au clic ailleurs
+document.addEventListener('mousedown', (e) => {
+  if (!ctxMenu.contains(e.target)) closeContextMenu();
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeContextMenu();
+});
+
+// Sélection d'un outil depuis la palette
+document.querySelectorAll('.ctx-btn[data-tool]').forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const tool = btn.dataset.tool;
+    selectTool(tool);
+    closeContextMenu();
+  });
+});
+
+function selectTool(tool) {
+  state.tool = tool;
+  state.wallPoints = [];
+  state.selectedId = null;
+  // Mettre à jour la sidebar (les 4 boutons fixes)
+  document.querySelectorAll('.tool[data-tool]').forEach(t => {
+    t.classList.toggle('active', t.dataset.tool === tool);
+  });
+  updateActiveTool(tool);
+  render();
+  updatePropertiesPanel();
+  updateCursor();
+}
+window.selectTool = selectTool;
+
+// Recherche dans la palette
+function filterCtxMenu(q) {
+  const query = q.toLowerCase().trim();
+  document.querySelectorAll('.ctx-btn[data-tool]').forEach(btn => {
+    if (!query) { btn.classList.remove('hidden'); return; }
+    const search = (btn.dataset.search || '') + ' ' + (btn.querySelector('span')?.textContent || '') + ' ' + btn.dataset.tool;
+    btn.classList.toggle('hidden', !search.toLowerCase().includes(query));
+  });
+  // Masquer les sections vides
+  document.querySelectorAll('.ctx-section').forEach(sec => {
+    const visible = [...sec.querySelectorAll('.ctx-btn')].some(b => !b.classList.contains('hidden'));
+    sec.style.display = visible ? '' : 'none';
+  });
+  // Masquer les dividers orphelins (simple: les cacher tous puis réafficher si section visible)
+  document.querySelectorAll('.ctx-divider').forEach((d,i) => {
+    d.style.display = query ? 'none' : '';
+  });
+}
+window.filterCtxMenu = filterCtxMenu;
+
+// Initialiser l'outil actif affiché
+updateActiveTool('line');
+
+// ==================== CALQUES DYNAMIQUES ====================
+function getActiveLayer() {
+  return state.dynLayers.find(l => l.id === state.activeLayerId) || state.dynLayers[0];
+}
+function addLayer(name) {
+  const id = newLayerId();
+  const n = name || `Calque ${state.dynLayers.length + 1}`;
+  state.dynLayers.push({ id, name: n, visible: true, opacity: 1, locked: false });
+  state.activeLayerId = id;
+  renderLayersPanel();
+  return id;
+}
+function addImageLayer() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.onchange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const src = ev.target.result;
+      const id = newLayerId();
+      const img = new Image();
+      img.onload = () => {
+        // Dessiner l'image sur un canvas tmp pour avoir les pixels
+        const tmp = document.createElement('canvas');
+        tmp.width = state.imgWidth || img.width;
+        tmp.height = state.imgHeight || img.height;
+        const tc = tmp.getContext('2d');
+        tc.drawImage(img, 0, 0, tmp.width, tmp.height);
+        const ly = { id, name: file.name.replace(/\.[^.]+$/,''), visible: true, opacity: 0.5, locked: false, imgSrc: src, imgWidth: tmp.width, imgHeight: tmp.height };
+        state.dynLayers.push(ly);
+        state.activeLayerId = id;
+        renderLayersPanel();
+        renderExtraLayers();
+      };
+      img.src = src;
+    };
+    reader.readAsDataURL(file);
+  };
+  input.click();
+}
+function duplicateLayer() {
+  const src = getActiveLayer();
+  if (!src) return;
+  const id = newLayerId();
+  const shapes = state.shapes.filter(s => (s.layer || 'annot') === src.id);
+  const newShapes = shapes.map(s => ({ ...s, id: 's' + (state.nextId++), layer: id }));
+  const newLy = { ...src, id, name: src.name + ' (copie)' };
+  const idx = state.dynLayers.indexOf(src);
+  state.dynLayers.splice(idx + 1, 0, newLy);
+  state.shapes.push(...newShapes);
+  state.activeLayerId = id;
+  renderLayersPanel();
+  render();
+}
+function deleteLayer(id) {
+  if (state.dynLayers.length <= 1) { alert('Il faut garder au moins un calque.'); return; }
+  if (!confirm('Supprimer ce calque et tous ses éléments ?')) return;
+  state.shapes = state.shapes.filter(s => (s.layer || 'annot') !== id);
+  state.dynLayers = state.dynLayers.filter(l => l.id !== id);
+  if (state.activeLayerId === id) state.activeLayerId = state.dynLayers[state.dynLayers.length - 1].id;
+  renderLayersPanel();
+  render();
+}
+function toggleBgLayer() {
+  state.bgVisible = !state.bgVisible;
+  const eye = document.getElementById('eye-bg');
+  eye.classList.toggle('on', state.bgVisible);
+  eye.style.opacity = state.bgVisible ? '1' : '0.4';
+  canvas.style.display = state.bgVisible ? 'block' : 'none';
+}
+
+// Drag-reorder
+let dragSrcLayerId = null;
+function onLayerDragStart(e, id) { dragSrcLayerId = id; e.dataTransfer.effectAllowed = 'move'; }
+function onLayerDragOver(e, id) {
+  e.preventDefault();
+  document.querySelectorAll('.dyn-layer-row').forEach(r => r.classList.remove('drag-over'));
+  const row = document.getElementById('lyrow-' + id);
+  if (row) row.classList.add('drag-over');
+}
+function onLayerDrop(e, targetId) {
+  e.preventDefault();
+  document.querySelectorAll('.dyn-layer-row').forEach(r => r.classList.remove('drag-over'));
+  if (!dragSrcLayerId || dragSrcLayerId === targetId) return;
+  const srcIdx = state.dynLayers.findIndex(l => l.id === dragSrcLayerId);
+  const tgtIdx = state.dynLayers.findIndex(l => l.id === targetId);
+  const [moved] = state.dynLayers.splice(srcIdx, 1);
+  state.dynLayers.splice(tgtIdx, 0, moved);
+  renderLayersPanel();
+  render();
+}
+
+function renderLayersPanel() {
+  const container = document.getElementById('dyn-layers-list');
+  // Ordre inversé dans le panel (haut = dernier rendu = au-dessus visuellement)
+  const layersReversed = [...state.dynLayers].reverse();
+  container.innerHTML = layersReversed.map(ly => {
+    const isActive = ly.id === state.activeLayerId;
+    const count = state.shapes.filter(s => (s.layer || 'annot') === ly.id).length;
+    const imgBadge = ly.imgSrc ? `<span class="ly-img-badge">🖼</span>` : '';
+    const eyeSvg = `<svg class="ly-eye ${ly.visible ? 'on' : ''}" style="opacity:${ly.visible?1:0.35}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" onclick="event.stopPropagation();toggleDynLayer('${ly.id}')"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
+    return `<div class="dyn-layer-row ${isActive ? 'active' : ''}" id="lyrow-${ly.id}"
+      draggable="true"
+      onclick="setActiveLayer('${ly.id}')"
+      ondragstart="onLayerDragStart(event,'${ly.id}')"
+      ondragover="onLayerDragOver(event,'${ly.id}')"
+      ondrop="onLayerDrop(event,'${ly.id}')">
+      ${eyeSvg}
+      ${imgBadge}
+      <input class="ly-name" type="text" value="${escapeAttr(ly.name)}"
+        onclick="event.stopPropagation()"
+        onchange="renameDynLayer('${ly.id}',this.value)"
+        title="Double-cliquez pour renommer">
+      <span class="ly-count">${count}</span>
+      <input type="range" class="ly-opaque-range" min="10" max="100" value="${Math.round(ly.opacity*100)}" title="Opacité"
+        onclick="event.stopPropagation()"
+        oninput="event.stopPropagation();setLayerOpacity('${ly.id}',this.value/100)"
+        style="width:44px;flex-shrink:0">
+      <span class="ly-del" onclick="event.stopPropagation();deleteLayer('${ly.id}')" title="Supprimer ce calque">✕</span>
+    </div>`;
+  }).join('');
+  // Mise à jour compteur total
+  document.getElementById('shape-total') && (document.getElementById('shape-total').textContent = state.shapes.length);
+}
+function escapeAttr(s) { return String(s).replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+window.setActiveLayer = (id) => {
+  state.activeLayerId = id;
+  renderLayersPanel();
+};
+window.toggleDynLayer = (id) => {
+  const ly = state.dynLayers.find(l => l.id === id);
+  if (ly) { ly.visible = !ly.visible; renderLayersPanel(); render(); renderExtraLayers(); }
+};
+window.renameDynLayer = (id, name) => {
+  const ly = state.dynLayers.find(l => l.id === id);
+  if (ly) { ly.name = name; renderLayersPanel(); }
+};
+window.setLayerOpacity = (id, val) => {
+  const ly = state.dynLayers.find(l => l.id === id);
+  if (ly) { ly.opacity = val; render(); renderExtraLayers(); }
+};
+window.addLayer = addLayer;
+window.addImageLayer = addImageLayer;
+window.duplicateLayer = duplicateLayer;
+window.onLayerDragStart = onLayerDragStart;
+window.onLayerDragOver = onLayerDragOver;
+window.onLayerDrop = onLayerDrop;
+window.deleteLayer = deleteLayer;
+window.toggleBgLayer = toggleBgLayer;
+
+// Rendu des calques image
+function renderExtraLayers() {
+  const w = state.imgWidth, h = state.imgHeight;
+  if (!w) return;
+  let svg = '';
+  for (const ly of state.dynLayers) {
+    if (ly.imgSrc && ly.visible) {
+      svg += `<image href="${ly.imgSrc}" x="0" y="0" width="${w}" height="${h}" opacity="${ly.opacity}" preserveAspectRatio="xMidYMid meet"/>`;
+    }
+  }
+  extraLayersSvg.innerHTML = svg;
+}
+
+// ==================== MINIMAP ====================
+const minimapCanvas = document.getElementById('minimap-canvas');
+const minimapCtx = minimapCanvas.getContext('2d');
+const minimapEl = document.getElementById('minimap');
+const minimapVP = document.getElementById('minimap-viewport');
+
+function toggleMinimap() {
+  state.minimap.show = !state.minimap.show;
+  minimapEl.style.display = state.minimap.show ? 'block' : 'none';
+  const lbl = document.getElementById('minimap-lbl');
+  if (lbl) lbl.textContent = state.minimap.show ? 'on' : 'off';
+  if (state.minimap.show) updateMinimap();
+}
+window.toggleMinimap = toggleMinimap;
+
+function updateMinimap() {
+  if (!state.minimap.show || !state.imgLoaded) return;
+  const mw = 160, mh = 110;
+  const scale = Math.min(mw / state.imgWidth, mh / state.imgHeight);
+  const dw = state.imgWidth * scale, dh = state.imgHeight * scale;
+  const ox = (mw - dw) / 2, oy = (mh - dh) / 2;
+  minimapCtx.clearRect(0, 0, mw, mh);
+  minimapCtx.fillStyle = '#111';
+  minimapCtx.fillRect(0, 0, mw, mh);
+  minimapCtx.drawImage(canvas, ox, oy, dw, dh);
+  // Viewport rectangle
+  const rect = canvasArea.getBoundingClientRect();
+  const vx = (-state.panX / state.zoom) * scale + ox;
+  const vy = (-state.panY / state.zoom) * scale + oy;
+  const vw = (rect.width / state.zoom) * scale;
+  const vh = (rect.height / state.zoom) * scale;
+  minimapVP.style.left = Math.max(ox, vx) + 'px';
+  minimapVP.style.top = Math.max(oy, vy) + 'px';
+  minimapVP.style.width = Math.min(dw, vw) + 'px';
+  minimapVP.style.height = Math.min(dh, vh) + 'px';
+}
+
+// Clic sur minimap → navigate
+minimapEl.addEventListener('click', (e) => {
+  if (!state.imgLoaded) return;
+  const rect = minimapEl.getBoundingClientRect();
+  const mw = 160, mh = 110;
+  const scale = Math.min(mw / state.imgWidth, mh / state.imgHeight);
+  const ox = (mw - state.imgWidth * scale) / 2;
+  const oy = (mh - state.imgHeight * scale) / 2;
+  const imgX = (e.clientX - rect.left - ox) / scale;
+  const imgY = (e.clientY - rect.top - oy) / scale;
+  const caRect = canvasArea.getBoundingClientRect();
+  state.panX = caRect.width / 2 - imgX * state.zoom;
+  state.panY = caRect.height / 2 - imgY * state.zoom;
+  applyTransform();
+  updateMinimap();
+});
+
+// ==================== FILTRES PHOTO ====================
+function toggleFiltersPanel() {
+  const panel = document.getElementById('filters-panel');
+  if (!panel) return;
+  const isVisible = panel.style.display !== 'none';
+  panel.style.display = isVisible ? 'none' : 'block';
+  const btn = document.getElementById('btn-filters');
+  if (btn) btn.classList.toggle('on', !isVisible);
+  // Scroll vers le panneau filtres
+  if (!isVisible) panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+window.toggleFiltersPanel = toggleFiltersPanel;
+
+function applyFilters() {
+  const b = document.getElementById('f-brightness');
+  const c = document.getElementById('f-contrast');
+  const sat = document.getElementById('f-saturation');
+  const sh = document.getElementById('f-sharpen');
+  const bl = document.getElementById('f-blur');
+  const sep = document.getElementById('f-sepia');
+  const hu = document.getElementById('f-hue');
+  state.filters = { brightness: +b.value, contrast: +c.value, saturation: +sat.value, sharpen: +sh.value, blur: +bl.value, sepia: +sep.value, hue: +hu.value };
+  document.getElementById('fv-brightness').textContent = b.value + '%';
+  document.getElementById('fv-contrast').textContent = c.value + '%';
+  document.getElementById('fv-saturation').textContent = sat.value + '%';
+  document.getElementById('fv-sharpen').textContent = sh.value;
+  document.getElementById('fv-blur').textContent = bl.value + 'px';
+  document.getElementById('fv-sepia').textContent = sep.value + '%';
+  document.getElementById('fv-hue').textContent = hu.value + '°';
+  canvas.style.filter = `brightness(${b.value}%) contrast(${c.value}%) saturate(${sat.value}%) blur(${bl.value}px) sepia(${sep.value}%) hue-rotate(${hu.value}deg)`;
+}
+window.applyFilters = applyFilters;
+
+function resetFilters() {
+  ['f-brightness','f-contrast','f-saturation'].forEach(id => document.getElementById(id).value = 100);
+  ['f-sharpen','f-blur','f-sepia','f-hue'].forEach(id => document.getElementById(id).value = 0);
+  state.filters = { brightness: 100, contrast: 100, saturation: 100, sharpen: 0, blur: 0, sepia: 0, hue: 0 };
+  canvas.style.filter = '';
+  applyFilters();
+}
+window.resetFilters = resetFilters;
+
+function bakeFilters() {
+  if (!state.imgLoaded) return;
+  if (!confirm('Fusionner les filtres dans le plan ? (non annulable via Ctrl+Z)')) return;
+  const tmp = document.createElement('canvas');
+  tmp.width = state.imgWidth; tmp.height = state.imgHeight;
+  const tc = tmp.getContext('2d');
+  tc.filter = canvas.style.filter || 'none';
+  tc.drawImage(canvas, 0, 0);
+  tc.filter = 'none';
+  ctx.clearRect(0, 0, state.imgWidth, state.imgHeight);
+  ctx.drawImage(tmp, 0, 0);
+  state.imgData = ctx.getImageData(0, 0, state.imgWidth, state.imgHeight);
+  canvas.style.filter = '';
+  resetFilters();
+}
+window.bakeFilters = bakeFilters;
+
+// ==================== LÉGENDE AUTOMATIQUE ====================
+function generateLegend() {
+  if (!state.imgLoaded) { alert('Importez un plan d\'abord'); return; }
+  // Compter les types présents
+  const typeMap = {
+    camera: { label: 'Caméra', color: state.defaults.cameraColor },
+    fov: { label: 'Angle de vue', color: state.defaults.fovColor },
+    baie: { label: 'Baie informatique', color: state.defaults.baieColor },
+    rj45: { label: 'Prise RJ45', color: state.defaults.rj45Color },
+    borne: { label: 'Borne WiFi', color: state.defaults.borneColor },
+    porte: { label: 'Porte contrôle accès', color: state.defaults.porteColor },
+    centrale: { label: 'Centrale CA', color: state.defaults.centraleColor },
+    badge: { label: 'Lecteur de badge', color: state.defaults.badgeColor },
+    alarme: { label: 'Centrale alarme', color: state.defaults.alarmeColor },
+    ir: { label: 'Détecteur IR/PIR', color: state.defaults.irColor },
+    clavier: { label: 'Clavier/Digicode', color: state.defaults.clavierColor },
+    sirene: { label: 'Sirène', color: state.defaults.sireneColor },
+    hp: { label: 'Haut-parleur', color: state.defaults.hpColor },
+    onduleur: { label: 'Onduleur/UPS', color: state.defaults.onduleurColor },
+    percement: { label: 'Percement', color: state.defaults.percementColor },
+    numero: { label: 'Repère numéroté', color: state.defaults.numeroColor },
+    cable: { label: 'Câble/Liaison', color: state.defaults.cableColor },
+  };
+  const counts = {};
+  for (const s of state.shapes) {
+    if (typeMap[s.type]) counts[s.type] = (counts[s.type] || 0) + 1;
+  }
+  const present = Object.entries(counts).filter(([,n]) => n > 0);
+  if (present.length === 0) { alert('Aucun élément sur le plan.'); return; }
+  const rows = present.map(([type, count]) => {
+    const info = typeMap[type];
+    return `<rect x="8" y="${0}" width="14" height="14" rx="3" fill="${info.color}"/>
+            <text x="28" y="11" font-family="sans-serif" font-size="11" fill="#111">${escapeXml(info.label)}</text>
+            <text x="172" y="11" text-anchor="end" font-family="sans-serif" font-size="11" font-weight="700" fill="#111">×${count}</text>`;
+  });
+  const legH = rows.length * 20 + 40;
+  const svgLeg = `<g data-shape-id="legend-${Date.now()}" data-is-legend="1">
+    <rect x="0" y="0" width="190" height="${legH}" rx="6" fill="rgba(255,255,255,0.95)" stroke="#333" stroke-width="1.5"/>
+    <text x="95" y="18" text-anchor="middle" font-family="sans-serif" font-size="12" font-weight="700" fill="#111">LÉGENDE</text>
+    <line x1="8" y1="24" x2="182" y2="24" stroke="#ddd" stroke-width="1"/>
+    ${rows.map((r, i) => `<g transform="translate(0,${i*20+28})">${r}</g>`).join('')}
+  </g>`;
+  // Ajouter comme shape spécial "legend"
+  addShape({
+    type: 'legend',
+    x: 20, y: 20,
+    layer: state.activeLayerId,
+    svgContent: svgLeg,
+    w: 190, h: legH,
+    counts: Object.fromEntries(present),
+  });
+}
+window.generateLegend = generateLegend;
+
+// ==================== EXPORT PDF ====================
+function exportPDF() {
+  if (!state.imgLoaded) { alert('Aucun plan chargé'); return; }
+  // Créer un canvas offscreen avec tout
+  const off = document.createElement('canvas');
+  off.width = state.imgWidth; off.height = state.imgHeight;
+  const octx = off.getContext('2d');
+  if (state.bgVisible) octx.drawImage(canvas, 0, 0);
+  else { octx.fillStyle = '#fff'; octx.fillRect(0, 0, off.width, off.height); }
+  const svgStr = `<svg xmlns="http://www.w3.org/2000/svg" width="${state.imgWidth}" height="${state.imgHeight}" viewBox="0 0 ${state.imgWidth} ${state.imgHeight}">${overlay.innerHTML}</svg>`;
+  const img = new Image();
+  img.onload = () => {
+    octx.drawImage(img, 0, 0);
+    const dataUrl = off.toDataURL('image/jpeg', 0.92);
+    // Ouvrir dans nouvel onglet — le navigateur peut imprimer en PDF via Ctrl+P
+    const win = window.open('', '_blank');
+    if (!win) { alert('Activez les pop-ups pour l\'export PDF'); return; }
+    win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Plan OCI Connect</title>
+    <style>*{margin:0;padding:0;box-sizing:border-box}body{background:#fff}
+    @media print{@page{size:auto;margin:10mm}body{-webkit-print-color-adjust:exact}}
+    .page{max-width:100%;display:flex;flex-direction:column;align-items:center;padding:20px;font-family:sans-serif}
+    h2{font-size:16px;color:#2a6fd1;margin-bottom:12px}
+    img{max-width:100%;height:auto;border:1px solid #ddd}
+    .footer{margin-top:16px;font-size:10px;color:#888}
+    .btn-print{margin:16px 0;padding:10px 24px;background:#2a6fd1;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:14px}
+    @media print{.btn-print{display:none}}
+    </style></head><body>
+    <div class="page">
+      <h2>◆ Plan OCI Connect — ${new Date().toLocaleDateString('fr-FR')}</h2>
+      <button class="btn-print" onclick="window.print()">🖨️ Imprimer / Enregistrer en PDF</button>
+      <img src="${dataUrl}" alt="Plan annoté">
+      <div class="footer">Généré par Plan Annotator OCI Connect · ${new Date().toLocaleString('fr-FR')}</div>
+    </div>
+    </body></html>`);
+    win.document.close();
+  };
+  img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgStr)));
+}
+window.exportPDF = exportPDF;
+
+// ==================== GRILLE MAGNÉTIQUE ====================
+function toggleGrid() {
+  state.grid.show = !state.grid.show;
+  const lbl = document.getElementById('grid-lbl');
+  if (lbl) lbl.textContent = state.grid.show ? 'on' : 'off';
+  gridSvg.style.display = state.grid.show ? 'block' : 'none';
+  renderGrid();
+}
+function toggleSnap() {
+  state.grid.snap = !state.grid.snap;
+  const lbl = document.getElementById('snap-lbl');
+  if (lbl) lbl.textContent = state.grid.snap ? 'on' : 'off';
+}
+function snapToGrid(x, y) {
+  if (!state.grid.snap) return { x, y };
+  const g = state.grid.size;
+  return { x: Math.round(x / g) * g, y: Math.round(y / g) * g };
+}
+function renderGrid() {
+  if (!state.imgWidth || !state.grid.show) { gridSvg.innerHTML = ''; return; }
+  const w = state.imgWidth, h = state.imgHeight, g = state.grid.size;
+  let lines = `<defs><pattern id="grid-pat" width="${g}" height="${g}" patternUnits="userSpaceOnUse"><path d="M ${g} 0 L 0 0 0 ${g}" fill="none" stroke="rgba(100,160,255,0.25)" stroke-width="0.5"/></pattern></defs>`;
+  lines += `<rect width="${w}" height="${h}" fill="url(#grid-pat)"/>`;
+  gridSvg.innerHTML = lines;
+}
+window.toggleGrid = toggleGrid;
+window.toggleSnap = toggleSnap;
+
+// ==================== OUTIL MESURE ====================
+function activateMeasure() {
+  const btn = document.getElementById('btn-measure');
+  if (state.measure.active) {
+    state.measure.active = false;
+    state.measure.drawing = false;
+    state.measure.p1 = null; state.measure.p2 = null;
+    btn.classList.remove('on');
+    measureSvg.innerHTML = '';
+    // Revenir à l'outil select
+    if (state.tool === 'measure') {
+      const sel = document.querySelector('[data-tool="select"]');
+      if (sel) sel.click();
+    }
+  } else {
+    state.measure.active = true;
+    btn.classList.add('on');
+    // Afficher modal d'échelle si pas encore définie
+    if (!state.measure.scale) showMeasureModal();
+  }
+}
+function showMeasureModal() {
+  const modal = document.createElement('div');
+  modal.className = 'modal-backdrop';
+  modal.innerHTML = `
+    <div class="modal-box">
+      <h2>📐 Définir l'échelle du plan</h2>
+      <p style="font-size:12px;color:#888;margin-bottom:16px">Tracez une distance connue sur le plan, puis indiquez sa longueur réelle.</p>
+      <label>Distance réelle correspondante</label>
+      <div style="display:flex;gap:8px;margin-bottom:14px">
+        <input type="number" id="m-real" min="0.01" step="0.1" value="10" style="flex:1">
+        <select id="m-unit" style="width:auto">
+          <option value="m">m</option>
+          <option value="cm">cm</option>
+          <option value="mm">mm</option>
+          <option value="ft">ft</option>
+        </select>
+      </div>
+      <div class="modal-actions">
+        <button class="btn" onclick="this.closest('.modal-backdrop').remove();state.measure.active=false;document.getElementById('btn-measure').classList.remove('on')">Annuler</button>
+        <button class="btn primary" onclick="confirmMeasureScale()">Tracer la référence →</button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+}
+window.confirmMeasureScale = () => {
+  const real = parseFloat(document.getElementById('m-real').value) || 10;
+  const unit = document.getElementById('m-unit').value;
+  state.measure._pendingReal = real;
+  state.measure._pendingUnit = unit;
+  document.querySelector('.modal-backdrop').remove();
+  // Activer le tracé de référence
+  state.measure.drawing = false;
+  state.measure.p1 = null;
+  state.measure.p2 = null;
+  state.measure.mode = 'calibrate';
+  alert('Cliquez sur le plan pour tracer la distance de référence (' + real + ' ' + unit + ').\nClic 1 = départ · Clic 2 = arrivée');
+};
+window.activateMeasure = activateMeasure;
+window.showMeasureModal = showMeasureModal;
+
+function renderMeasure() {
+  if (!state.imgWidth) { measureSvg.innerHTML = ''; return; }
+  let svg = '';
+  // Afficher la ligne de calibration / mesure en cours
+  if (state.measure.p1) {
+    const p2 = state.measure.p2 || state.measure.p1;
+    const mx = (state.measure.p1.x + p2.x) / 2;
+    const my = (state.measure.p1.y + p2.y) / 2 - 12;
+    const dist = Math.hypot(p2.x - state.measure.p1.x, p2.y - state.measure.p1.y);
+    let label = '';
+    if (state.measure.scale && state.measure.mode !== 'calibrate') {
+      const real = (dist / state.measure.scale.px) * state.measure.scale.real;
+      label = real.toFixed(2) + ' ' + state.measure.scale.unit;
+    } else if (state.measure.mode === 'calibrate') {
+      label = state.measure._pendingReal + ' ' + state.measure._pendingUnit + ' (référence)';
+    }
+    const color = state.measure.mode === 'calibrate' ? '#f59e0b' : '#22d3ee';
+    svg += `<line x1="${state.measure.p1.x}" y1="${state.measure.p1.y}" x2="${p2.x}" y2="${p2.y}" stroke="${color}" stroke-width="2" stroke-dasharray="6 3"/>`;
+    svg += `<circle cx="${state.measure.p1.x}" cy="${state.measure.p1.y}" r="5" fill="${color}"/>`;
+    svg += `<circle cx="${p2.x}" cy="${p2.y}" r="5" fill="${color}"/>`;
+    if (label) {
+      const tw = label.length * 7 + 12;
+      svg += `<rect x="${mx - tw/2}" y="${my - 14}" width="${tw}" height="18" rx="3" fill="rgba(0,0,0,0.75)"/>`;
+      svg += `<text x="${mx}" y="${my - 1}" text-anchor="middle" font-family="sans-serif" font-size="12" font-weight="700" fill="${color}">${label}</text>`;
+    }
+  }
+  // Afficher toutes les mesures enregistrées
+  for (const m of (state.measure.saved || [])) {
+    const mx = (m.p1.x + m.p2.x) / 2;
+    const my = (m.p1.y + m.p2.y) / 2 - 12;
+    const dist = Math.hypot(m.p2.x - m.p1.x, m.p2.y - m.p1.y);
+    const real = (dist / state.measure.scale.px) * state.measure.scale.real;
+    const label = real.toFixed(2) + ' ' + state.measure.scale.unit;
+    const tw = label.length * 7 + 12;
+    svg += `<line x1="${m.p1.x}" y1="${m.p1.y}" x2="${m.p2.x}" y2="${m.p2.y}" stroke="#22d3ee" stroke-width="1.5" stroke-dasharray="5 3" opacity="0.7"/>`;
+    svg += `<rect x="${mx - tw/2}" y="${my - 14}" width="${tw}" height="18" rx="3" fill="rgba(0,0,0,0.7)"/>`;
+    svg += `<text x="${mx}" y="${my - 1}" text-anchor="middle" font-family="sans-serif" font-size="11" font-weight="700" fill="#22d3ee">${label}</text>`;
+  }
+  measureSvg.innerHTML = svg;
+}
+
+// Gestion des clics sur le plan en mode mesure
+function handleMeasureClick(p) {
+  if (!state.measure.active) return false;
+  if (!state.measure.p1) {
+    state.measure.p1 = p;
+    state.measure.p2 = p;
+  } else if (!state.measure.p2 || state.measure.mode === 'calibrate') {
+    state.measure.p2 = p;
+    if (state.measure.mode === 'calibrate') {
+      // Enregistrer l'échelle
+      const dist = Math.hypot(p.x - state.measure.p1.x, p.y - state.measure.p1.y);
+      if (dist > 5) {
+        state.measure.scale = { px: dist, real: state.measure._pendingReal, unit: state.measure._pendingUnit };
+        state.measure.mode = 'measure';
+        state.measure.p1 = null; state.measure.p2 = null;
+        alert(`Échelle définie : ${dist.toFixed(1)} px = ${state.measure._pendingReal} ${state.measure._pendingUnit}\nMaintenant tracez vos mesures !`);
+      }
+    } else {
+      // Sauvegarder la mesure
+      state.measure.saved = state.measure.saved || [];
+      state.measure.saved.push({ p1: state.measure.p1, p2: state.measure.p2 });
+      state.measure.p1 = null; state.measure.p2 = null;
+    }
+  }
+  renderMeasure();
+  return true;
+}
+
+// Keyboard shortcuts — utilise selectTool() pour synchroniser tout
 window.addEventListener('keydown', (e) => {
   if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') return;
-  const keyMap = { v: 'select', h: 'pan', b: 'pen', l: 'line', w: 'wall', d: 'doorplan', r: 'rect', c: 'camera', f: 'fov', t: 'text', i: 'baie', j: 'rj45', x: 'percement', e: 'eraser', n: 'borne', a: 'porte', k: 'centrale', g: 'badge', m: 'alarme', q: 'ir', p: 'clavier', s: 'sirene', u: 'hp', o: 'onduleur' };
+  const keyMap = { v: 'select', h: 'pan', b: 'pen', l: 'line', w: 'wall', d: 'doorplan', r: 'rect', c: 'camera', f: 'fov', t: 'text', i: 'baie', j: 'rj45', x: 'percement', e: 'eraser', n: 'borne', a: 'porte', k: 'centrale', g: 'badge', m: 'alarme', q: 'ir', p: 'clavier', s: 'sirene', u: 'hp', o: 'onduleur', y: 'circle', z: 'arrow', '2': 'highlight', '3': 'bubble', '4': 'cote', '5': 'numero', '6': 'stamp', '7': 'cable' };
   if (keyMap[e.key.toLowerCase()]) {
-    const btn = document.querySelector(`[data-tool="${keyMap[e.key.toLowerCase()]}"]`);
-    if (btn) btn.click();
+    selectTool(keyMap[e.key.toLowerCase()]);
   } else if (e.key === 'Escape') {
+    closeContextMenu();
     state.wallPoints = []; state.selectedId = null; state.currentShape = null; state.drawing = false;
     render(); updatePropertiesPanel();
   } else if (e.key === 'Delete' || e.key === 'Backspace') {
     if (state.selectedId) { deleteShape(state.selectedId); }
-  } else if (e.key === ' ') {
+  } else if (e.key === ' ' && !ctxMenu.classList.contains('visible')) {
     state.spacePressed = true; updateCursor(); e.preventDefault();
   } else if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
     e.preventDefault(); if (e.shiftKey) redo(); else undo();
@@ -696,7 +1886,14 @@ function handlePanEnd(e) {
 function handleMouseDown(e) {
   if (state.isPanning || state.spacePressed) return;
   if (!state.imgLoaded) return;
-  const p = screenToImg(e.clientX, e.clientY);
+  let p = screenToImg(e.clientX, e.clientY);
+  p = snapToGrid(p.x, p.y);
+
+  // Mode mesure : intercepter en priorité
+  if (state.measure.active) {
+    handleMeasureClick(p);
+    return;
+  }
 
   // handles (select mode)
   const handleEl = e.target.closest('[data-handle]');
@@ -731,10 +1928,10 @@ function handleMouseDown(e) {
 
   if (state.tool === 'pen') {
     state.drawing = true;
-    state.currentShape = { type: 'pen', points: [[p.x, p.y]], stroke: state.defaults.strokeColor, width: state.defaults.strokeWidth, layer: 'trace' };
+    state.currentShape = { type: 'pen', points: [[p.x, p.y]], stroke: state.defaults.strokeColor, width: state.defaults.strokeWidth, layer: state.activeLayerId };
   } else if (state.tool === 'line') {
     state.drawing = true;
-    state.currentShape = { type: 'line', x1: p.x, y1: p.y, x2: p.x, y2: p.y, stroke: state.defaults.strokeColor, width: state.defaults.strokeWidth, layer: 'trace' };
+    state.currentShape = { type: 'line', x1: p.x, y1: p.y, x2: p.x, y2: p.y, stroke: state.defaults.strokeColor, width: state.defaults.strokeWidth, layer: state.activeLayerId };
   } else if (state.tool === 'wall') {
     if (state.wallPoints.length === 0) {
       state.wallPoints.push([p.x, p.y]);
@@ -746,15 +1943,15 @@ function handleMouseDown(e) {
     state.currentShape = {
       type: 'doorplan', x1: p.x, y1: p.y, x2: p.x, y2: p.y,
       thickness: state.defaults.doorThickness, color: state.defaults.doorColor,
-      swingFlip: state.defaults.doorSwingFlip, layer: 'trace'
+      swingFlip: state.defaults.doorSwingFlip, layer: state.activeLayerId
     };
   } else if (state.tool === 'rect') {
     state.drawing = true;
-    state.currentShape = { type: 'rect', x: p.x, y: p.y, w: 0, h: 0, stroke: state.defaults.strokeColor, width: state.defaults.strokeWidth, fill: 'none', layer: 'trace' };
+    state.currentShape = { type: 'rect', x: p.x, y: p.y, w: 0, h: 0, stroke: state.defaults.strokeColor, width: state.defaults.strokeWidth, fill: 'none', layer: state.activeLayerId };
   } else if (state.tool === 'camera') {
     const shape = {
       type: 'camera', x: p.x, y: p.y, radius: state.defaults.cameraRadius,
-      color: state.defaults.cameraColor, label: nextCameraLabel(), layer: 'annot'
+      color: state.defaults.cameraColor, label: nextCameraLabel(), layer: state.activeLayerId
     };
     addShape(shape);
     state.selectedId = shape.id;
@@ -763,7 +1960,7 @@ function handleMouseDown(e) {
     const shape = {
       type: 'fov', x: p.x, y: p.y, radius: state.defaults.fovRadius,
       bearing: state.defaults.fovBearing, aperture: state.defaults.fovAperture,
-      color: state.defaults.fovColor, opacity: state.defaults.fovOpacity, layer: 'annot'
+      color: state.defaults.fovColor, opacity: state.defaults.fovOpacity, layer: state.activeLayerId
     };
     addShape(shape);
     state.selectedId = shape.id;
@@ -771,12 +1968,12 @@ function handleMouseDown(e) {
   } else if (state.tool === 'text') {
     const txt = prompt('Texte:');
     if (txt) {
-      addShape({ type: 'text', x: p.x, y: p.y, text: txt, color: state.defaults.textColor, size: state.defaults.textSize, layer: 'annot' });
+      addShape({ type: 'text', x: p.x, y: p.y, text: txt, color: state.defaults.textColor, size: state.defaults.textSize, layer: state.activeLayerId });
     }
   } else if (state.tool === 'baie') {
     const shape = {
       type: 'baie', x: p.x, y: p.y, size: state.defaults.baieSize,
-      color: state.defaults.baieColor, label: nextBaieLabel(), layer: 'annot'
+      color: state.defaults.baieColor, label: nextBaieLabel(), layer: state.activeLayerId
     };
     addShape(shape);
     state.selectedId = shape.id;
@@ -784,7 +1981,7 @@ function handleMouseDown(e) {
   } else if (state.tool === 'rj45') {
     const shape = {
       type: 'rj45', x: p.x, y: p.y, size: state.defaults.rj45Size,
-      color: state.defaults.rj45Color, label: nextRj45Label(), layer: 'annot'
+      color: state.defaults.rj45Color, label: nextRj45Label(), layer: state.activeLayerId
     };
     addShape(shape);
     state.selectedId = shape.id;
@@ -792,7 +1989,7 @@ function handleMouseDown(e) {
   } else if (state.tool === 'percement') {
     const shape = {
       type: 'percement', x: p.x, y: p.y, size: state.defaults.percementSize,
-      color: state.defaults.percementColor, width: state.defaults.percementWidth, layer: 'annot'
+      color: state.defaults.percementColor, width: state.defaults.percementWidth, layer: state.activeLayerId
     };
     addShape(shape);
     state.selectedId = shape.id;
@@ -801,7 +1998,7 @@ function handleMouseDown(e) {
     const shape = {
       type: 'borne', x: p.x, y: p.y, radius: state.defaults.borneRadius,
       color: state.defaults.borneColor, label: nextBorneLabel(),
-      wifiRadius: state.defaults.wifiRadius, wifiOpacity: state.defaults.wifiOpacity, layer: 'annot'
+      wifiRadius: state.defaults.wifiRadius, wifiOpacity: state.defaults.wifiOpacity, layer: state.activeLayerId
     };
     addShape(shape);
     state.selectedId = shape.id;
@@ -809,7 +2006,7 @@ function handleMouseDown(e) {
   } else if (state.tool === 'porte') {
     const shape = {
       type: 'porte', x: p.x, y: p.y, size: state.defaults.porteSize,
-      color: state.defaults.porteColor, label: nextPorteLabel(), layer: 'annot'
+      color: state.defaults.porteColor, label: nextPorteLabel(), layer: state.activeLayerId
     };
     addShape(shape);
     state.selectedId = shape.id;
@@ -817,72 +2014,126 @@ function handleMouseDown(e) {
   } else if (state.tool === 'centrale') {
     const shape = {
       type: 'centrale', x: p.x, y: p.y, size: state.defaults.centraleSize,
-      color: state.defaults.centraleColor, label: state.defaults.centraleLabel, layer: 'annot'
+      color: state.defaults.centraleColor, label: state.defaults.centraleLabel, layer: state.activeLayerId
     };
     addShape(shape);
     state.selectedId = shape.id;
     updatePropertiesPanel();
   } else if (state.tool === 'badge') {
-    const shape = { type: 'badge', x: p.x, y: p.y, size: state.defaults.badgeSize, color: state.defaults.badgeColor, label: nextLabel('badge','BDG'), layer: 'annot' };
+    const shape = { type: 'badge', x: p.x, y: p.y, size: state.defaults.badgeSize, color: state.defaults.badgeColor, label: nextLabel('badge','BDG'), layer: state.activeLayerId };
     addShape(shape); state.selectedId = shape.id; updatePropertiesPanel();
   } else if (state.tool === 'alarme') {
-    const shape = { type: 'alarme', x: p.x, y: p.y, size: state.defaults.alarmeSize, color: state.defaults.alarmeColor, label: nextLabel('alarme','AL'), layer: 'annot' };
+    const shape = { type: 'alarme', x: p.x, y: p.y, size: state.defaults.alarmeSize, color: state.defaults.alarmeColor, label: nextLabel('alarme','AL'), layer: state.activeLayerId };
     addShape(shape); state.selectedId = shape.id; updatePropertiesPanel();
   } else if (state.tool === 'ir') {
-    const shape = { type: 'ir', x: p.x, y: p.y, size: state.defaults.irSize, color: state.defaults.irColor, label: nextLabel('ir','IR'), layer: 'annot' };
+    const shape = { type: 'ir', x: p.x, y: p.y, size: state.defaults.irSize, color: state.defaults.irColor, label: nextLabel('ir','IR'), layer: state.activeLayerId };
     addShape(shape); state.selectedId = shape.id; updatePropertiesPanel();
   } else if (state.tool === 'clavier') {
-    const shape = { type: 'clavier', x: p.x, y: p.y, size: state.defaults.clavierSize, color: state.defaults.clavierColor, label: nextLabel('clavier','CLV'), layer: 'annot' };
+    const shape = { type: 'clavier', x: p.x, y: p.y, size: state.defaults.clavierSize, color: state.defaults.clavierColor, label: nextLabel('clavier','CLV'), layer: state.activeLayerId };
     addShape(shape); state.selectedId = shape.id; updatePropertiesPanel();
   } else if (state.tool === 'sirene') {
-    const shape = { type: 'sirene', x: p.x, y: p.y, size: state.defaults.sireneSize, color: state.defaults.sireneColor, label: nextLabel('sirene','SIR'), layer: 'annot' };
+    const shape = { type: 'sirene', x: p.x, y: p.y, size: state.defaults.sireneSize, color: state.defaults.sireneColor, label: nextLabel('sirene','SIR'), layer: state.activeLayerId };
     addShape(shape); state.selectedId = shape.id; updatePropertiesPanel();
   } else if (state.tool === 'hp') {
-    const shape = { type: 'hp', x: p.x, y: p.y, size: state.defaults.hpSize, color: state.defaults.hpColor, label: nextLabel('hp','HP'), layer: 'annot' };
+    const shape = { type: 'hp', x: p.x, y: p.y, size: state.defaults.hpSize, color: state.defaults.hpColor, label: nextLabel('hp','HP'), layer: state.activeLayerId };
     addShape(shape); state.selectedId = shape.id; updatePropertiesPanel();
   } else if (state.tool === 'onduleur') {
-    const shape = { type: 'onduleur', x: p.x, y: p.y, size: state.defaults.onduleurSize, color: state.defaults.onduleurColor, label: nextLabel('onduleur','UPS'), layer: 'annot' };
+    const shape = { type: 'onduleur', x: p.x, y: p.y, size: state.defaults.onduleurSize, color: state.defaults.onduleurColor, label: nextLabel('onduleur','UPS'), layer: state.activeLayerId };
     addShape(shape); state.selectedId = shape.id; updatePropertiesPanel();
   } else if (state.tool === 'eraser') {
     state.drawing = true;
     state.lastErasePoint = p;
     eraseAt(p.x, p.y);
+  } else if (state.tool === 'circle') {
+    state.drawing = true;
+    state.currentShape = { type: 'circle', cx: p.x, cy: p.y, rx: 0, ry: 0, stroke: state.defaults.circleColor, width: state.defaults.circleWidth, fill: state.defaults.circleFill, layer: state.activeLayerId };
+  } else if (state.tool === 'arrow') {
+    state.drawing = true;
+    state.currentShape = { type: 'arrow', x1: p.x, y1: p.y, x2: p.x, y2: p.y, stroke: state.defaults.arrowColor, width: state.defaults.arrowWidth, layer: state.activeLayerId };
+  } else if (state.tool === 'highlight') {
+    state.drawing = true;
+    state.currentShape = { type: 'highlight', x: p.x, y: p.y, w: 0, h: 0, color: state.defaults.highlightColor, opacity: state.defaults.highlightOpacity, layer: state.activeLayerId };
+  } else if (state.tool === 'cote') {
+    state.drawing = true;
+    state.currentShape = { type: 'cote', x1: p.x, y1: p.y, x2: p.x, y2: p.y, stroke: state.defaults.coteColor, width: state.defaults.coteWidth, layer: state.activeLayerId };
+  } else if (state.tool === 'bubble') {
+    const txt = prompt('Texte de la note :');
+    if (txt) {
+      addShape({ type: 'bubble', x: p.x, y: p.y, text: txt, color: state.defaults.bubbleColor, border: state.defaults.bubbleBorder, size: 13, layer: state.activeLayerId });
+    }
+  } else if (state.tool === 'numero') {
+    const n = (state.shapes.filter(s => s.type === 'numero').length) + 1;
+    addShape({ type: 'numero', x: p.x, y: p.y, numero: n, color: state.defaults.numeroColor, size: state.defaults.numeroSize, layer: state.activeLayerId });
+    state.selectedId = state.shapes[state.shapes.length-1].id; updatePropertiesPanel();
+  } else if (state.tool === 'stamp') {
+    const input = document.createElement('input');
+    input.type = 'file'; input.accept = 'image/*';
+    input.onchange = (e) => {
+      const file = e.target.files[0]; if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const img = new Image();
+        img.onload = () => {
+          const ratio = img.width / img.height;
+          const stampW = 80, stampH = Math.round(80 / ratio);
+          addShape({ type: 'stamp', x: p.x, y: p.y, w: stampW, h: stampH, src: ev.target.result, layer: state.activeLayerId });
+          state.selectedId = state.shapes[state.shapes.length-1].id; updatePropertiesPanel();
+        };
+        img.src = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+    };
+    input.click();
+  } else if (state.tool === 'cable') {
+    state.drawing = true;
+    state.currentShape = { type: 'cable', x1: p.x, y1: p.y, x2: p.x, y2: p.y, stroke: state.defaults.cableColor, width: state.defaults.cableWidth, label: state.defaults.cableLabel, layer: state.activeLayerId };
   }
 }
 
 function handleMouseMove(e) {
   if (!state.imgLoaded) return;
-  const p = screenToImg(e.clientX, e.clientY);
-  document.getElementById('statusbar').textContent = `x: ${Math.round(p.x)}, y: ${Math.round(p.y)} · zoom ${Math.round(state.zoom*100)}%`;
+  let p = screenToImg(e.clientX, e.clientY);
+  const pSnapped = snapToGrid(p.x, p.y);
+  document.getElementById('statusbar').textContent = `x: ${Math.round(pSnapped.x)}, y: ${Math.round(pSnapped.y)} · zoom ${Math.round(state.zoom*100)}%${state.grid.snap ? ' · snap' : ''}`;
+
+  // Mise à jour mesure en temps réel
+  if (state.measure.active && state.measure.p1) {
+    state.measure.p2 = pSnapped;
+    renderMeasure();
+  }
 
   if (state.isDraggingHandle) {
     const shape = state.shapes.find(s => s.id === state.dragHandle.id);
     if (!shape) return;
     const h = state.dragHandle.handle;
-    const dx = p.x - state.dragStart.x;
-    const dy = p.y - state.dragStart.y;
+    const dx = pSnapped.x - state.dragStart.x;
+    const dy = pSnapped.y - state.dragStart.y;
     if (h === 'move') {
-      if (shape.type === 'camera' || shape.type === 'fov' || shape.type === 'text' || shape.type === 'baie' || shape.type === 'rj45' || shape.type === 'percement' || shape.type === 'borne' || shape.type === 'porte' || shape.type === 'centrale' || shape.type === 'badge' || shape.type === 'alarme' || shape.type === 'ir' || shape.type === 'clavier' || shape.type === 'sirene' || shape.type === 'hp' || shape.type === 'onduleur') {
+      if (shape.type === 'camera' || shape.type === 'fov' || shape.type === 'text' || shape.type === 'baie' || shape.type === 'rj45' || shape.type === 'percement' || shape.type === 'borne' || shape.type === 'porte' || shape.type === 'centrale' || shape.type === 'badge' || shape.type === 'alarme' || shape.type === 'ir' || shape.type === 'clavier' || shape.type === 'sirene' || shape.type === 'hp' || shape.type === 'onduleur' || shape.type === 'bubble' || shape.type === 'numero' || shape.type === 'stamp' || shape.type === 'legend') {
         shape.x += dx; shape.y += dy;
-      } else if (shape.type === 'line' || shape.type === 'doorplan') {
+      } else if (shape.type === 'circle') {
+        shape.cx += dx; shape.cy += dy;
+      } else if (shape.type === 'line' || shape.type === 'doorplan' || shape.type === 'arrow' || shape.type === 'cote' || shape.type === 'cable') {
         shape.x1 += dx; shape.y1 += dy; shape.x2 += dx; shape.y2 += dy;
-      } else if (shape.type === 'rect') {
+      } else if (shape.type === 'rect' || shape.type === 'highlight') {
         shape.x += dx; shape.y += dy;
       } else if (shape.type === 'pen' || shape.type === 'polyline') {
         shape.points = shape.points.map(pt => [pt[0]+dx, pt[1]+dy]);
       }
-      state.dragStart = p;
-    } else if (h === 'p1' && (shape.type === 'line' || shape.type === 'doorplan')) { shape.x1 = p.x; shape.y1 = p.y; }
-    else if (h === 'p2' && (shape.type === 'line' || shape.type === 'doorplan')) { shape.x2 = p.x; shape.y2 = p.y; }
+      state.dragStart = pSnapped;
+    } else if (h === 'p1' && (shape.type === 'line' || shape.type === 'doorplan' || shape.type === 'arrow' || shape.type === 'cote' || shape.type === 'cable')) { shape.x1 = pSnapped.x; shape.y1 = pSnapped.y; }
+    else if (h === 'p2' && (shape.type === 'line' || shape.type === 'doorplan' || shape.type === 'arrow' || shape.type === 'cote' || shape.type === 'cable')) { shape.x2 = pSnapped.x; shape.y2 = pSnapped.y; }
+    else if (h === 'circle-rx') { shape.rx = Math.max(2, Math.abs(pSnapped.x - shape.cx)); }
+    else if (h === 'circle-ry') { shape.ry = Math.max(2, Math.abs(pSnapped.y - shape.cy)); }
     else if (h === 'radius' && (shape.type === 'camera' || shape.type === 'fov' || shape.type === 'borne')) {
-      shape.radius = Math.max(5, Math.hypot(p.x - shape.x, p.y - shape.y));
+      shape.radius = Math.max(5, Math.hypot(pSnapped.x - shape.x, pSnapped.y - shape.y));
       if (shape.type === 'fov') {
-        shape.bearing = (Math.atan2(p.y - shape.y, p.x - shape.x) * 180 / Math.PI + 360) % 360;
+        shape.bearing = (Math.atan2(pSnapped.y - shape.y, pSnapped.x - shape.x) * 180 / Math.PI + 360) % 360;
       }
     } else if (h === 'wifiradius' && shape.type === 'borne') {
-      shape.wifiRadius = Math.max(20, Math.hypot(p.x - shape.x, p.y - shape.y));
+      shape.wifiRadius = Math.max(20, Math.hypot(pSnapped.x - shape.x, pSnapped.y - shape.y));
     } else if (h === 'rect-br' && shape.type === 'rect') {
-      shape.w = p.x - shape.x; shape.h = p.y - shape.y;
+      shape.w = pSnapped.x - shape.x; shape.h = pSnapped.y - shape.y;
     }
     updatePropertiesPanel();
     render();
@@ -891,32 +2142,47 @@ function handleMouseMove(e) {
 
   if (!state.drawing) return;
   if (state.tool === 'pen') {
-    state.currentShape.points.push([p.x, p.y]);
+    state.currentShape.points.push([pSnapped.x, pSnapped.y]);
     render();
   } else if (state.tool === 'line') {
-    state.currentShape.x2 = p.x; state.currentShape.y2 = p.y;
+    state.currentShape.x2 = pSnapped.x; state.currentShape.y2 = pSnapped.y;
     render();
   } else if (state.tool === 'doorplan') {
-    state.currentShape.x2 = p.x; state.currentShape.y2 = p.y;
+    state.currentShape.x2 = pSnapped.x; state.currentShape.y2 = pSnapped.y;
     render();
   } else if (state.tool === 'wall') {
     if (state.wallPoints.length > 0) {
-      state.wallPoints[state.wallPoints.length - 1] = [p.x, p.y];
+      state.wallPoints[state.wallPoints.length - 1] = [pSnapped.x, pSnapped.y];
       render();
     }
   } else if (state.tool === 'rect') {
-    state.currentShape.w = p.x - state.currentShape.x;
-    state.currentShape.h = p.y - state.currentShape.y;
+    state.currentShape.w = pSnapped.x - state.currentShape.x;
+    state.currentShape.h = pSnapped.y - state.currentShape.y;
     render();
   } else if (state.tool === 'eraser') {
-    const last = state.lastErasePoint || p;
-    const dist = Math.hypot(p.x - last.x, p.y - last.y);
+    const last = state.lastErasePoint || pSnapped;
+    const dist = Math.hypot(pSnapped.x - last.x, pSnapped.y - last.y);
     const steps = Math.max(1, Math.ceil(dist / (state.defaults.eraserSize / 2)));
     for (let i = 1; i <= steps; i++) {
       const t = i / steps;
-      eraseAt(last.x + (p.x - last.x) * t, last.y + (p.y - last.y) * t);
+      eraseAt(last.x + (pSnapped.x - last.x) * t, last.y + (pSnapped.y - last.y) * t);
     }
-    state.lastErasePoint = p;
+    state.lastErasePoint = pSnapped;
+  } else if (state.tool === 'circle') {
+    const dx = pSnapped.x - state.currentShape.cx;
+    const dy = pSnapped.y - state.currentShape.cy;
+    state.currentShape.rx = Math.abs(dx);
+    state.currentShape.ry = Math.abs(dy);
+    render();
+  } else if (state.tool === 'arrow') {
+    state.currentShape.x2 = pSnapped.x; state.currentShape.y2 = pSnapped.y; render();
+  } else if (state.tool === 'highlight') {
+    state.currentShape.w = pSnapped.x - state.currentShape.x;
+    state.currentShape.h = pSnapped.y - state.currentShape.y; render();
+  } else if (state.tool === 'cote') {
+    state.currentShape.x2 = pSnapped.x; state.currentShape.y2 = pSnapped.y; render();
+  } else if (state.tool === 'cable') {
+    state.currentShape.x2 = pSnapped.x; state.currentShape.y2 = pSnapped.y; render();
   }
 }
 
@@ -928,12 +2194,24 @@ function handleMouseUp(e) {
     return;
   }
   if (!state.drawing) return;
-  if (state.tool === 'pen' || state.tool === 'line' || state.tool === 'rect' || state.tool === 'doorplan') {
+  if (['pen','line','rect','doorplan','circle','arrow','highlight','cote','cable'].includes(state.tool)) {
     if (state.tool === 'rect' && (Math.abs(state.currentShape.w) < 3 || Math.abs(state.currentShape.h) < 3)) {
       state.currentShape = null; state.drawing = false; render(); return;
     }
     if (state.tool === 'doorplan' && Math.hypot(state.currentShape.x2 - state.currentShape.x1, state.currentShape.y2 - state.currentShape.y1) < 5) {
       state.currentShape = null; state.drawing = false; render(); return;
+    }
+    if (state.tool === 'circle' && state.currentShape.rx < 3) {
+      state.currentShape = null; state.drawing = false; render(); return;
+    }
+    if (state.tool === 'highlight' && (Math.abs(state.currentShape.w) < 5 || Math.abs(state.currentShape.h) < 5)) {
+      state.currentShape = null; state.drawing = false; render(); return;
+    }
+    // Pour cable, demander un label optionnel
+    if (state.tool === 'cable') {
+      const lbl = prompt('Label du câble (optionnel) :', state.defaults.cableLabel || '');
+      if (lbl !== null) state.currentShape.label = lbl;
+      else { state.currentShape = null; state.drawing = false; render(); return; }
     }
     addShape(state.currentShape);
     state.currentShape = null;
@@ -948,7 +2226,7 @@ function handleDoubleClick(e) {
   if (state.tool === 'wall' && state.wallPoints.length >= 2) {
     const pts = state.wallPoints.slice(0, -1); // drop the preview point
     if (pts.length >= 2) {
-      addShape({ type: 'polyline', points: pts, stroke: state.defaults.wallColor, width: state.defaults.wallThickness, wallType: state.defaults.wallType, layer: 'trace' });
+      addShape({ type: 'polyline', points: pts, stroke: state.defaults.wallColor, width: state.defaults.wallThickness, wallType: state.defaults.wallType, layer: state.activeLayerId });
     }
     state.wallPoints = [];
     state.drawing = false;
@@ -1023,27 +2301,32 @@ function fovPath(cx, cy, radius, bearing, aperture) {
 }
 
 function shapeToSVG(s, isSelected) {
-  const lay = s.layer || 'trace';
-  if (!state.layers[lay]) return '';
+  const lay = s.layer || 'annot';
+  // Visibilité : chercher dans dynLayers d'abord
+  const dynLy = state.dynLayers.find(l => l.id === lay);
+  if (dynLy && !dynLy.visible) return '';
+  if (!dynLy && !state.bgVisible) return '';  // fallback plan
+  const lyOpacity = dynLy ? dynLy.opacity : 1;
   const sel = isSelected ? ' data-selected="1"' : '';
+  const opAttr = lyOpacity < 1 ? ` opacity="${lyOpacity}"` : '';
   if (s.type === 'pen') {
     const d = 'M ' + s.points.map(p => `${p[0]} ${p[1]}`).join(' L ');
-    return `<path data-shape-id="${s.id}"${sel} d="${d}" fill="none" stroke="${s.stroke}" stroke-width="${s.width}" stroke-linecap="round" stroke-linejoin="round"/>`;
+    return `<path data-shape-id="${s.id}"${sel}${opAttr} d="${d}" fill="none" stroke="${s.stroke}" stroke-width="${s.width}" stroke-linecap="round" stroke-linejoin="round"/>`;
   }
   if (s.type === 'line') {
-    return `<line data-shape-id="${s.id}"${sel} x1="${s.x1}" y1="${s.y1}" x2="${s.x2}" y2="${s.y2}" stroke="${s.stroke}" stroke-width="${s.width}" stroke-linecap="round"/>`;
+    return `<line data-shape-id="${s.id}"${sel}${opAttr} x1="${s.x1}" y1="${s.y1}" x2="${s.x2}" y2="${s.y2}" stroke="${s.stroke}" stroke-width="${s.width}" stroke-linecap="round"/>`;
   }
   if (s.type === 'polyline') {
     const pts = s.points.map(p => `${p[0]},${p[1]}`).join(' ');
     const isCloison = s.wallType === 'cloison';
     const dash = isCloison ? ` stroke-dasharray="${Math.max(8, s.width*1.6)} ${Math.max(5, s.width*0.8)}"` : '';
     const cap = s.wallType ? 'stroke-linecap="square" stroke-linejoin="miter"' : 'stroke-linecap="round" stroke-linejoin="round"';
-    return `<polyline data-shape-id="${s.id}"${sel} points="${pts}" fill="none" stroke="${s.stroke}" stroke-width="${s.width}" ${cap}${dash}/>`;
+    return `<polyline data-shape-id="${s.id}"${sel}${opAttr} points="${pts}" fill="none" stroke="${s.stroke}" stroke-width="${s.width}" ${cap}${dash}/>`;
   }
   if (s.type === 'rect') {
     const x = Math.min(s.x, s.x + s.w), y = Math.min(s.y, s.y + s.h);
     const w = Math.abs(s.w), h = Math.abs(s.h);
-    return `<rect data-shape-id="${s.id}"${sel} x="${x}" y="${y}" width="${w}" height="${h}" fill="${s.fill || 'none'}" stroke="${s.stroke}" stroke-width="${s.width}"/>`;
+    return `<rect data-shape-id="${s.id}"${sel}${opAttr} x="${x}" y="${y}" width="${w}" height="${h}" fill="${s.fill || 'none'}" stroke="${s.stroke}" stroke-width="${s.width}"/>`;
   }
   if (s.type === 'camera') {
     const r = s.radius || 12;
@@ -1250,6 +2533,99 @@ function shapeToSVG(s, isSelected) {
       ${pictoLbl(s,half)}
     </g>`;
   }
+  // ======= NOUVEAUX TYPES =======
+  if (s.type === 'circle') {
+    const rx = Math.max(1, s.rx || 10), ry = Math.max(1, s.ry || 10);
+    return `<ellipse data-shape-id="${s.id}"${sel}${opAttr} cx="${s.cx}" cy="${s.cy}" rx="${rx}" ry="${ry}" fill="${s.fill || 'none'}" stroke="${s.stroke}" stroke-width="${s.width}"/>`;
+  }
+  if (s.type === 'arrow') {
+    const markId = `arr${s.id.replace(/[^a-z0-9]/g,'')}`;
+    const aw = Math.max(5, (s.width||2) * 4);
+    return `<defs><marker id="${markId}" markerWidth="${aw}" markerHeight="${aw}" refX="${aw-1}" refY="${aw/2}" orient="auto" markerUnits="strokeWidth"><polygon points="0 0, ${aw} ${aw/2}, 0 ${aw}" fill="${s.stroke}"/></marker></defs>
+<line data-shape-id="${s.id}"${sel}${opAttr} x1="${s.x1}" y1="${s.y1}" x2="${s.x2}" y2="${s.y2}" stroke="${s.stroke}" stroke-width="${s.width||2}" marker-end="url(#${markId})" stroke-linecap="round"/>`;
+  }
+  if (s.type === 'highlight') {
+    const x = Math.min(s.x, s.x+s.w), y = Math.min(s.y, s.y+s.h);
+    const w = Math.abs(s.w), h = Math.abs(s.h);
+    return `<rect data-shape-id="${s.id}"${sel}${opAttr} x="${x}" y="${y}" width="${w}" height="${h}" rx="3" fill="${s.color||'#fef08a'}" fill-opacity="${s.opacity||0.4}" stroke="${s.color||'#fef08a'}" stroke-opacity="0.7" stroke-width="1"/>`;
+  }
+  if (s.type === 'bubble') {
+    const lines = escapeXml(s.text||'').split('\\n');
+    const fs = s.size || 13;
+    const maxLen = lines.reduce((m,l) => Math.max(m, l.length), 0);
+    const pw = Math.max(70, maxLen * (fs*0.6) + 18);
+    const ph = lines.length * (fs+5) + 14;
+    return `<g data-shape-id="${s.id}"${sel}${opAttr}>
+      <rect x="${s.x}" y="${s.y}" width="${pw}" height="${ph}" rx="6" fill="${s.color||'#fef08a'}" stroke="${s.border||'#ca8a04'}" stroke-width="1.5"/>
+      <polygon points="${s.x+14},${s.y+ph} ${s.x+6},${s.y+ph+12} ${s.x+26},${s.y+ph}" fill="${s.color||'#fef08a'}" stroke="${s.border||'#ca8a04'}" stroke-width="1.5" stroke-linejoin="round"/>
+      ${lines.map((l,i) => `<text x="${s.x+9}" y="${s.y+13+i*(fs+5)}" font-family="sans-serif" font-size="${fs}" fill="#111">${l}</text>`).join('')}
+    </g>`;
+  }
+  if (s.type === 'cote') {
+    const dx = s.x2-s.x1, dy = s.y2-s.y1;
+    const len = Math.hypot(dx, dy) || 1;
+    const nx = -dy/len*10, ny = dx/len*10;
+    let lbl = Math.round(len) + ' px';
+    if (state.measure && state.measure.scale) {
+      const real = (len / state.measure.scale.px) * state.measure.scale.real;
+      lbl = real.toFixed(2) + ' ' + state.measure.scale.unit;
+    }
+    const mx = (s.x1+s.x2)/2, my = (s.y1+s.y2)/2;
+    const lblW = lbl.length * 7 + 10;
+    return `<g data-shape-id="${s.id}"${sel}${opAttr}>
+      <line x1="${s.x1}" y1="${s.y1}" x2="${s.x2}" y2="${s.y2}" stroke="${s.stroke||'#111'}" stroke-width="${s.width||1.5}"/>
+      <line x1="${s.x1+nx}" y1="${s.y1+ny}" x2="${s.x1-nx}" y2="${s.y1-ny}" stroke="${s.stroke||'#111'}" stroke-width="${(s.width||1.5)*1.3}"/>
+      <line x1="${s.x2+nx}" y1="${s.y2+ny}" x2="${s.x2-nx}" y2="${s.y2-ny}" stroke="${s.stroke||'#111'}" stroke-width="${(s.width||1.5)*1.3}"/>
+      <rect x="${mx-lblW/2}" y="${my-9}" width="${lblW}" height="15" rx="3" fill="rgba(255,255,255,0.92)" stroke="${s.stroke||'#111'}" stroke-width="0.5"/>
+      <text x="${mx}" y="${my+3}" text-anchor="middle" font-family="sans-serif" font-size="11" font-weight="700" fill="${s.stroke||'#111'}">${lbl}</text>
+    </g>`;
+  }
+  if (s.type === 'numero') {
+    const r = s.size || 22;
+    return `<g data-shape-id="${s.id}"${sel}${opAttr}>
+      <circle cx="${s.x}" cy="${s.y}" r="${r+3}" fill="none" stroke="${s.color}" stroke-width="1.5" opacity="0.4"/>
+      <circle cx="${s.x}" cy="${s.y}" r="${r}" fill="${s.color}" stroke="#fff" stroke-width="2"/>
+      <text x="${s.x}" y="${s.y+r*0.42}" text-anchor="middle" font-family="sans-serif" font-size="${Math.round(r*1.05)}" font-weight="800" fill="#fff">${s.numero||1}</text>
+    </g>`;
+  }
+  if (s.type === 'stamp') {
+    return `<image data-shape-id="${s.id}"${sel}${opAttr} href="${s.src}" x="${s.x-s.w/2}" y="${s.y-s.h/2}" width="${s.w}" height="${s.h}" preserveAspectRatio="xMidYMid meet"/>`;
+  }
+  if (s.type === 'cable') {
+    const dx = s.x2-s.x1, dy = s.y2-s.y1;
+    const len = Math.hypot(dx,dy)||1;
+    const cx1=s.x1+dx*0.25, cy1=s.y1+dy*0.25-len*0.18;
+    const cx2=s.x2-dx*0.25, cy2=s.y2-dy*0.25-len*0.18;
+    const mx=(s.x1+s.x2)/2, my=(s.y1+s.y2)/2-len*0.1;
+    const lbl = escapeXml(s.label||'');
+    const lblW = lbl ? lbl.length*6.5+10 : 0;
+    return `<g data-shape-id="${s.id}"${sel}${opAttr}>
+      <path d="M ${s.x1} ${s.y1} C ${cx1} ${cy1} ${cx2} ${cy2} ${s.x2} ${s.y2}" fill="none" stroke="${s.stroke}" stroke-width="${s.width||2}" stroke-dasharray="6 3"/>
+      <circle cx="${s.x1}" cy="${s.y1}" r="4" fill="${s.stroke}"/>
+      <circle cx="${s.x2}" cy="${s.y2}" r="4" fill="${s.stroke}"/>
+      ${lbl ? `<rect x="${mx-lblW/2}" y="${my-9}" width="${lblW}" height="14" rx="3" fill="rgba(255,255,255,0.93)" stroke="${s.stroke}" stroke-width="0.8"/>
+      <text x="${mx}" y="${my+2}" text-anchor="middle" font-family="sans-serif" font-size="10.5" font-weight="600" fill="${s.stroke}">${lbl}</text>` : ''}
+    </g>`;
+  }
+  if (s.type === 'legend') {
+    const items = Object.entries(s.counts||{});
+    const tColors = { camera:state.defaults.cameraColor, fov:state.defaults.fovColor, baie:state.defaults.baieColor, rj45:state.defaults.rj45Color, borne:state.defaults.borneColor, porte:state.defaults.porteColor, centrale:state.defaults.centraleColor, badge:state.defaults.badgeColor, alarme:state.defaults.alarmeColor, ir:state.defaults.irColor, clavier:state.defaults.clavierColor, sirene:state.defaults.sireneColor, hp:state.defaults.hpColor, onduleur:state.defaults.onduleurColor, percement:state.defaults.percementColor, numero:state.defaults.numeroColor, cable:state.defaults.cableColor };
+    const tNames = { camera:'Caméra', fov:'Angle de vue', baie:'Baie info.', rj45:'RJ45', borne:'WiFi AP', porte:'Porte CA', centrale:'Centrale CA', badge:'Lecteur badge', alarme:'Alarme', ir:'Détect. IR', clavier:'Clavier', sirene:'Sirène', hp:'HP', onduleur:'UPS', percement:'Percement', numero:'Repère', cable:'Câble' };
+    const lh=20, pw=200, hdr=28, pad=8;
+    const h = hdr + items.length*lh + pad;
+    return `<g data-shape-id="${s.id}"${sel}${opAttr} transform="translate(${s.x},${s.y})">
+      <rect x="0" y="0" width="${pw}" height="${h}" rx="7" fill="rgba(255,255,255,0.97)" stroke="#555" stroke-width="1.5"/>
+      <rect x="0" y="0" width="${pw}" height="${hdr}" rx="7" fill="#2a6fd1"/>
+      <rect x="0" y="${hdr-5}" width="${pw}" height="5" fill="#2a6fd1"/>
+      <text x="${pw/2}" y="18" text-anchor="middle" font-family="sans-serif" font-size="12" font-weight="700" fill="#fff">LÉGENDE OCI Connect</text>
+      ${items.map(([type,count],i) => {
+        const col=tColors[type]||'#888'; const nm=tNames[type]||type;
+        return `<rect x="8" y="${hdr+4+i*lh}" width="12" height="12" rx="2" fill="${col}"/>
+        <text x="26" y="${hdr+14+i*lh}" font-family="sans-serif" font-size="10.5" fill="#222">${nm}</text>
+        <text x="${pw-8}" y="${hdr+14+i*lh}" text-anchor="end" font-family="sans-serif" font-size="10.5" font-weight="700" fill="${col}">×${count}</text>`;
+      }).join('')}
+    </g>`;
+  }
   return '';
 }
 function escapeXml(s) { return String(s).replace(/[<>&"']/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&apos;'})[c]); }
@@ -1289,13 +2665,39 @@ function selectionOverlay(s) {
     const sz = s.size || 24;
     return `<rect class="selection-box" x="${s.x - sz - 4}" y="${s.y - sz - 4}" width="${sz*2 + 8}" height="${sz*2 + 8}"/><circle class="handle" data-handle="move" data-id="${s.id}" cx="${s.x}" cy="${s.y}" r="5"/>`;
   }
+  // Nouveaux types
+  if (s.type === 'circle') {
+    return `<ellipse class="selection-box" cx="${s.cx}" cy="${s.cy}" rx="${s.rx+4}" ry="${s.ry+4}"/>
+      <circle class="handle" data-handle="move" data-id="${s.id}" cx="${s.cx}" cy="${s.cy}" r="5"/>
+      <circle class="handle rot" data-handle="circle-rx" data-id="${s.id}" cx="${s.cx+s.rx}" cy="${s.cy}" r="5"/>
+      <circle class="handle rot" data-handle="circle-ry" data-id="${s.id}" cx="${s.cx}" cy="${s.cy+s.ry}" r="5"/>`;
+  }
+  if (s.type === 'arrow' || s.type === 'cote' || s.type === 'cable') {
+    return `<circle class="handle" data-handle="p1" data-id="${s.id}" cx="${s.x1}" cy="${s.y1}" r="5"/>
+      <circle class="handle" data-handle="p2" data-id="${s.id}" cx="${s.x2}" cy="${s.y2}" r="5"/>`;
+  }
+  if (s.type === 'highlight') {
+    const x=Math.min(s.x,s.x+s.w), y=Math.min(s.y,s.y+s.h), w=Math.abs(s.w), h=Math.abs(s.h);
+    return `<rect class="selection-box" x="${x-2}" y="${y-2}" width="${w+4}" height="${h+4}"/>
+      <circle class="handle" data-handle="move" data-id="${s.id}" cx="${x+w/2}" cy="${y+h/2}" r="5"/>
+      <circle class="handle rot" data-handle="rect-br" data-id="${s.id}" cx="${x+w}" cy="${y+h}" r="5"/>`;
+  }
+  if (s.type === 'bubble' || s.type === 'numero' || s.type === 'stamp' || s.type === 'legend') {
+    const cx = s.cx || s.x, cy = s.cy || s.y;
+    return `<circle class="handle" data-handle="move" data-id="${s.id}" cx="${cx}" cy="${cy}" r="6"/>`;
+  }
   return '';
 }
 
 function render() {
-  // Sort: trace layer first, then annot
-  const order = { trace: 0, annot: 1 };
-  const sorted = [...state.shapes].sort((a, b) => (order[a.layer||'trace'] || 0) - (order[b.layer||'trace'] || 0));
+  // Trier les shapes selon l'ordre des calques dynamiques (index dans dynLayers)
+  const layerOrder = {};
+  state.dynLayers.forEach((l, i) => { layerOrder[l.id] = i; });
+  const sorted = [...state.shapes].sort((a, b) => {
+    const oa = layerOrder[a.layer || 'annot'] ?? 999;
+    const ob = layerOrder[b.layer || 'annot'] ?? 999;
+    return oa - ob;
+  });
   let svg = '';
   for (const s of sorted) {
     svg += shapeToSVG(s, s.id === state.selectedId);
@@ -1316,11 +2718,12 @@ function render() {
   }
   overlay.innerHTML = svg;
 
-  // counts
-  document.getElementById('cnt-trace').textContent = state.shapes.filter(s => (s.layer||'trace') === 'trace').length;
-  document.getElementById('cnt-annot').textContent = state.shapes.filter(s => s.layer === 'annot').length;
-  document.getElementById('shape-total').textContent = state.shapes.length;
+  // Mise à jour compteurs dans le panneau calques
+  document.getElementById('shape-total') && (document.getElementById('shape-total').textContent = state.shapes.length);
+  renderLayersPanel();
   updateShapeList();
+  renderExtraLayers();
+  updateMinimap();
 }
 
 function updateShapeList() {
@@ -1328,9 +2731,11 @@ function updateShapeList() {
   if (state.shapes.length === 0) { el.innerHTML = '<div style="padding:8px;font-size:12px;color:#777;">Aucun élément</div>'; return; }
   el.innerHTML = state.shapes.map(s => {
     const color = s.color || s.stroke || '#888';
-    const icon = { camera: '⊙', fov: '⌖', line: '╱', polyline: '⌐', rect: '▭', pen: '〜', text: 'T', baie: '▦', rj45: '▤', doorplan: '▯', percement: '✕', borne: '⊕', porte: 'P', centrale: '⊟', badge: '⊡', alarme: '🔔', ir: '◉', clavier: '⊞', sirene: '◈', hp: '◀', onduleur: '⚡' }[s.type] || '•';
-    const label = s.label || s.text || (s.type + ' ' + s.id.replace('s',''));
-    return `<div class="shape-item ${s.id === state.selectedId ? 'selected' : ''}" onclick="selectShape('${s.id}')"><span class="dot" style="background:${color}"></span><span class="lbl">${icon} ${escapeXml(label)}</span><span class="del" onclick="event.stopPropagation();deleteShape('${s.id}')">✕</span></div>`;
+    const icon = { camera: '⊙', fov: '⌖', line: '╱', polyline: '⌐', rect: '▭', pen: '〜', text: 'T', baie: '▦', rj45: '▤', doorplan: '▯', percement: '✕', borne: '⊕', porte: 'P', centrale: '⊟', badge: '⊡', alarme: '🔔', ir: '◉', clavier: '⊞', sirene: '◈', hp: '◀', onduleur: '⚡', circle: '◯', arrow: '➜', highlight: '▓', bubble: '💬', cote: '↔', numero: '①', stamp: '🖼', cable: '〰', legend: '📋' }[s.type] || '•';
+    const label = s.label || s.text || (s.type === 'numero' ? `#${s.numero}` : s.type + ' ' + s.id.replace('s',''));
+    const ly = state.dynLayers.find(l => l.id === s.layer);
+    const lyName = ly ? `<span style="font-size:9px;color:#666;background:#1e1e1e;padding:1px 3px;border-radius:2px;margin-left:2px">${ly.name.substring(0,8)}</span>` : '';
+    return `<div class="shape-item ${s.id === state.selectedId ? 'selected' : ''}" onclick="selectShape('${s.id}')"><span class="dot" style="background:${color}"></span><span class="lbl">${icon} ${escapeXml(label)}${lyName}</span><span class="del" onclick="event.stopPropagation();deleteShape('${s.id}')">✕</span></div>`;
   }).join('');
 }
 window.selectShape = (id) => { state.selectedId = id; updatePropertiesPanel(); render(); };
@@ -1387,6 +2792,14 @@ function updatePropertiesPanel() {
     percement: 'Cliquez pour marquer un percement / traversée de cloison (croix rouge).',
     eraser: 'Glissez pour effacer (en blanc) des parties du plan importé. Règle la taille dans le panneau. Bouton « Restaurer » si besoin.',
     delete: 'Cliquez sur un élément pour le supprimer.',
+    circle: 'Cliquez + glissez pour tracer un cercle ou une ellipse. Maintenez Shift pour un cercle parfait.',
+    arrow: 'Cliquez + glissez pour tracer une flèche directionnelle. Utile pour indiquer un sens ou un flux.',
+    highlight: 'Cliquez + glissez pour créer une zone surlignée colorée translucide. Idéal pour identifier des zones sur une photo.',
+    bubble: 'Cliquez pour ajouter une bulle de commentaire (post-it). Saisissez votre note dans la fenêtre.',
+    cote: 'Cliquez + glissez pour tracer une cotation avec la dimension. Si une échelle est définie (outil Mesure), la distance réelle est affichée.',
+    numero: 'Cliquez pour placer un repère numéroté (①②③…). Auto-incrémenté. Utile pour légender une photo.',
+    stamp: 'Cliquez pour insérer une image (logo, photo, signature…) directement sur le plan.',
+    cable: 'Cliquez + glissez pour tracer une liaison câblée entre deux points. Un label optionnel peut être ajouté.',
   };
   hint.textContent = toolHints[state.tool] || '';
 
@@ -1501,6 +2914,60 @@ function updatePropertiesPanel() {
       <div class="hint-box" style="margin-top:12px">La gomme efface directement le plan importé (peint en blanc). Les annotations ne sont pas touchées.</div>
       <button class="btn danger" style="margin-top:10px;width:100%" onclick="restoreOriginalPlan()">↺ Restaurer le plan original</button>
     `;
+  } else if (state.tool === 'circle') {
+    el.innerHTML = `
+      <label class="field">Couleur du contour</label>
+      <div class="color-row"><input type="color" value="${state.defaults.circleColor}" oninput="state.defaults.circleColor=this.value"></div>
+      ${fld({id:'cw', label:'Épaisseur', value:state.defaults.circleWidth, min:0.5, max:60, step:0.5, set:'state.defaults.circleWidth=v'})}
+      <label class="field" style="margin-top:8px">Remplissage</label>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input type="color" value="${state.defaults.circleFill === 'none' ? '#ffffff' : state.defaults.circleFill}" oninput="state.defaults.circleFill=this.value">
+        <label style="font-size:12px;color:#aaa;display:flex;gap:6px;align-items:center"><input type="checkbox" ${state.defaults.circleFill==='none'?'checked':''} onchange="state.defaults.circleFill=this.checked?'none':document.querySelector('[oninput*=circleFill]').value"> Vide (pas de remplissage)</label>
+      </div>
+      <div class="hint-box" style="margin-top:12px">Tirez en diagonal pour une ellipse, ou gardez la même distance H/V pour un cercle parfait.</div>
+    `;
+  } else if (state.tool === 'arrow') {
+    el.innerHTML = `
+      <label class="field">Couleur</label>
+      <div class="color-row"><input type="color" value="${state.defaults.arrowColor}" oninput="state.defaults.arrowColor=this.value"></div>
+      ${fld({id:'aw', label:'Épaisseur', value:state.defaults.arrowWidth, min:0.5, max:40, step:0.5, set:'state.defaults.arrowWidth=v'})}
+    `;
+  } else if (state.tool === 'highlight') {
+    el.innerHTML = `
+      <label class="field">Couleur de surbrillance</label>
+      <div class="color-row"><input type="color" value="${state.defaults.highlightColor}" oninput="state.defaults.highlightColor=this.value"></div>
+      ${fld({id:'ho', label:'Opacité', unit:'%', value:Math.round(state.defaults.highlightOpacity*100), min:5, max:90, step:1, set:'state.defaults.highlightOpacity=v/100'})}
+    `;
+  } else if (state.tool === 'bubble') {
+    el.innerHTML = `
+      <label class="field">Couleur fond</label>
+      <div class="color-row"><input type="color" value="${state.defaults.bubbleColor}" oninput="state.defaults.bubbleColor=this.value">
+      <span style="font-size:12px;color:#aaa">Bordure</span>
+      <input type="color" value="${state.defaults.bubbleBorder}" oninput="state.defaults.bubbleBorder=this.value"></div>
+    `;
+  } else if (state.tool === 'cote') {
+    el.innerHTML = `
+      <label class="field">Couleur</label>
+      <div class="color-row"><input type="color" value="${state.defaults.coteColor}" oninput="state.defaults.coteColor=this.value"></div>
+      ${fld({id:'cow', label:'Épaisseur', value:state.defaults.coteWidth, min:0.5, max:20, step:0.5, set:'state.defaults.coteWidth=v'})}
+      <div class="hint-box" style="margin-top:8px">${state.measure.scale ? `Échelle : ${state.measure.scale.px.toFixed(0)} px = ${state.measure.scale.real} ${state.measure.scale.unit}` : 'Définissez une échelle (📐 Mesure) pour afficher les distances réelles.'}</div>
+    `;
+  } else if (state.tool === 'numero') {
+    el.innerHTML = `
+      <label class="field">Couleur</label>
+      <div class="color-row"><input type="color" value="${state.defaults.numeroColor}" oninput="state.defaults.numeroColor=this.value"></div>
+      ${fld({id:'ns', label:'Taille', value:state.defaults.numeroSize, min:8, max:200, step:1, set:'state.defaults.numeroSize=v'})}
+      <div class="hint-box" style="margin-top:8px">Auto-incrémenté. Utile pour numéroter des zones sur une photo.</div>
+    `;
+  } else if (state.tool === 'cable') {
+    el.innerHTML = `
+      <label class="field">Couleur</label>
+      <div class="color-row"><input type="color" value="${state.defaults.cableColor}" oninput="state.defaults.cableColor=this.value"></div>
+      ${fld({id:'caw', label:'Épaisseur', value:state.defaults.cableWidth, min:0.5, max:20, step:0.5, set:'state.defaults.cableWidth=v'})}
+      <div class="hint-box" style="margin-top:8px">Tracé en courbe de Bézier avec label centré. Un prompt demande le label à la fin du tracé.</div>
+    `;
+  } else if (state.tool === 'stamp') {
+    el.innerHTML = `<div class="hint-box">Cliquez sur le plan pour choisir une image (logo, signature, photo…) et la coller à l'emplacement cliqué. Redimensionnable ensuite par sélection.</div>`;
   } else {
     el.innerHTML = '<div style="font-size:13px; color:#888;">Sélectionnez un élément ou choisissez un outil.</div>';
   }
@@ -1625,6 +3092,63 @@ function renderShapeProps(s, el) {
       <div class="color-row"><input type="color" value="${s.color}" oninput="updateShape('${s.id}',{color:this.value})"></div>
       ${fld({id:'snp_s', label:'Taille', value:s.size, min:8, max:250, step:1, set:`updateShape('${s.id}',{size:v})`, after:'updatePropertiesPanel()'})}
     `;
+  } else if (s.type === 'circle') {
+    html += `
+      <label class="field">Couleur contour</label>
+      <div class="color-row"><input type="color" value="${s.stroke||'#2a6fd1'}" oninput="updateShape('${s.id}',{stroke:this.value})"></div>
+      ${fld({id:'scw', label:'Épaisseur', value:s.width||2, min:0.5, max:60, step:0.5, set:`updateShape('${s.id}',{width:v})`})}
+      ${fld({id:'scrx', label:'Rayon X', value:s.rx||10, min:2, max:2000, step:1, set:`updateShape('${s.id}',{rx:v})`, after:'updatePropertiesPanel()'})}
+      ${fld({id:'scry', label:'Rayon Y', value:s.ry||10, min:2, max:2000, step:1, set:`updateShape('${s.id}',{ry:v})`, after:'updatePropertiesPanel()'})}
+    `;
+  } else if (s.type === 'arrow') {
+    html += `
+      <label class="field">Couleur</label>
+      <div class="color-row"><input type="color" value="${s.stroke||'#ef4444'}" oninput="updateShape('${s.id}',{stroke:this.value})"></div>
+      ${fld({id:'saw', label:'Épaisseur', value:s.width||2, min:0.5, max:40, step:0.5, set:`updateShape('${s.id}',{width:v})`})}
+    `;
+  } else if (s.type === 'highlight') {
+    html += `
+      <label class="field">Couleur</label>
+      <div class="color-row"><input type="color" value="${s.color||'#fef08a'}" oninput="updateShape('${s.id}',{color:this.value})"></div>
+      ${fld({id:'sho', label:'Opacité', unit:'%', value:Math.round((s.opacity||0.4)*100), min:5, max:90, step:1, set:`updateShape('${s.id}',{opacity:v/100})`, after:'updatePropertiesPanel()'})}
+    `;
+  } else if (s.type === 'bubble') {
+    html += `
+      <label class="field">Texte</label>
+      <textarea style="width:100%;background:#1a1a1a;border:1px solid #3a3a3a;color:#e5e5e5;padding:6px;border-radius:4px;font-size:12px;resize:vertical;min-height:60px" oninput="updateShape('${s.id}',{text:this.value})">${escapeXml(s.text||'')}</textarea>
+      <label class="field">Couleur fond</label>
+      <div class="color-row"><input type="color" value="${s.color||'#fef08a'}" oninput="updateShape('${s.id}',{color:this.value})">
+        <span style="font-size:12px;color:#aaa">Bordure</span>
+        <input type="color" value="${s.border||'#ca8a04'}" oninput="updateShape('${s.id}',{border:this.value})"></div>
+      ${fld({id:'sbs', label:'Taille texte', value:s.size||13, min:8, max:60, step:1, set:`updateShape('${s.id}',{size:v})`, after:'updatePropertiesPanel()'})}
+    `;
+  } else if (s.type === 'cote') {
+    html += `
+      <label class="field">Couleur</label>
+      <div class="color-row"><input type="color" value="${s.stroke||'#111'}" oninput="updateShape('${s.id}',{stroke:this.value})"></div>
+      ${fld({id:'scow', label:'Épaisseur', value:s.width||1.5, min:0.5, max:20, step:0.5, set:`updateShape('${s.id}',{width:v})`})}
+    `;
+  } else if (s.type === 'numero') {
+    html += `
+      <label class="field">Numéro</label>
+      <input type="number" min="1" max="999" value="${s.numero||1}" oninput="updateShape('${s.id}',{numero:parseInt(this.value)||1})">
+      <label class="field">Couleur</label>
+      <div class="color-row"><input type="color" value="${s.color||'#e67e22'}" oninput="updateShape('${s.id}',{color:this.value})"></div>
+      ${fld({id:'snrs', label:'Taille', value:s.size||22, min:8, max:200, step:1, set:`updateShape('${s.id}',{size:v})`, after:'updatePropertiesPanel()'})}
+    `;
+  } else if (s.type === 'stamp') {
+    html += `
+      ${fld({id:'sstw', label:'Largeur', value:s.w||80, min:10, max:2000, step:1, set:`updateShape('${s.id}',{w:v})`, after:'updatePropertiesPanel()'})}
+      ${fld({id:'ssth', label:'Hauteur', value:s.h||80, min:10, max:2000, step:1, set:`updateShape('${s.id}',{h:v})`, after:'updatePropertiesPanel()'})}
+    `;
+  } else if (s.type === 'cable') {
+    html += `
+      <label class="field">Label</label>
+      <input type="text" value="${escapeXml(s.label||'')}" oninput="updateShape('${s.id}',{label:this.value})">
+      <label class="field">Couleur</label>
+      <div class="color-row"><input type="color" value="${s.stroke||'#6366f1'}" oninput="updateShape('${s.id}',{stroke:this.value})"></div>
+      ${fld({id:'scaw', label:'Épaisseur', value:s.width||2, min:0.5, max:20, step:0.5, set:`updateShape('${s.id}',{width:v})`})}
+    `;
   }
   html += `<button class="btn danger" style="margin-top:12px;width:100%" onclick="deleteShape('${s.id}')">Supprimer cet élément</button>`;
   el.innerHTML = html;
@@ -1653,6 +3177,13 @@ document.querySelectorAll('.preset-color').forEach(el => {
     else if (state.tool === 'sirene') state.defaults.sireneColor = c;
     else if (state.tool === 'hp') state.defaults.hpColor = c;
     else if (state.tool === 'onduleur') state.defaults.onduleurColor = c;
+    else if (state.tool === 'circle') state.defaults.circleColor = c;
+    else if (state.tool === 'arrow') state.defaults.arrowColor = c;
+    else if (state.tool === 'highlight') state.defaults.highlightColor = c;
+    else if (state.tool === 'bubble') state.defaults.bubbleColor = c;
+    else if (state.tool === 'cote') state.defaults.coteColor = c;
+    else if (state.tool === 'numero') state.defaults.numeroColor = c;
+    else if (state.tool === 'cable') state.defaults.cableColor = c;
     if (state.selectedId) {
       const s = state.shapes.find(x => x.id === state.selectedId);
       if (s) {
@@ -1665,26 +3196,6 @@ document.querySelectorAll('.preset-color').forEach(el => {
   });
 });
 
-// Layer selection (visual highlight only)
-document.querySelectorAll('.layer-selectable').forEach(el => {
-  el.addEventListener('click', () => {
-    document.querySelectorAll('.layer-selectable').forEach(x => x.classList.remove('active-layer'));
-    el.classList.add('active-layer');
-  });
-});
-
-// Layers
-window.toggleLayer = (name) => {
-  state.layers[name] = !state.layers[name];
-  const eye = document.getElementById('eye-' + name);
-  eye.classList.toggle('visible', state.layers[name]);
-  eye.style.opacity = state.layers[name] ? '1' : '0.4';
-  if (name === 'plan') {
-    canvas.style.display = state.layers.plan ? 'block' : 'none';
-  }
-  render();
-};
-
 // ==================== EXPORT ====================
 document.getElementById('btn-export-png').addEventListener('click', () => {
   if (!state.imgLoaded) { alert('Aucun plan chargé'); return; }
@@ -1693,7 +3204,7 @@ document.getElementById('btn-export-png').addEventListener('click', () => {
   off.width = state.imgWidth;
   off.height = state.imgHeight;
   const octx = off.getContext('2d');
-  if (state.layers.plan) octx.drawImage(canvas, 0, 0);
+  if (state.bgVisible) octx.drawImage(canvas, 0, 0);
   else { octx.fillStyle = '#fff'; octx.fillRect(0, 0, off.width, off.height); }
   // Serialize SVG overlay
   const svgStr = `<svg xmlns="http://www.w3.org/2000/svg" width="${state.imgWidth}" height="${state.imgHeight}" viewBox="0 0 ${state.imgWidth} ${state.imgHeight}">${overlay.innerHTML}</svg>`;
@@ -1715,7 +3226,7 @@ document.getElementById('btn-export-svg').addEventListener('click', () => {
   const planB64 = canvas.toDataURL('image/png');
   const svg = `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${state.imgWidth}" height="${state.imgHeight}" viewBox="0 0 ${state.imgWidth} ${state.imgHeight}">
-${state.layers.plan ? `<image href="${planB64}" width="${state.imgWidth}" height="${state.imgHeight}"/>` : ''}
+${state.bgVisible ? `<image href="${planB64}" width="${state.imgWidth}" height="${state.imgHeight}"/>` : ''}
 ${overlay.innerHTML}
 </svg>`;
   const blob = new Blob([svg], { type: 'image/svg+xml' });
@@ -1728,8 +3239,10 @@ ${overlay.innerHTML}
 // Save project (JSON with image as base64)
 document.getElementById('btn-save').addEventListener('click', async () => {
   if (!state.imgLoaded) { alert('Aucun plan chargé'); return; }
+  // Pour la sauvegarde des calques images, on évite de sauver les imgSrc (trop lourd) — on sauve juste les métadonnées
+  const dynLayersMeta = state.dynLayers.map(l => ({ ...l, imgSrc: l.imgSrc || undefined }));
   const project = {
-    version: 1,
+    version: 2,
     imgWidth: state.imgWidth,
     imgHeight: state.imgHeight,
     imgSrc: canvas.toDataURL('image/png'),
@@ -1737,6 +3250,11 @@ document.getElementById('btn-save').addEventListener('click', async () => {
     nextId: state.nextId,
     mode: state.mode,
     threshold: state.threshold,
+    dynLayers: dynLayersMeta,
+    activeLayerId: state.activeLayerId,
+    bgVisible: state.bgVisible,
+    measureScale: state.measure.scale,
+    measureSaved: state.measure.saved,
   };
   const blob = new Blob([JSON.stringify(project)], { type: 'application/json' });
   const a = document.createElement('a');
@@ -1776,6 +3294,11 @@ function loadProject(project) {
     overlay.setAttribute('width', state.imgWidth);
     overlay.setAttribute('height', state.imgHeight);
     overlay.setAttribute('viewBox', `0 0 ${state.imgWidth} ${state.imgHeight}`);
+    [gridSvg, extraLayersSvg, measureSvg].forEach(s => {
+      s.setAttribute('width', state.imgWidth);
+      s.setAttribute('height', state.imgHeight);
+      s.setAttribute('viewBox', `0 0 ${state.imgWidth} ${state.imgHeight}`);
+    });
     ctx.drawImage(img, 0, 0);
     state.imgData = ctx.getImageData(0, 0, state.imgWidth, state.imgHeight);
     state.imgLoaded = true;
@@ -1783,6 +3306,23 @@ function loadProject(project) {
     state.nextId = project.nextId || 1;
     state.mode = project.mode || 'color';
     state.threshold = project.threshold || 100;
+    // Restaurer calques dynamiques (v2+) ou migrer depuis v1
+    if (project.dynLayers && project.version >= 2) {
+      state.dynLayers = project.dynLayers;
+      state.activeLayerId = project.activeLayerId || state.dynLayers[0]?.id || 'annot';
+      state.bgVisible = project.bgVisible !== undefined ? project.bgVisible : true;
+    } else {
+      // Migration v1 → v2 : convertir les layers 'trace'/'annot' en dynLayers
+      state.dynLayers = [
+        { id: 'trace', name: 'Traçage / Murs', visible: true, opacity: 1, locked: false },
+        { id: 'annot', name: 'Annotations', visible: true, opacity: 1, locked: false },
+      ];
+      state.activeLayerId = 'annot';
+      state.bgVisible = true;
+    }
+    if (project.measureScale) state.measure.scale = project.measureScale;
+    if (project.measureSaved) { state.measure.saved = project.measureSaved; state.measure.mode = 'measure'; }
+    canvas.style.display = state.bgVisible ? 'block' : 'none';
     document.getElementById('mode-select').value = state.mode;
     document.getElementById('threshold').value = state.threshold;
     document.getElementById('threshold-val').textContent = state.threshold;
@@ -1792,6 +3332,9 @@ function loadProject(project) {
     applyMode();
     fitToView();
     render();
+    renderGrid();
+    renderLayersPanel();
+    if (project.measureSaved && project.measureSaved.length) renderMeasure();
     pushHistory();
   };
   img.src = project.imgSrc;
@@ -1843,7 +3386,6 @@ function restoreOriginalPlan() {
   if (!confirm('Restaurer le plan original ? Toutes les gommes seront effacées.')) return;
   const img = new Image();
   img.onload = () => {
-    // Keep current rotation-adjusted size? Reset to original orientation
     state.imgWidth = img.width;
     state.imgHeight = img.height;
     canvas.width = img.width;
@@ -1851,6 +3393,11 @@ function restoreOriginalPlan() {
     overlay.setAttribute('width', img.width);
     overlay.setAttribute('height', img.height);
     overlay.setAttribute('viewBox', `0 0 ${img.width} ${img.height}`);
+    [gridSvg, extraLayersSvg, measureSvg].forEach(s => {
+      s.setAttribute('width', img.width);
+      s.setAttribute('height', img.height);
+      s.setAttribute('viewBox', `0 0 ${img.width} ${img.height}`);
+    });
     ctx.drawImage(img, 0, 0);
     state.imgData = ctx.getImageData(0, 0, img.width, img.height);
     document.getElementById('cnt-plan').textContent = `${img.width}×${img.height}`;
@@ -1925,8 +3472,11 @@ function rotatePlan(clockwise) {
   }
 
   document.getElementById('cnt-plan').textContent = `${newW}×${newH}`;
-
-  // Rotate originalSrc too so that "Restaurer" reverts to the rotated orientation
+  [gridSvg, extraLayersSvg, measureSvg].forEach(s => {
+    s.setAttribute('width', newW);
+    s.setAttribute('height', newH);
+    s.setAttribute('viewBox', `0 0 ${newW} ${newH}`);
+  });
   if (state.originalSrc) {
     const origImg = new Image();
     origImg.onload = () => {
@@ -1946,11 +3496,18 @@ function rotatePlan(clockwise) {
   pushHistory();
 }
 
-document.getElementById('btn-rot-left').addEventListener('click', () => rotatePlan(false));
-document.getElementById('btn-rot-right').addEventListener('click', () => rotatePlan(true));
+// Rotation : appelée directement via onclick dans le dropdown
 
-// Init
-updatePropertiesPanel();
+// ==================== ÎLOT FLOTTANT ====================
+// DD save/load wiring
+document.getElementById('dd-save').addEventListener('click', () => document.getElementById('btn-save').click());
+document.getElementById('dd-load').addEventListener('click', () => document.getElementById('btn-load').click());
+
+// Ctrl+S
+document.addEventListener('keydown', (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); document.getElementById('btn-save').click(); }
+});
+renderLayersPanel();
 render();
 pushHistory();
 
