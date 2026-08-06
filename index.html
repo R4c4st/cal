@@ -2,6 +2,11 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#141517">
 <title>Plan Annotator — OCI Connect</title>
 <style>
 :root {
@@ -303,6 +308,25 @@ input[type=color] { width: 38px; height: 28px; background: var(--bg-0); border: 
 .handle { fill: #fff; stroke: #2a6fd1; stroke-width: 2; cursor: pointer; }
 .handle.rot { fill: #2a9d8f; stroke: #fff; }
 .selection-box { fill: none; stroke: #2a6fd1; stroke-width: 1; stroke-dasharray: 4 3; }
+
+/* ===== BOUTONS ZOOM FLOTTANTS (tactile) ===== */
+#touch-zoom-bar {
+  position: absolute; right: 14px; bottom: 84px; z-index: 40;
+  display: flex; flex-direction: column; gap: 8px;
+}
+#touch-zoom-bar button {
+  width: 46px; height: 46px; border-radius: 12px;
+  background: var(--bg-2); border: 1px solid var(--border-light);
+  color: var(--text-0); font-size: 22px; font-weight: 600;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; box-shadow: var(--shadow); touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+#touch-zoom-bar button:active { background: var(--bg-3); transform: scale(0.94); }
+/* Masqué sur grand écran (bureau) où la molette suffit */
+@media (hover: hover) and (pointer: fine) and (min-width: 900px) {
+  #touch-zoom-bar { display: none; }
+}
 </style>
 </head>
 <body>
@@ -1008,6 +1032,71 @@ canvasArea.addEventListener('wheel', (e) => {
   const factor = e.deltaY > 0 ? 0.9 : 1.111;
   setZoom(state.zoom * factor, e.clientX, e.clientY);
 }, { passive: false });
+
+// ==================== TACTILE : pinch-zoom + pan 2 doigts ====================
+// (le S Pen conserve le comportement souris ; ces gestes servent aux 2 doigts)
+(function() {
+  let pinchActive = false;
+  let lastDist = 0;
+  let lastMidX = 0, lastMidY = 0;
+
+  function dist(t1, t2) {
+    const dx = t1.clientX - t2.clientX, dy = t1.clientY - t2.clientY;
+    return Math.hypot(dx, dy);
+  }
+
+  canvasArea.addEventListener('touchstart', (e) => {
+    if (e.touches.length === 2) {
+      pinchActive = true;
+      lastDist = dist(e.touches[0], e.touches[1]);
+      lastMidX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+      lastMidY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+      e.preventDefault();
+    }
+  }, { passive: false });
+
+  canvasArea.addEventListener('touchmove', (e) => {
+    if (pinchActive && e.touches.length === 2) {
+      e.preventDefault();
+      const newDist = dist(e.touches[0], e.touches[1]);
+      const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+      const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+      // pan (déplacement du milieu des 2 doigts)
+      state.panX += midX - lastMidX;
+      state.panY += midY - lastMidY;
+      // zoom (variation d'écartement) centré sur le milieu
+      if (lastDist > 0) {
+        setZoom(state.zoom * (newDist / lastDist), midX, midY);
+      } else {
+        applyTransform();
+      }
+      lastDist = newDist;
+      lastMidX = midX;
+      lastMidY = midY;
+    }
+  }, { passive: false });
+
+  canvasArea.addEventListener('touchend', (e) => {
+    if (e.touches.length < 2) { pinchActive = false; lastDist = 0; }
+  });
+})();
+
+// ==================== BOUTONS ZOOM FLOTTANTS (tactile) ====================
+(function() {
+  const bar = document.createElement('div');
+  bar.id = 'touch-zoom-bar';
+  bar.innerHTML =
+    '<button data-z="in"  aria-label="Zoom avant">+</button>' +
+    '<button data-z="fit" aria-label="Ajuster">▢</button>' +
+    '<button data-z="out" aria-label="Zoom arrière">−</button>';
+  document.getElementById('canvas-area').appendChild(bar);
+  bar.addEventListener('click', (e) => {
+    const b = e.target.closest('button'); if (!b) return;
+    if (b.dataset.z === 'in') zoomIn();
+    else if (b.dataset.z === 'out') zoomOut();
+    else if (b.dataset.z === 'fit') fitToView();
+  });
+})();
 
 // convert screen coords to image coords
 function screenToImg(clientX, clientY) {
@@ -3523,6 +3612,90 @@ pushHistory();
       }
     }
   } catch(e) {}
+})();
+</script>
+
+<!-- ============ PWA : manifest inline + service worker ============ -->
+<script>
+(function() {
+  // --- Icône SVG (losange bleu/violet, cohérent avec le logo ◆) ---
+  const iconSvg =
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">' +
+    '<rect width="512" height="512" rx="96" fill="#141517"/>' +
+    '<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">' +
+    '<stop offset="0" stop-color="#3b82f6"/><stop offset="1" stop-color="#8b5cf6"/>' +
+    '</linearGradient></defs>' +
+    '<rect x="146" y="146" width="220" height="220" rx="40" transform="rotate(45 256 256)" fill="url(#g)"/>' +
+    '</svg>';
+  const iconUrl = 'data:image/svg+xml;base64,' + btoa(iconSvg);
+
+  // --- Manifest (blob) ---
+  const manifest = {
+    name: 'Plan Annotator — OCI Connect',
+    short_name: 'Plan Annotator',
+    description: 'Annotation de plans courant faible',
+    start_url: '.',
+    scope: '.',
+    display: 'standalone',
+    orientation: 'any',
+    background_color: '#141517',
+    theme_color: '#141517',
+    icons: [
+      { src: iconUrl, sizes: '192x192', type: 'image/svg+xml', purpose: 'any maskable' },
+      { src: iconUrl, sizes: '512x512', type: 'image/svg+xml', purpose: 'any maskable' }
+    ]
+  };
+  const mBlob = new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' });
+  const link = document.createElement('link');
+  link.rel = 'manifest';
+  link.href = URL.createObjectURL(mBlob);
+  document.head.appendChild(link);
+  // icône apple + favicon
+  ['apple-touch-icon', 'icon'].forEach(rel => {
+    const l = document.createElement('link'); l.rel = rel; l.href = iconUrl; document.head.appendChild(l);
+  });
+
+  // --- Service worker (cache la page elle-même pour le hors-ligne) ---
+  if ('serviceWorker' in navigator) {
+    const swCode =
+      "const CACHE='plan-annotator-v1';" +
+      "const URL='" + location.href.split('#')[0] + "';" +
+      "self.addEventListener('install',e=>{" +
+      "  self.skipWaiting();" +
+      "  e.waitUntil(caches.open(CACHE).then(c=>c.add(URL)));" +
+      "});" +
+      "self.addEventListener('activate',e=>{e.waitUntil(self.clients.claim());});" +
+      "self.addEventListener('fetch',e=>{" +
+      "  if(e.request.method!=='GET')return;" +
+      "  e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).catch(()=>caches.match(URL))));" +
+      "});";
+    const swBlob = new Blob([swCode], { type: 'text/javascript' });
+    const swUrl = URL.createObjectURL(swBlob);
+    navigator.serviceWorker.register(swUrl).catch(()=>{});
+  }
+
+  // --- Bouton "Installer l'appli" (topbar) ---
+  let deferredPrompt = null;
+  const installBtn = document.createElement('button');
+  installBtn.className = 'tbtn primary';
+  installBtn.style.cssText = 'display:none;margin-left:6px';
+  installBtn.innerHTML = '⤓ Installer';
+  const spacer = document.querySelector('.topbar .spacer');
+  if (spacer && spacer.parentNode) spacer.parentNode.insertBefore(installBtn, spacer.nextSibling);
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    installBtn.style.display = 'inline-flex';
+  });
+  installBtn.addEventListener('click', async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    await deferredPrompt.userChoice;
+    deferredPrompt = null;
+    installBtn.style.display = 'none';
+  });
+  window.addEventListener('appinstalled', () => { installBtn.style.display = 'none'; });
 })();
 </script>
 
