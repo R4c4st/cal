@@ -330,10 +330,63 @@ input[type=color] { width: 38px; height: 28px; background: var(--bg-0); border: 
 @media (hover: hover) and (pointer: fine) and (min-width: 900px) {
   #touch-zoom-bar { display: none; }
 }
+
+/* ===== MODE MOBILE : panneaux escamotables (tiroirs) ===== */
+#drawer-tools-btn, #drawer-panel-btn { display: none; }
+#drawer-backdrop { display: none; }
+body.mobile-ui #drawer-tools-btn,
+body.mobile-ui #drawer-panel-btn {
+  display: flex; align-items: center; justify-content: center;
+  position: fixed; z-index: 120;
+  width: 48px; height: 48px; border-radius: 14px;
+  background: var(--accent); color: #fff; border: none;
+  font-size: 22px; box-shadow: var(--shadow-lg);
+  cursor: pointer; touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+body.mobile-ui #drawer-tools-btn:active,
+body.mobile-ui #drawer-panel-btn:active { transform: scale(0.93); }
+body.mobile-ui #drawer-tools-btn { top: 56px; left: 12px; }
+body.mobile-ui #drawer-panel-btn { top: 56px; right: 12px; background: var(--bg-3); color: var(--text-0); border: 1px solid var(--border-light); }
+body.mobile-ui #drawer-backdrop.open {
+  display: block; position: fixed; inset: 0; z-index: 110;
+  background: rgba(0,0,0,0.5); animation: ddFade 0.15s ease;
+}
+body.mobile-ui .workspace { position: relative; }
+body.mobile-ui .canvas-area { width: 100%; }
+body.mobile-ui .sidebar {
+  position: fixed; top: 46px; left: 0; bottom: 0; z-index: 115;
+  width: 64px; padding: 12px 0;
+  transform: translateX(-110%);
+  transition: transform 0.22s cubic-bezier(0.4,0,0.2,1);
+  box-shadow: var(--shadow-lg);
+}
+body.mobile-ui .sidebar.open { transform: translateX(0); }
+body.mobile-ui .sidebar .tool { width: 46px; height: 46px; }
+body.mobile-ui .rightpanel {
+  position: fixed; top: 46px; right: 0; bottom: 0; z-index: 115;
+  width: 82vw; max-width: 340px;
+  transform: translateX(110%);
+  transition: transform 0.22s cubic-bezier(0.4,0,0.2,1);
+  box-shadow: var(--shadow-lg);
+}
+body.mobile-ui .rightpanel.open { transform: translateX(0); }
+body.mobile-ui .topbar .tbtn .lbl { display: none; }
+body.mobile-ui .topbar .brand { font-size: 12px; margin-right: 6px; max-width: 130px; overflow: hidden; text-overflow: ellipsis; }
+body.mobile-ui .topbar { gap: 1px; padding: 0 6px; }
+body.mobile-ui .topbar .tbtn { padding: 0 7px; }
+body.mobile-ui #touch-zoom-bar { display: flex; right: 12px; bottom: 60px; }
+body.mobile-ui #minimap { display: none !important; }
+body.mobile-ui .zoom-controls { display: none; }
 </style>
 </head>
 <body>
 <div id="tool-tooltip"></div>
+
+<!-- Tiroirs mobiles -->
+<div id="drawer-backdrop"></div>
+<button id="drawer-tools-btn" aria-label="Outils">✎</button>
+<button id="drawer-panel-btn" aria-label="Calques et propriétés">▤</button>
 
 <div class="app">
   <div class="topbar">
@@ -3615,6 +3668,45 @@ pushHistory();
       }
     }
   } catch(e) {}
+})();
+</script>
+
+<script>
+// ===== MODE MOBILE : gestion des tiroirs =====
+(function() {
+  const body = document.body;
+  const sidebar = document.getElementById('sidebar');
+  const rightpanel = document.querySelector('.rightpanel');
+  const backdrop = document.getElementById('drawer-backdrop');
+  const toolsBtn = document.getElementById('drawer-tools-btn');
+  const panelBtn = document.getElementById('drawer-panel-btn');
+  function evalMobile() {
+    const narrow = window.innerWidth < 1024;
+    const coarse = window.matchMedia('(pointer: coarse)').matches;
+    if (narrow || coarse) body.classList.add('mobile-ui');
+    else { body.classList.remove('mobile-ui'); closeAll(); }
+  }
+  function closeAll() {
+    sidebar && sidebar.classList.remove('open');
+    rightpanel && rightpanel.classList.remove('open');
+    backdrop && backdrop.classList.remove('open');
+  }
+  function openDrawer(el) { closeAll(); el && el.classList.add('open'); backdrop && backdrop.classList.add('open'); }
+  toolsBtn && toolsBtn.addEventListener('click', () => {
+    if (sidebar.classList.contains('open')) closeAll(); else openDrawer(sidebar);
+  });
+  panelBtn && panelBtn.addEventListener('click', () => {
+    if (rightpanel.classList.contains('open')) closeAll(); else openDrawer(rightpanel);
+  });
+  backdrop && backdrop.addEventListener('click', closeAll);
+  if (sidebar) {
+    sidebar.querySelectorAll('.tool').forEach(t => {
+      t.addEventListener('click', () => { if (body.classList.contains('mobile-ui')) setTimeout(closeAll, 120); });
+    });
+  }
+  window.addEventListener('resize', evalMobile);
+  window.addEventListener('orientationchange', () => setTimeout(evalMobile, 200));
+  evalMobile();
 })();
 </script>
 

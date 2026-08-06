@@ -1,6 +1,6 @@
 // Service worker — Plan Annotator (OCI Connect)
 // Cache l'app pour un fonctionnement hors-ligne après la première visite.
-const CACHE = 'plan-annotator-v1';
+const CACHE = 'plan-annotator-v2';
 
 // Ressources locales à mettre en cache (chemins relatifs au scope du SW).
 const ASSETS = [
