@@ -7,6 +7,9 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#141517">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg">
+<link rel="apple-touch-icon" href="icon.svg">
 <title>Plan Annotator — OCI Connect</title>
 <style>
 :root {
@@ -3615,85 +3618,29 @@ pushHistory();
 })();
 </script>
 
-<!-- ============ PWA : manifest inline + service worker ============ -->
 <script>
+// ===== PWA : enregistrement du service worker + bouton installer =====
 (function() {
-  // --- Icône SVG (losange bleu/violet, cohérent avec le logo ◆) ---
-  const iconSvg =
-    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">' +
-    '<rect width="512" height="512" rx="96" fill="#141517"/>' +
-    '<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">' +
-    '<stop offset="0" stop-color="#3b82f6"/><stop offset="1" stop-color="#8b5cf6"/>' +
-    '</linearGradient></defs>' +
-    '<rect x="146" y="146" width="220" height="220" rx="40" transform="rotate(45 256 256)" fill="url(#g)"/>' +
-    '</svg>';
-  const iconUrl = 'data:image/svg+xml;base64,' + btoa(iconSvg);
-
-  // --- Manifest (blob) ---
-  const manifest = {
-    name: 'Plan Annotator — OCI Connect',
-    short_name: 'Plan Annotator',
-    description: 'Annotation de plans courant faible',
-    start_url: '.',
-    scope: '.',
-    display: 'standalone',
-    orientation: 'any',
-    background_color: '#141517',
-    theme_color: '#141517',
-    icons: [
-      { src: iconUrl, sizes: '192x192', type: 'image/svg+xml', purpose: 'any maskable' },
-      { src: iconUrl, sizes: '512x512', type: 'image/svg+xml', purpose: 'any maskable' }
-    ]
-  };
-  const mBlob = new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' });
-  const link = document.createElement('link');
-  link.rel = 'manifest';
-  link.href = URL.createObjectURL(mBlob);
-  document.head.appendChild(link);
-  // icône apple + favicon
-  ['apple-touch-icon', 'icon'].forEach(rel => {
-    const l = document.createElement('link'); l.rel = rel; l.href = iconUrl; document.head.appendChild(l);
-  });
-
-  // --- Service worker (cache la page elle-même pour le hors-ligne) ---
   if ('serviceWorker' in navigator) {
-    const swCode =
-      "const CACHE='plan-annotator-v1';" +
-      "const URL='" + location.href.split('#')[0] + "';" +
-      "self.addEventListener('install',e=>{" +
-      "  self.skipWaiting();" +
-      "  e.waitUntil(caches.open(CACHE).then(c=>c.add(URL)));" +
-      "});" +
-      "self.addEventListener('activate',e=>{e.waitUntil(self.clients.claim());});" +
-      "self.addEventListener('fetch',e=>{" +
-      "  if(e.request.method!=='GET')return;" +
-      "  e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).catch(()=>caches.match(URL))));" +
-      "});";
-    const swBlob = new Blob([swCode], { type: 'text/javascript' });
-    const swUrl = URL.createObjectURL(swBlob);
-    navigator.serviceWorker.register(swUrl).catch(()=>{});
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch(()=>{});
+    });
   }
-
-  // --- Bouton "Installer l'appli" (topbar) ---
   let deferredPrompt = null;
   const installBtn = document.createElement('button');
   installBtn.className = 'tbtn primary';
   installBtn.style.cssText = 'display:none;margin-left:6px';
-  installBtn.innerHTML = '⤓ Installer';
+  installBtn.innerHTML = '\u2913 Installer';
   const spacer = document.querySelector('.topbar .spacer');
   if (spacer && spacer.parentNode) spacer.parentNode.insertBefore(installBtn, spacer.nextSibling);
-
   window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    installBtn.style.display = 'inline-flex';
+    e.preventDefault(); deferredPrompt = e; installBtn.style.display = 'inline-flex';
   });
   installBtn.addEventListener('click', async () => {
     if (!deferredPrompt) return;
     deferredPrompt.prompt();
     await deferredPrompt.userChoice;
-    deferredPrompt = null;
-    installBtn.style.display = 'none';
+    deferredPrompt = null; installBtn.style.display = 'none';
   });
   window.addEventListener('appinstalled', () => { installBtn.style.display = 'none'; });
 })();
